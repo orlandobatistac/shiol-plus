@@ -1381,3 +1381,119 @@ async def plp_invalidate_dashboard_cache() -> Dict[str, Any]:
         "message": "Dashboard cache invalidated",
         "timestamp": datetime.utcnow().isoformat() + "Z"
     }
+
+
+# =============================================================================
+# PIPELINE POOL ENDPOINT — Server-to-server, no freemium restriction
+# =============================================================================
+
+@router.get("/pipeline/pool")
+async def get_pipeline_pool(
+    count: int = 20,
+    draw_date: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Return N tickets from the SHIOL+ pipeline pool for a given draw date.
+
+    Intended exclusively for PatternLottoPro server-to-server calls.
+    No freemium restrictions apply — auth is enforced via Bearer API key
+    at the router level (verify_plp_api_key dependency).
+
+    Args:
+        count: Number of tickets to return (1-55, default 20)
+        draw_date: Target draw date YYYY-MM-DD. If omitted, uses next scheduled drawing.
+
+    Returns:
+        { tickets: [...], draw_date, count, total_available }
+
+    Raises:
+        400: Invalid date format or count out of range
+        404: No pipeline tickets found for the requested draw date
+    """
+    # Validate count
+    if count < 1 or count > 55:
+        raise HTTPException(
+            status_code=400,
+            detail="count must be between 1 and 55"
+        )
+
+    # Resolve draw_date
+    if draw_date:
+        resolved_date = _parse_date_str(draw_date)
+    else:
+        resolved_date = calculate_next_drawing_date()
+        if not resolved_date:
+            raise HTTPException(
+                status_code=503,
+                detail="Unable to determine next drawing date"
+            )
+        if isinstance(resolved_date, datetime):
+            resolved_date = resolved_date.strftime("%Y-%m-%d")
+
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+
+            # Count total available tickets for this draw_date
+            cursor.execute(
+                "SELECT COUNT(*) FROM generated_tickets WHERE draw_date = ?",
+                (resolved_date,)
+            )
+            row = cursor.fetchone()
+            total_available = row[0] if row else 0
+
+            if total_available == 0:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No pipeline tickets found for draw date {resolved_date}. "
+                           "The pipeline may not have run yet for this draw. "
+                           "Please try again later."
+                )
+
+            # Fetch N tickets ordered by confidence DESC for best quality
+            cursor.execute(
+                """
+                SELECT id, draw_date, strategy_used, n1, n2, n3, n4, n5,
+                       powerball, confidence_score, created_at
+                FROM generated_tickets
+                WHERE draw_date = ?
+                ORDER BY confidence_score DESC
+                LIMIT ?
+                """,
+                (resolved_date, count)
+            )
+            rows = cursor.fetchall()
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"pipeline/pool DB error for draw_date={resolved_date}: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="No AI insights available for this draw. Please try again in a few minutes."
+        )
+
+    tickets = [
+        {
+            "id": row[0],
+            "draw_date": row[1],
+            "strategy": row[2],
+            "n1": row[3],
+            "n2": row[4],
+            "n3": row[5],
+            "n4": row[6],
+            "n5": row[7],
+            "pb": row[8],
+            "confidence": round(float(row[9] or 0.5), 4),
+            "created_at": row[10],
+        }
+        for row in rows
+    ]
+
+    return {
+        "tickets": tickets,
+        "draw_date": resolved_date,
+        "count": len(tickets),
+        "total_available": total_available,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
