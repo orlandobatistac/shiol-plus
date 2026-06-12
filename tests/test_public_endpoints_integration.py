@@ -52,6 +52,18 @@ def test_public_winners_stats(fastapi_app):
     assert "total_won" in data and isinstance(data["total_won"], str)
 
 
+def test_public_best_match_all_time(fastapi_app):
+    client = TestClient(fastapi_app)
+    resp = client.get("/api/v1/public/best-match")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert data["period"] == "all time"
+    assert data["best_match"]["draw_date"] == "2025-09-03"
+    assert data["best_match"]["total_prize"] >= 100_000_000
+    assert data["best_match"]["has_predictions"] is True
+
+
 def test_public_predictions_by_draw_with_freemium(fastapi_app):
     # Ensure endpoint formats predictions and applies freemium
     client = TestClient(fastapi_app)

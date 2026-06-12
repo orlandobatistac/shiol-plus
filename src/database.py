@@ -1834,6 +1834,121 @@ def get_draw_analytics(draw_date: str, limit: int = 50) -> Dict[str, Any]:
         }
 
 
+def get_best_match_all_time() -> Optional[Dict[str, Any]]:
+    """Return the historical draw with the highest computed prize total.
+
+    Uses powerball_draws as the official result source and generated_tickets as
+    the prediction source, matching the public recent-draws and draw analytics
+    calculation path instead of relying on stored prize_won values.
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("PRAGMA table_info(generated_tickets)")
+        generated_ticket_columns = {str(row[1]) for row in cursor.fetchall()}
+        if "powerball" in generated_ticket_columns:
+            ticket_pb_column = "powerball"
+        elif "pb" in generated_ticket_columns:
+            ticket_pb_column = "pb"
+        else:
+            conn.close()
+            logger.error("generated_tickets is missing a Powerball column")
+            return None
+
+        cursor.execute(
+            f"""
+            SELECT
+                p.rowid,
+                p.draw_date,
+                p.n1, p.n2, p.n3, p.n4, p.n5, p.pb,
+                gt.n1, gt.n2, gt.n3, gt.n4, gt.n5, gt.{ticket_pb_column}
+            FROM powerball_draws p
+            JOIN generated_tickets gt ON gt.draw_date = p.draw_date
+            ORDER BY p.draw_date DESC
+            """
+        )
+        rows = cursor.fetchall()
+        conn.close()
+
+        if not rows:
+            return None
+
+        draws: Dict[str, Dict[str, Any]] = {}
+
+        for row in rows:
+            draw_id = int(row[0]) if row[0] is not None else 0
+            draw_date = str(row[1]) if row[1] else ""
+            winning_numbers = [
+                int(row[2] or 0),
+                int(row[3] or 0),
+                int(row[4] or 0),
+                int(row[5] or 0),
+                int(row[6] or 0),
+            ]
+            winning_pb = int(row[7] or 0)
+            ticket_numbers = [
+                int(row[8] or 0),
+                int(row[9] or 0),
+                int(row[10] or 0),
+                int(row[11] or 0),
+                int(row[12] or 0),
+            ]
+            ticket_pb = int(row[13] or 0)
+
+            draw_summary = draws.setdefault(
+                draw_date,
+                {
+                    "id": draw_id,
+                    "draw_date": draw_date,
+                    "n1": winning_numbers[0],
+                    "n2": winning_numbers[1],
+                    "n3": winning_numbers[2],
+                    "n4": winning_numbers[3],
+                    "n5": winning_numbers[4],
+                    "pb": winning_pb,
+                    "has_predictions": True,
+                    "total_prize": 0.0,
+                    "total_tickets": 0,
+                    "predictions_with_prizes": 0,
+                    "best_prize": 0.0,
+                    "best_result": "No Match",
+                    "jackpot": "Not available",
+                },
+            )
+
+            main_matches = len(set(ticket_numbers) & set(winning_numbers))
+            pb_match = ticket_pb == winning_pb
+            prize_amount, prize_description = calculate_prize_amount(main_matches, pb_match)
+            prize_amount = float(prize_amount or 0.0)
+
+            draw_summary["total_tickets"] += 1
+            draw_summary["total_prize"] += prize_amount
+            if prize_amount > 0:
+                draw_summary["predictions_with_prizes"] += 1
+            if prize_amount > draw_summary["best_prize"]:
+                draw_summary["best_prize"] = prize_amount
+                draw_summary["best_result"] = prize_description or "No Match"
+
+        best_draw = max(
+            draws.values(),
+            key=lambda d: (
+                float(d.get("total_prize") or 0.0),
+                float(d.get("best_prize") or 0.0),
+                int(d.get("predictions_with_prizes") or 0),
+                str(d.get("draw_date") or ""),
+            ),
+        )
+
+        best_draw["total_prize"] = float(best_draw.get("total_prize") or 0.0)
+        best_draw["best_prize"] = float(best_draw.get("best_prize") or 0.0)
+        return best_draw
+
+    except sqlite3.Error as e:
+        logger.error(f"SQLite error in get_best_match_all_time: {e}")
+        return None
+
+
 def get_analytics_summary(days_back: int = 30) -> Dict[str, Any]:
     """Return high-level analytics summary for the site over the given period."""
     try:

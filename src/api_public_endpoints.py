@@ -550,6 +550,30 @@ async def get_winners_stats():
             "error": str(e)
         }
 
+@public_frontend_router.get("/api/v1/public/best-match")
+async def get_public_best_match():
+    """Return the all-time best draw match for public display."""
+    try:
+        from src.database import get_best_match_all_time
+
+        best_match = get_best_match_all_time()
+        if not best_match:
+            return {
+                "best_match": None,
+                "period": "all time",
+                "status": "no_data",
+            }
+
+        return {
+            "best_match": convert_numpy_types(best_match),
+            "period": "all time",
+            "status": "success",
+        }
+
+    except Exception as e:
+        logger.error(f"Error fetching public best match: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching best match: {str(e)}")
+
 @public_frontend_router.get("/api/v1/public/stats")
 async def get_public_stats():
     """Get SHIOL+ system stats: total matches found and estimated prizes"""
