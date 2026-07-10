@@ -1,0 +1,106 @@
+{
+  "game_id": "powerball",
+  "draw_date": "2026-07-01",
+  "draw": {
+    "draw_date": "2026-07-01",
+    "n1": 2,
+    "n2": 6,
+    "n3": 26,
+    "n4": 39,
+    "n5": 68,
+    "pb": 6,
+    "source": "ny_data_api"
+  },
+  "total_tickets": 160,
+  "strategy_results": {
+    "frequency_weighted": {
+      "tickets_count": 20,
+      "matches_3": 0,
+      "matches_4": 0,
+      "matches_5": 0,
+      "total_prize": 0,
+      "roi": -1.0,
+      "weight_before": 0.9,
+      "weight_after": 0.81,
+      "status": "active"
+    },
+    "cooccurrence": {
+      "tickets_count": 20,
+      "matches_3": 0,
+      "matches_4": 0,
+      "matches_5": 0,
+      "total_prize": 8,
+      "roi": -0.8,
+      "weight_before": 0.9,
+      "weight_after": 0.828,
+      "status": "active"
+    },
+    "range_balanced": {
+      "tickets_count": 20,
+      "matches_3": 0,
+      "matches_4": 0,
+      "matches_5": 0,
+      "total_prize": 0,
+      "roi": -1.0,
+      "weight_before": 0.9,
+      "weight_after": 0.81,
+      "status": "active"
+    },
+    "coverage_optimizer": {
+      "tickets_count": 20,
+      "matches_3": 1,
+      "matches_4": 0,
+      "matches_5": 0,
+      "total_prize": 7,
+      "roi": -0.825,
+      "weight_before": 0.9,
+      "weight_after": 0.82575,
+      "status": "active"
+    },
+    "xgboost_ml": {
+      "tickets_count": 20,
+      "matches_3": 0,
+      "matches_4": 0,
+      "matches_5": 0,
+      "total_prize": 4,
+      "roi": -0.9,
+      "weight_before": 0.98,
+      "weight_after": 0.8918,
+      "status": "active"
+    },
+    "hybrid_ensemble": {
+      "tickets_count": 20,
+      "matches_3": 0,
+      "matches_4": 0,
+      "matches_5": 0,
+      "total_prize": 12,
+      "roi": -0.7,
+      "weight_before": 0.9175,
+      "weight_after": 0.853275,
+      "status": "active"
+    },
+    "intelligent_scoring": {
+      "tickets_count": 20,
+      "matches_3": 0,
+      "matches_4": 0,
+      "matches_5": 0,
+      "total_prize": 0,
+      "roi": -1.0,
+      "weight_before": 0.92,
+      "weight_after": 0.828,
+      "status": "active"
+    },
+    "random_baseline": {
+      "tickets_count": 20,
+      "matches_3": 0,
+      "matches_4": 0,
+      "matches_5": 0,
+      "total_prize": 0,
+      "roi": -1.0,
+      "weight_before": 0.92,
+      "weight_after": 0.828,
+      "status": "active"
+    }
+  },
+  "executed_at": "2026-07-04T21:23:20.605554"
+}

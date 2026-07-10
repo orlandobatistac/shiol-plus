@@ -1,0 +1,61 @@
+name = "shiol-plus"
+main = "src/worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# ── D1 Database ───────────────────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "shiol-plus-db"
+database_id = "ad168e4c-e90c-4642-8b29-6c8d0bfc6157"
+
+# ── Container: motor de estrategias (Python) ───────────────────
+# Ver docs/adr/0001-python-first-engine-docker-cloudflare-standby.md (Fase 2).
+# image_build_context = "." es obligatorio: por defecto Wrangler usa como
+# contexto la carpeta del Dockerfile (engine/), pero el Dockerfile necesita
+# requirements.txt, que vive en la raíz del repo.
+[[containers]]
+class_name = "EngineContainer"
+image = "./engine/Dockerfile"
+image_build_context = "."
+instance_type = "basic"   # 1/4 vCPU, 1 GiB RAM, 4 GB disco — suficiente para
+                          # pandas/numpy/xgboost/scikit-learn en este volumen
+                          # de datos (miles de draws, no millones). Subir a
+                          # standard-1 si hace falta más memoria en la práctica.
+max_instances = 1         # proyecto personal, sin concurrencia real que atender
+
+[[durable_objects.bindings]]
+class_name = "EngineContainer"
+name = "ENGINE"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["EngineContainer"]
+
+# ── Frontend: Workers Static Assets (reemplaza a build.js + Cloudflare Pages) ──
+# Ver docs/adr/0001-... (Fase 4). public/ se sirve directo, sin paso de build:
+# Cloudflare lo maneja como una unidad junto con el Worker en un solo deploy.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# ── Variables de entorno ──────────────────────────────────────
+[vars]
+ENVIRONMENT = "production"
+
+# ── Cron Triggers ────────────────────────────────────────────
+# Powerball: lun/mié/sáb sorteo ~22:59 ET
+# Primario: 05:00 UTC (7h after draw) — da tiempo para que NC Lottery publique
+# Backup:   09:00 UTC (+4h) — por si el primario falló
+[triggers]
+crons = [
+  "0 5 * * TUE",   # Martes    05:00 UTC (draw lunes)
+  "0 9 * * TUE",   # Martes    09:00 UTC (backup)
+  "0 5 * * THU",   # Jueves    05:00 UTC (draw miércoles)
+  "0 9 * * THU",   # Jueves    09:00 UTC (backup)
+  "0 5 * * SUN",   # Domingo   05:00 UTC (draw sábado)
+  "0 9 * * SUN",   # Domingo   09:00 UTC (backup)
+]
+
+# ── Dev local ─────────────────────────────────────────────────
+# wrangler dev --local --persist

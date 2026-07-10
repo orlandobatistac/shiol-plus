@@ -1,0 +1,10 @@
+{
+  "frequency_weighted": 0.81,
+  "cooccurrence": 0.828,
+  "range_balanced": 0.81,
+  "coverage_optimizer": 0.82575,
+  "xgboost_ml": 0.8918,
+  "hybrid_ensemble": 0.853275,
+  "intelligent_scoring": 0.828,
+  "random_baseline": 0.828
+}
