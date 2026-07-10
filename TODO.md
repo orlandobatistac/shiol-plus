@@ -3,7 +3,7 @@
 Contexto persistente del proyecto. Actualizar esta lista al cerrar cada sesion de trabajo
 para que una conversacion nueva pueda retomar sin perder contexto.
 
-Ultima actualizacion: 2026-07-09 (sesión 23 -- rediseño UX del dashboard, deployado)
+Ultima actualizacion: 2026-07-09 (sesion 24 -- respaldo GitHub v8/v9 y plan de migracion)
 
 ## Estado actual
 
@@ -29,6 +29,41 @@ Ultima actualizacion: 2026-07-09 (sesión 23 -- rediseño UX del dashboard, depl
   Mega Millions hizo el catch-up (Opción B) contra el sorteo 2026-07-03 (primera
   evaluación real desde la activación) y ya generó el siguiente ciclo (2026-07-10).
   El pendiente de la sesión 19 ("no se puede confirmar hasta que pase") queda cerrado.
+
+## Hecho (2026-07-09, sesion 24 - respaldo GitHub v8/v9 y plan de migracion)
+
+- [x] **Repositorio GitHub conectado**: esta carpeta `C:\Dev\apps\shiol-plus-v9`
+      quedo vinculada al repositorio publico
+      `https://github.com/orlandobatistac/shiol-plus`, conservando todo el historial
+      de la aplicacion monolitica anterior.
+- [x] **Rama v9 publicada**: `agent/publish-v9`, commit
+      `988ec9a2e0405f00bd6561105cc9d7af7a6f20cb`. Contiene la sustitucion completa
+      de la arquitectura v7/v8 (FastAPI + VPS) por la arquitectura v9 vigente
+      (Worker + Static Assets + D1 + Container Python). La sintaxis de los cuatro
+      archivos JavaScript principales y de todo `engine/` fue verificada antes del
+      push; `.env`, `node_modules`, `.wrangler`, bytecode y artefactos temporales
+      de backfill quedaron fuera.
+- [x] **PR de migracion creado como borrador**: PR #40,
+      `https://github.com/orlandobatistac/shiol-plus/pull/40`, desde
+      `agent/publish-v9` hacia `main`. **NO fusionar todavia.**
+- [x] **Rama de respaldo v8 creada**: `agent/publish-v8`, apuntando al ultimo commit
+      operativo de v8 (`3052f75d942926244194a569b8891fe7658cc6a2`). Esta rama
+      conserva explicitamente la version del VPS aunque `main` cambie en el futuro.
+- [x] **Riesgo de deploy antiguo confirmado**: el `main` actual contiene
+      `.github/workflows/deploy-light.yml`, que corre en cada push a `main`, entra
+      por SSH al VPS, hace `git pull origin main`, instala `requirements-prod.txt`
+      y reinicia `shiolplus.service`. Tambien existe `deploy-restart.yml`, pero es
+      solo manual (`workflow_dispatch`). El push de `agent/publish-v9` y la creacion
+      de `agent/publish-v8` no dispararon ningun workflow ni tocaron el VPS.
+- [ ] **Orden obligatorio antes de fusionar PR #40**:
+      1. Migrar `shiolplus.com`/DNS desde el VPS hacia Cloudflare.
+      2. Verificar produccion v9 en el dominio final (frontend, APIs, Container,
+         D1, crons y ambos juegos).
+      3. Desactivar manualmente `Deploy to Server (Light)` en GitHub Actions para
+         impedir que un push a `main` vuelva a desplegar al VPS.
+      4. Fusionar el PR #40.
+      5. Confirmar que `main` representa v9 y que el VPS antiguo ya no recibe
+         despliegues. Mantener `agent/publish-v8` como respaldo sin modificar.
 
 ## Hecho (2026-07-09, sesión 23 — rediseño UX del dashboard: podio, tooltips, detalle colapsable)
 
