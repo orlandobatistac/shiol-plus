@@ -3,7 +3,7 @@
 Contexto persistente del proyecto. Actualizar esta lista al cerrar cada sesion de trabajo
 para que una conversacion nueva pueda retomar sin perder contexto.
 
-Ultima actualizacion: 2026-07-09 (sesion 25 -- rediseño minimalista completo del frontend)
+Ultima actualizacion: 2026-07-09 (sesion 26 -- deploy Cloudflare del rediseño minimalista)
 
 ## Estado actual
 
@@ -14,7 +14,7 @@ Ultima actualizacion: 2026-07-09 (sesion 25 -- rediseño minimalista completo de
   21), el fix de colisión de números en `wins` (sesión 22), y el rediseño UX del
   dashboard con podio + tooltips + detalle técnico colapsable (sesión 23, ver
   "Hecho" abajo). Versión activa en producción:
-  `4cf746f6-7489-4642-a303-b2fa578624b8` (2026-07-09, sesión 23).
+  `362a9b54-2c37-49c0-8d01-c2ebb086c960` (2026-07-09, sesión 26).
   URL: https://shiol-plus.orlandob.workers.dev
 - Container `shiol-plus-enginecontainer` (Application ID `a03cfd96-a494-4a00-a00e-86a5832e9678`)
   en estado `ready` en producción. Imagen ~1.1GB (reducida de 1.83GB en sesión 10).
@@ -30,7 +30,7 @@ Ultima actualizacion: 2026-07-09 (sesion 25 -- rediseño minimalista completo de
   evaluación real desde la activación) y ya generó el siguiente ciclo (2026-07-10).
   El pendiente de la sesión 19 ("no se puede confirmar hasta que pase") queda cerrado.
 
-## Hecho (2026-07-09, sesion 25 - rediseno minimalista completo del frontend)
+## Hecho (2026-07-09, sesiones 25-26 - rediseno minimalista y deploy Cloudflare)
 
 - [x] **Direccion visual aprobada e implementada**: reemplazo del dashboard oscuro
       con multiples tarjetas, colores e iconos por una interfaz editorial minimalista
@@ -56,9 +56,13 @@ Ultima actualizacion: 2026-07-09 (sesion 25 -- rediseño minimalista completo de
       tickets y 4 wins. Modal XGBoost mostro los 20 tickets. Verificado desktop y
       viewport movil 390x844, sin desbordamiento horizontal. `node --check` limpio
       en `home.js` y `game.js`; IDs de HTML/JS y llaves CSS balanceados.
-- [ ] **Deploy pendiente**: este cambio solo actualiza la rama `agent/publish-v9`
-      y el PR #40. No fusionar ni desplegar antes de completar el cambio de dominio
-      y desactivar el workflow automatico del VPS documentado en la sesion 24.
+- [x] **Deploy directo a Cloudflare completado**: `wrangler deploy` publico los
+      cinco assets del frontend y actualizo el Container sin fusionar el PR #40,
+      tocar `main` ni ejecutar el workflow del VPS. Version activa:
+      `362a9b54-2c37-49c0-8d01-c2ebb086c960`. Verificacion publica: portada,
+      estilos, scripts, `/api/health`, jackpots, estrategias, rendimiento y wins
+      de Powerball/Mega Millions respondieron 200; ambos juegos devolvieron sus
+      8 estrategias. `.env` fue restaurado con el mismo tamano y fecha.
 
 ## Hecho (2026-07-09, sesion 24 - respaldo GitHub v8/v9 y plan de migracion)
 
