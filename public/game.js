@@ -1,66 +1,91 @@
-/**
- * SHIOL+ v9 — Frontend App (dashboard de detalle de UN juego)
- * Llama al Worker API y renderiza el dashboard para el juego dado en
- * `?game=` de la URL (ej. game.html?game=mega_millions). Sin ese parámetro,
- * cae a 'powerball' por compatibilidad.
- *
- * En dev: el Worker sirve desde localhost via `wrangler dev`
- * En prod: mismo origen (shiol-plus.orlandob.workers.dev / shiolplus.com)
- */
-
-const API  = ''; // mismo origen — Worker maneja /api/*
+const API = '';
 const GAME = new URLSearchParams(location.search).get('game') || 'powerball';
+const ET_TZ = 'America/New_York';
+const DRAW_HOUR_ET = 22;
+const DRAW_MIN_ET = 59;
+const DAY_ABBR = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
 
-// ── Fetch helpers ──────────────────────────────────────────
+let gameInfoPromise = null;
+let countdownTimer = null;
+let strategyNamesCache = {};
+let lastFocusedElement = null;
+
 async function api(path) {
   try {
-    const res = await fetch(API + path);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch (e) {
-    console.error('API error:', path, e);
+    const response = await fetch(API + path);
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    return await response.json();
+  } catch (error) {
+    console.error('API error:', path, error);
     return null;
   }
 }
 
-// ── Format helpers ─────────────────────────────────────────
-const fmt$ = n => n >= 1_000_000
-  ? '$' + (n / 1_000_000).toFixed(1) + 'M'
-  : n >= 1_000
-    ? '$' + (n / 1_000).toFixed(0) + 'K'
-    : '$' + n.toLocaleString();
-
-const fmtROI = r => {
-  const pct = (r * 100).toFixed(1);
-  const cls = r >= 0 ? 'pos' : 'neg';
-  return `<span class="${cls}">${r >= 0 ? '+' : ''}${pct}%</span>`;
-};
-
-const statusPill = s => {
-  const map = {
-    active: 'pill-active',
-    probation: 'pill-probation',
-    archived: 'pill-archived',
-  };
-  return `<span class="pill ${map[s] || 'pill-active'}">${s}</span>`;
-};
-
-const titleCase = s => s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
-function ballsHTML(numbers, extra) {
-  return numbers.map(n => `<span class="ball white">${n}</span>`).join('') +
-    (extra != null ? `<span class="ball pb">${extra}</span>` : '');
+function money(value) {
+  const number = Number(value || 0);
+  if (number >= 1000000000) return '$' + (number / 1000000000).toFixed(1) + 'B';
+  if (number >= 1000000) return '$' + (number / 1000000).toFixed(1) + 'M';
+  if (number >= 1000) return '$' + (number / 1000).toFixed(0) + 'K';
+  return '$' + number.toLocaleString();
 }
 
-// ── Identidad del juego (nombre, título de página, footer) ──
-// Un solo fetch de /api/games se reutiliza acá y en renderCountdown() para
-// no pedir la lista dos veces.
-let gameInfoPromise = null;
+function roi(value) {
+  const number = Number(value || 0);
+  const percent = (number * 100).toFixed(1);
+  return '<span class="' + (number >= 0 ? 'pos' : 'neg') + '">' +
+    (number >= 0 ? '+' : '') + percent + '%</span>';
+}
+
+function strategyName(value) {
+  const normalized = String(value || '').replace(/_mega_millions$/, '');
+  const names = {
+    xgboost_ml: 'XGBoost ML',
+    hybrid_ensemble: 'Hybrid Ensemble',
+    frequency_weighted: 'Frequency Weighted',
+    intelligent_scoring: 'Intelligent Scoring',
+    coverage_optimizer: 'Coverage Optimizer',
+    cooccurrence: 'Cooccurrence',
+    range_balanced: 'Range Balanced',
+    random_baseline: 'Random Baseline'
+  };
+  return names[normalized] || normalized.replace(/_/g, ' ').replace(/\b\w/g, function (character) {
+    return character.toUpperCase();
+  });
+}
+
+function titleCase(value) {
+  return String(value || '').replace(/_/g, ' ').replace(/\b\w/g, function (character) {
+    return character.toUpperCase();
+  });
+}
+
+function dateLabel(value, options) {
+  if (!value) return '';
+  const date = new Date(value.length === 10 ? value + 'T12:00:00Z' : value);
+  return new Intl.DateTimeFormat('en-US', options || {
+    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC'
+  }).format(date);
+}
+
+function ballsHTML(numbers, extra) {
+  const whiteBalls = (numbers || []).map(function (number) {
+    return '<span class="ball">' + String(number).padStart(2, '0') + '</span>';
+  }).join('');
+  const extraBall = extra == null ? '' :
+    '<span class="ball extra">' + String(extra).padStart(2, '0') + '</span>';
+  return whiteBalls + extraBall;
+}
+
 function getGameInfo() {
   if (!gameInfoPromise) {
-    gameInfoPromise = api('/api/games').then(games => {
-      const g = games && games.find(g => g.id === GAME);
-      return g || { id: GAME, name: titleCase(GAME), draw_days: 'mon,wed,sat', active: false };
+    gameInfoPromise = api('/api/games').then(function (games) {
+      const game = games && games.find(function (item) { return item.id === GAME; });
+      return game || {
+        id: GAME,
+        name: strategyName(GAME),
+        draw_days: 'mon,wed,sat',
+        active: false
+      };
     });
   }
   return gameInfoPromise;
@@ -68,441 +93,484 @@ function getGameInfo() {
 
 async function renderGameIdentity() {
   const game = await getGameInfo();
-  document.title = `SHIOL+ · ${game.name}`;
-  const logoGameEl = document.getElementById('logo-game');
-  if (logoGameEl) logoGameEl.textContent = `· ${game.name}`;
+  document.title = 'SHIOL+ | ' + game.name + ' strategy report';
+  document.body.classList.toggle('game-mega', GAME === 'mega_millions');
+
+  const title = document.getElementById('report-title');
+  const description = document.getElementById('report-description');
+  title.textContent = game.name + ' strategy report';
+  description.textContent =
+    'Eight strategies measured by win rate and total prizes across evaluated ' +
+    game.name + ' tickets.';
+
+  document.querySelectorAll('.game-switcher a').forEach(function (link) {
+    const active = link.dataset.game === GAME;
+    link.classList.toggle('active', active);
+    if (active) link.setAttribute('aria-current', 'page');
+  });
+
   const footer = document.getElementById('page-footer');
   if (footer) {
-    const days = game.draw_days.split(',').map(d => titleCase(d)).join('/');
-    footer.innerHTML = `<p>SHIOL+ v9 · Strategy Analytics Engine · Data updated after each ${game.name} draw (${days})</p>`;
+    footer.innerHTML =
+      '<span>SHIOL+ v9</span><span>' + game.name +
+      ' data updates after every published draw.</span>';
   }
 }
 
-// ── Latest Draw ────────────────────────────────────────────
 async function renderDraw() {
-  const data = await api(`/api/draws?game=${GAME}&limit=1`);
-  if (!data || !data.length) return;
-
-  const d = data[0];
+  const draws = await api('/api/draws?game=' + GAME + '&limit=1');
+  if (!draws || !draws.length) {
+    document.getElementById('draw-balls').innerHTML =
+      '<span class="summary-secondary">No result available</span>';
+    return;
+  }
+  const draw = draws[0];
   document.getElementById('draw-balls').innerHTML =
-    ballsHTML([d.n1, d.n2, d.n3, d.n4, d.n5], d.pb);
-  document.getElementById('draw-date').textContent = d.draw_date;
+    ballsHTML([draw.n1, draw.n2, draw.n3, draw.n4, draw.n5], draw.pb);
+  document.getElementById('draw-date').textContent = '- ' + dateLabel(draw.draw_date, {
+    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC'
+  });
 }
 
-// ── Countdown to next draw ──────────────────────────────────
-// Calcula el próximo sorteo en hora del Este (America/New_York) a partir de
-// draw_days (viene de /api/games, ej. "mon,wed,sat") y una hora fija de sorteo
-// (~22:59 ET, igual que asume src/worker.js para el cron). No usa librerías de
-// zona horaria — para un hobby project con margen de minutos es suficiente;
-// puede desviarse por unos minutos justo en el cambio de horario de verano.
-const ET_TZ = 'America/New_York';
-const DRAW_HOUR_ET = 22;
-const DRAW_MIN_ET = 59;
-const DAY_ABBR = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
-
 function getEtNowParts() {
-  const fmt = new Intl.DateTimeFormat('en-US', {
-    timeZone: ET_TZ, hourCycle: 'h23',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit', weekday: 'short',
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: ET_TZ,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    weekday: 'short'
   });
-  const parts = Object.fromEntries(fmt.formatToParts(new Date()).map(p => [p.type, p.value]));
+  const parts = {};
+  formatter.formatToParts(new Date()).forEach(function (part) {
+    parts[part.type] = part.value;
+  });
   return {
-    year: +parts.year, month: +parts.month, day: +parts.day,
-    hour: +parts.hour, minute: +parts.minute, second: +parts.second,
-    weekday: DAY_ABBR[parts.weekday.toLowerCase().slice(0, 3)],
+    year: Number(parts.year),
+    month: Number(parts.month),
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+    second: Number(parts.second),
+    weekday: DAY_ABBR[parts.weekday.toLowerCase().slice(0, 3)]
   };
 }
 
-function nextDrawDate(drawDayAbbrs) {
-  const targets = new Set(drawDayAbbrs.map(d => DAY_ABBR[d.trim().toLowerCase()]));
+function nextDrawDate(drawDays) {
+  const targets = new Set(drawDays.map(function (day) {
+    return DAY_ABBR[day.trim().toLowerCase()];
+  }));
   const now = new Date();
   const et = getEtNowParts();
+  const etNowAsUtc = Date.UTC(et.year, et.month - 1, et.day, et.hour, et.minute, et.second);
+  const offsetMs = now.getTime() - etNowAsUtc;
 
-  // offset entre "ahora real" (UTC) y "ahora en ET interpretado como si fuera UTC"
-  const etNowAsUTC = Date.UTC(et.year, et.month - 1, et.day, et.hour, et.minute, et.second);
-  const offsetMs = now.getTime() - etNowAsUTC;
-
-  for (let addDays = 0; addDays <= 7; addDays++) {
+  for (let addDays = 0; addDays <= 7; addDays += 1) {
     const weekday = (et.weekday + addDays) % 7;
     if (!targets.has(weekday)) continue;
-    const targetWallAsUTC = Date.UTC(et.year, et.month - 1, et.day + addDays, DRAW_HOUR_ET, DRAW_MIN_ET, 0);
-    const targetRealUTC = targetWallAsUTC + offsetMs;
-    if (targetRealUTC > now.getTime()) return new Date(targetRealUTC);
+    const targetWallAsUtc = Date.UTC(
+      et.year, et.month - 1, et.day + addDays, DRAW_HOUR_ET, DRAW_MIN_ET, 0
+    );
+    const target = new Date(targetWallAsUtc + offsetMs);
+    if (target.getTime() > now.getTime()) return target;
   }
   return null;
 }
 
-let countdownTimer = null;
-
 async function renderCountdown() {
   const game = await getGameInfo();
   const drawDays = game.draw_days.split(',');
-
+  const value = document.getElementById('countdown-value');
   const label = document.getElementById('next-draw-label');
-  label.textContent = `${game.name} · ${drawDays.map(d => titleCase(d)).join('/')} · 10:59 PM ET`;
 
   function tick() {
     const target = nextDrawDate(drawDays);
-    if (!target) return;
-    const diff = Math.max(0, target.getTime() - Date.now());
+    if (!target) {
+      value.textContent = 'Schedule unavailable';
+      label.textContent = '';
+      return;
+    }
 
-    const days = Math.floor(diff / 86400000);
-    const hours = Math.floor((diff % 86400000) / 3600000);
-    const mins = Math.floor((diff % 3600000) / 60000);
-    const secs = Math.floor((diff % 60000) / 1000);
+    const difference = Math.max(0, target.getTime() - Date.now());
+    const days = Math.floor(difference / 86400000);
+    const hours = Math.floor((difference % 86400000) / 3600000);
+    const minutes = Math.floor((difference % 3600000) / 60000);
 
-    document.getElementById('cd-days').textContent = String(days);
-    document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
-    document.getElementById('cd-mins').textContent = String(mins).padStart(2, '0');
-    document.getElementById('cd-secs').textContent = String(secs).padStart(2, '0');
+    value.textContent = new Intl.DateTimeFormat('en-US', {
+      timeZone: ET_TZ,
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(target);
+    label.textContent =
+      'In ' + days + 'd ' + hours + 'h ' + minutes + 'm - 10:59 PM ET';
   }
 
   tick();
   if (countdownTimer) clearInterval(countdownTimer);
-  countdownTimer = setInterval(tick, 1000);
+  countdownTimer = setInterval(tick, 30000);
 }
 
-// ── Current Jackpot (real, vía /api/jackpot -- ver worker.js y
-// engine/pipeline/fetch_jackpot.py) ──────────────────────────
 async function renderJackpot() {
-  const amountEl = document.getElementById('jackpot-amount');
-  const subEl = document.getElementById('jackpot-sub');
+  const amount = document.getElementById('jackpot-amount');
+  const sub = document.getElementById('jackpot-sub');
+  const data = await api('/api/jackpot?game=' + GAME);
 
-  const data = await api(`/api/jackpot?game=${GAME}`);
   if (!data || !data.found) {
-    amountEl.textContent = '—';
-    subEl.textContent = 'No estimate available';
+    amount.textContent = 'Not available';
+    sub.textContent = 'No current estimate';
     return;
   }
 
-  amountEl.textContent = fmt$(data.amount);
-  const cash = `Cash value ${fmt$(data.cash_value)}`;
-  // `stale` = el scraper viene fallando su validador de sanidad hace rato
-  // (ver refreshJackpot() en worker.js) -- se sigue mostrando el último
-  // valor bueno, pero avisando que puede estar desactualizado.
-  subEl.textContent = data.stale ? `${cash} — estimate may be outdated` : `${cash}, next draw`;
+  amount.textContent = money(data.amount);
+  sub.textContent = 'Cash value ' + money(data.cash_value) +
+    (data.stale ? ' - estimate may be outdated' : '');
 }
 
-// ── Sparkline (mini gráfico de tendencia de peso) ───────────
-function sparklineSVG(values) {
-  if (!values || values.length < 2) return '<span class="spark-empty">—</span>';
+async function renderRankings() {
+  const data = await api('/api/ticket-performance?game=' + GAME);
+  const body = document.getElementById('podium');
 
-  const w = 72, h = 26, pad = 3;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = (max - min) || 1;
-  const step = (w - pad * 2) / (values.length - 1);
+  if (!data || !data.length) {
+    body.innerHTML = '<div class="empty-state">No evaluated tickets yet.</div>';
+    return;
+  }
 
-  const points = values.map((v, i) => {
-    const x = pad + i * step;
-    const y = h - pad - ((v - min) / range) * (h - pad * 2);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  body.innerHTML = data.map(function (strategy, index) {
+    const totalWon = Number(strategy.total_won || 0);
+    return [
+      '<div class="ranking-row ' + (index === 0 ? 'is-leading' : '') + '" role="row">',
+        '<span class="ranking-rank">' + (index + 1) + '</span>',
+        '<span class="ranking-name">' + strategyName(strategy.strategy_id) + '</span>',
+        '<span class="metric">' + Number(strategy.win_rate || 0).toFixed(1) + '%</span>',
+        '<span class="metric desktop-only">' + Number(strategy.total_tickets || 0).toLocaleString() + '</span>',
+        '<span class="metric ' + (totalWon > 0 ? 'positive' : '') + '">' + money(totalWon) + '</span>',
+      '</div>'
+    ].join('');
+  }).join('');
+}
+
+function sparklineSvg(values) {
+  if (!values || values.length < 2) return '<span class="spark-empty">No trend</span>';
+  const width = 72;
+  const height = 24;
+  const padding = 3;
+  const min = Math.min.apply(null, values);
+  const max = Math.max.apply(null, values);
+  const range = max - min || 1;
+  const step = (width - padding * 2) / (values.length - 1);
+  const points = values.map(function (value, index) {
+    const x = padding + index * step;
+    const y = height - padding - ((value - min) / range) * (height - padding * 2);
+    return x.toFixed(1) + ',' + y.toFixed(1);
   }).join(' ');
-
-  const trendUp = values[values.length - 1] >= values[0];
-  const color = trendUp ? 'var(--green)' : 'var(--red)';
-
-  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
-    <polyline points="${points}" fill="none" style="stroke:${color};stroke-width:2;stroke-linecap:round;stroke-linejoin:round" />
-  </svg>`;
+  const color = values[values.length - 1] >= values[0] ? 'var(--positive)' : 'var(--negative)';
+  return '<svg class="sparkline" viewBox="0 0 72 24" width="72" height="24" aria-hidden="true">' +
+    '<polyline points="' + points + '" fill="none" style="stroke:' + color +
+    ';stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"></polyline></svg>';
 }
 
-async function renderSparklines(strategyIds) {
-  const histories = await Promise.all(
-    strategyIds.map(id => api(`/api/history?game=${GAME}&strategy=${id}&limit=12`))
-  );
+async function renderSparklines(ids) {
+  const histories = await Promise.all(ids.map(function (id) {
+    return api('/api/history?game=' + GAME + '&strategy=' + id + '&limit=12');
+  }));
 
-  strategyIds.forEach((id, i) => {
-    const cell = document.getElementById(`spark-${id}`);
+  ids.forEach(function (id, index) {
+    const cell = document.getElementById('spark-' + id);
+    const rows = histories[index];
     if (!cell) return;
-    const rows = histories[i];
     if (!rows || !rows.length) {
-      cell.innerHTML = '<span class="spark-empty">—</span>';
+      cell.innerHTML = '<span class="spark-empty">No trend</span>';
       return;
     }
-    const weights = rows.slice().reverse().map(r => r.weight_after);
-    cell.innerHTML = sparklineSVG(weights);
-  });
-}
-
-// ── Strategy Rankings ────────────────────────────────────────
-async function renderStrategies() {
-  const data = await api(`/api/strategies?game=${GAME}`);
-  const tbody = document.getElementById('strategies-body');
-
-  if (!data || !data.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="loading">No strategy data yet.</td></tr>';
-    return;
-  }
-
-  const maxWeight = Math.max(...data.map(s => s.current_weight));
-
-  tbody.innerHTML = data.map((s, i) => {
-    const fillPct = maxWeight > 0 ? (s.current_weight / maxWeight * 100).toFixed(1) : 0;
-    const name = titleCase(s.name);
-
-    return `
-      <tr>
-        <td style="color:var(--muted)">${i + 1}</td>
-        <td>
-          <div style="font-weight:600">${name}</div>
-          <div style="font-size:0.75rem;color:var(--muted)">${s.description || ''}</div>
-        </td>
-        <td>${statusPill(s.status)}</td>
-        <td>
-          <div class="weight-bar-wrap">
-            <div class="weight-bar"><div class="weight-fill" style="width:${fillPct}%"></div></div>
-            <span class="weight-val">${s.current_weight.toFixed(4)}</span>
-          </div>
-        </td>
-        <td id="spark-${s.id}"><span class="spark-empty">…</span></td>
-        <td>${fmtROI(s.avg_roi || 0)}</td>
-        <td>${s.lifetime_prize > 0 ? fmt$(s.lifetime_prize) : '—'}</td>
-      </tr>`;
-  }).join('');
-
-  renderSparklines(data.map(s => s.id));
-}
-
-// ── Last Cycle ─────────────────────────────────────────────
-async function renderLastCycle() {
-  const data = await api(`/api/latest-cycle?game=${GAME}`);
-  const tbody = document.getElementById('cycle-body');
-  const meta  = document.getElementById('cycle-meta');
-
-  if (!data || data.message) {
-    tbody.innerHTML = '<tr><td colspan="8" class="loading">No cycles evaluated yet.</td></tr>';
-    return;
-  }
-
-  const { cycle, strategy_results } = data;
-  meta.textContent = `Draw: ${cycle.draw_date} · ${cycle.n1}-${cycle.n2}-${cycle.n3}-${cycle.n4}-${cycle.n5} PB:${cycle.pb}`;
-
-  if (!strategy_results || !strategy_results.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="loading">No strategy results in this cycle.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = strategy_results.map(r => {
-    const name = titleCase(r.strategy_id);
-    const delta = (r.weight_after - r.weight_before);
-    const deltaStr = `<span class="${delta >= 0 ? 'pos' : 'neg'}">${delta >= 0 ? '+' : ''}${delta.toFixed(4)}</span>`;
-
-    return `
-      <tr>
-        <td>${name}</td>
-        <td>${r.tickets_count}</td>
-        <td>${r.matches_3 || 0}</td>
-        <td>${r.matches_4 || 0}</td>
-        <td>${r.matches_5 || 0}</td>
-        <td>${r.total_prize > 0 ? fmt$(r.total_prize) : '—'}</td>
-        <td>${fmtROI(r.roi)}</td>
-        <td>${deltaStr}</td>
-      </tr>`;
-  }).join('');
-}
-
-// ── Hall of Wins ───────────────────────────────────────────
-// Sesión 21: /api/wins ahora devuelve { total_amount, total_count, wins }
-// -- el total es un SUM() real de TODA la tabla (ya no solo lo visible),
-// porque `wins` se llena automático para cualquier premio desde esta sesión
-// y puede tener muchas más filas que el LIMIT de la lista.
-async function renderWins() {
-  const data = await api(`/api/wins?game=${GAME}`);
-  const grid = document.getElementById('wins-grid');
-  const totalEl = document.getElementById('wins-total');
-
-  if (!data || !data.total_count) {
-    grid.innerHTML = '<p style="color:var(--muted);font-style:italic">No recorded wins yet. The algorithm is hunting... 🎯</p>';
-    totalEl.textContent = '';
-    return;
-  }
-
-  const { total_amount, total_count, wins } = data;
-  totalEl.innerHTML = `<span class="wins-total-amount">${fmt$(total_amount)}</span> won across ${total_count} recorded win${total_count === 1 ? '' : 's'}`;
-
-  grid.innerHTML = wins.map(w => {
-    const isJackpot = w.prize_level === 'jackpot';
-    const amount = w.prize_amount > 0 ? fmt$(w.prize_amount) : 'Jackpot';
-    const levelLabel = w.prize_level.replace(/([+])/g, ' $1').replace(/_/g, ' ').toUpperCase();
-
-    return `
-      <div class="win-card ${isJackpot ? 'jackpot' : ''}">
-        <div class="prize-level">${levelLabel} ${w.verified ? '✓' : ''}</div>
-        <div class="prize-amount">${amount}</div>
-        <div class="win-meta">
-          <span>📅 ${w.draw_date || w.created_at?.slice(0, 10) || '—'}</span>
-          ${w.strategy_id ? `<span>🧠 ${titleCase(w.strategy_id)}</span>` : ''}
-          ${w.notes ? `<span>📝 ${w.notes}</span>` : ''}
-        </div>
-      </div>`;
-  }).join('');
-}
-
-// ── Ranking Podium (sesión 23 -- reemplaza el Scoreboard separado) ──
-// "¿Quién va ganando?" en lenguaje simple: top 3 por $ ganado / win rate real,
-// mismo endpoint que antes alimentaba el Scoreboard (/api/ticket-performance,
-// sesión 21). Las 8 estrategias completas con weight/ROI técnico quedan en el
-// <details> de abajo (ver renderStrategies()) -- ya no se duplica la misma
-// información en dos tablas distintas.
-async function renderRankingPodium() {
-  const data = await api(`/api/ticket-performance?game=${GAME}`);
-  const podium = document.getElementById('podium');
-
-  if (!data || !data.length) {
-    podium.innerHTML = '<p style="color:var(--muted);font-style:italic">No evaluated tickets yet — check back after the next draw.</p>';
-    return;
-  }
-
-  const medals = ['🥇', '🥈', '🥉'];
-  podium.innerHTML = data.slice(0, 3).map((s, i) => {
-    const rate = s.win_rate || 0;
-    const sub = rate > 0
-      ? `Wins a prize on ${rate.toFixed(1)}% of tickets played`
-      : 'No prizes yet';
-    return `
-      <div class="podium-row ${i === 0 ? 'podium-top' : ''}">
-        <span class="podium-rank">${medals[i]}</span>
-        <div class="podium-info">
-          <div class="podium-name">${titleCase(s.strategy_id)}</div>
-          <div class="podium-sub">${sub}</div>
-        </div>
-        <div class="podium-amount">${s.total_won > 0 ? fmt$(s.total_won) : '—'}</div>
-      </div>`;
-  }).join('');
-}
-
-// ── Info tooltips (glosario simple, sesión 23) ──────────────
-// El texto de cada tooltip vive directo en el HTML (.info-popover) -- acá
-// solo se maneja el toggle de abrir/cerrar al click, y cerrar cualquier otro
-// popover abierto para que no queden varios abiertos a la vez.
-function initInfoTooltips() {
-  document.addEventListener('click', e => {
-    const icon = e.target.closest('.info-icon');
-    document.querySelectorAll('.info-popover.open').forEach(p => {
-      if (!icon || p !== icon.nextElementSibling) p.classList.remove('open');
+    const values = rows.slice().reverse().map(function (row) {
+      return Number(row.weight_after || 0);
     });
-    if (icon) icon.nextElementSibling?.classList.toggle('open');
+    cell.innerHTML = sparklineSvg(values);
   });
 }
 
-// ── Next Draw Tickets + Modal (sesión 21) ───────────────────
-// 8 cards compactas (una por estrategia); click abre un modal con las 20
-// bolitas de esa estrategia para el próximo sorteo, ordenadas por
-// confidence de mayor a menor (ver /api/upcoming-tickets en worker.js).
-let strategyNamesCache = null;
-
-async function renderNextTickets() {
-  const strategies = await api(`/api/strategies?game=${GAME}`);
-  const grid = document.getElementById('next-tickets-grid');
+async function renderTechnicalStrategies() {
+  const strategies = await api('/api/strategies?game=' + GAME);
+  const body = document.getElementById('strategies-body');
 
   if (!strategies || !strategies.length) {
-    grid.innerHTML = '<p style="color:var(--muted);font-style:italic">No strategies to show.</p>';
+    body.innerHTML = '<tr><td colspan="7">No strategy data available.</td></tr>';
     return;
   }
-  strategyNamesCache = Object.fromEntries(strategies.map(s => [s.id, titleCase(s.id)]));
 
-  const previews = await Promise.all(
-    strategies.map(s => api(`/api/upcoming-tickets?game=${GAME}&strategy=${s.id}`))
-  );
+  const maxWeight = Math.max.apply(null, strategies.map(function (strategy) {
+    return Number(strategy.current_weight || 0);
+  }));
 
-  grid.innerHTML = strategies.map((s, i) => {
-    const p = previews[i];
-    const top = p && p.found && p.tickets.length ? p.tickets[0] : null;
-    const preview = top
-      ? ballsHTML([top.n1, top.n2, top.n3, top.n4, top.n5], top.extra)
-      : '<span class="stc-empty">Not generated yet</span>';
-
-    return `
-      <button class="strategy-ticket-card" data-strategy="${s.id}" ${top ? '' : 'disabled'}>
-        <div class="stc-head">
-          <span class="stc-name">${titleCase(s.id)}</span>
-          <span class="stc-weight">${s.current_weight.toFixed(3)}</span>
-        </div>
-        <div class="stc-preview">${preview}</div>
-        <div class="stc-cta">${top ? 'View all 20 →' : '—'}</div>
-      </button>`;
+  body.innerHTML = strategies.map(function (strategy, index) {
+    const weight = Number(strategy.current_weight || 0);
+    const fill = maxWeight ? (weight / maxWeight * 100).toFixed(1) : 0;
+    return [
+      '<tr>',
+        '<td>' + (index + 1) + '</td>',
+        '<td><strong>' + strategyName(strategy.id || strategy.name) + '</strong></td>',
+        '<td><span class="pill">' + String(strategy.status || 'active') + '</span></td>',
+        '<td><div class="weight-bar-wrap"><div class="weight-bar"><div class="weight-fill" style="width:' +
+          fill + '%"></div></div><span class="weight-val">' + weight.toFixed(4) + '</span></div></td>',
+        '<td id="spark-' + strategy.id + '"><span class="spark-empty">Loading</span></td>',
+        '<td>' + roi(strategy.avg_roi) + '</td>',
+        '<td>' + money(strategy.lifetime_prize || 0) + '</td>',
+      '</tr>'
+    ].join('');
   }).join('');
 
-  grid.querySelectorAll('.strategy-ticket-card:not([disabled])').forEach(card => {
-    card.addEventListener('click', () => openTicketsModal(card.dataset.strategy));
+  renderSparklines(strategies.map(function (strategy) { return strategy.id; }));
+}
+
+async function renderLastCycle() {
+  const data = await api('/api/latest-cycle?game=' + GAME);
+  const body = document.getElementById('cycle-body');
+  const meta = document.getElementById('cycle-meta');
+
+  if (!data || data.message) {
+    meta.textContent = '';
+    body.innerHTML = '<tr><td colspan="8">No evaluated cycle available.</td></tr>';
+    return;
+  }
+
+  const cycle = data.cycle;
+  const results = data.strategy_results || [];
+  meta.textContent = 'Draw ' + dateLabel(cycle.draw_date) + ': ' +
+    [cycle.n1, cycle.n2, cycle.n3, cycle.n4, cycle.n5].join(' - ') +
+    ' / ' + cycle.pb;
+
+  body.innerHTML = results.map(function (result) {
+    const delta = Number(result.weight_after || 0) - Number(result.weight_before || 0);
+    return [
+      '<tr>',
+        '<td>' + strategyName(result.strategy_id) + '</td>',
+        '<td>' + result.tickets_count + '</td>',
+        '<td>' + Number(result.matches_3 || 0) + '</td>',
+        '<td>' + Number(result.matches_4 || 0) + '</td>',
+        '<td>' + Number(result.matches_5 || 0) + '</td>',
+        '<td>' + money(result.total_prize || 0) + '</td>',
+        '<td>' + roi(result.roi) + '</td>',
+        '<td><span class="' + (delta >= 0 ? 'pos' : 'neg') + '">' +
+          (delta >= 0 ? '+' : '') + delta.toFixed(4) + '</span></td>',
+      '</tr>'
+    ].join('');
+  }).join('');
+}
+
+function parseNumbers(value) {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return String(value).split(/[ ,\-]+/).map(Number).filter(Boolean).slice(0, 5);
+  }
+}
+
+function prizeLabel(value) {
+  const normalized = String(value || '').toLowerCase().replace(/\s/g, '');
+  if (normalized === 'match0+pb') return 'Powerball';
+  if (normalized === 'match1+pb') return '1 number + Powerball';
+  if (normalized === 'match2+pb') return '2 numbers + Powerball';
+  if (normalized === 'match3') return '3 numbers';
+  if (normalized === 'match3+pb') return '3 numbers + Powerball';
+  if (normalized === 'match4') return '4 numbers';
+  if (normalized === 'match4+pb') return '4 numbers + Powerball';
+  if (normalized === 'match5') return '5 numbers';
+  if (normalized === 'jackpot') return 'Jackpot';
+  return titleCase(String(value || 'Verified prize').replace(/\+/g, ' + '));
+}
+
+async function renderWins() {
+  const data = await api('/api/wins?game=' + GAME);
+  const list = document.getElementById('wins-grid');
+  const total = document.getElementById('wins-total');
+
+  if (!data || !data.total_count) {
+    total.textContent = '';
+    list.innerHTML = '<div class="empty-state">No verified prizes recorded yet.</div>';
+    return;
+  }
+
+  total.innerHTML = '<strong>' + money(data.total_amount) + '</strong> across ' +
+    Number(data.total_count).toLocaleString() + ' wins';
+
+  list.innerHTML = (data.wins || []).slice(0, 6).map(function (win) {
+    const numbers = parseNumbers(win.numbers);
+    return [
+      '<div class="win-row">',
+        '<span class="win-date">' + dateLabel(win.draw_date || (win.created_at || '').slice(0, 10), {
+          month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC'
+        }) + '</span>',
+        '<span class="win-strategy">' + strategyName(win.strategy_id) + '</span>',
+        '<span class="win-match">' + prizeLabel(win.prize_level) + '</span>',
+        '<span class="win-numbers"><span class="draw-balls">' +
+          ballsHTML(numbers, win.extra) + '</span></span>',
+        '<span class="win-amount">' + money(win.prize_amount || 0) + '</span>',
+      '</div>'
+    ].join('');
+  }).join('');
+}
+
+async function renderNextTickets() {
+  const strategies = await api('/api/strategies?game=' + GAME);
+  const list = document.getElementById('next-tickets-grid');
+  const toggle = document.getElementById('tickets-toggle');
+
+  if (!strategies || !strategies.length) {
+    list.innerHTML = '<div class="empty-state">No strategies are available.</div>';
+    return;
+  }
+
+  strategies.forEach(function (strategy) {
+    strategyNamesCache[strategy.id] = strategyName(strategy.id);
+  });
+
+  const previews = await Promise.all(strategies.map(function (strategy) {
+    return api('/api/upcoming-tickets?game=' + GAME + '&strategy=' + strategy.id);
+  }));
+
+  list.innerHTML = strategies.map(function (strategy, index) {
+    const previewData = previews[index];
+    const ticket = previewData && previewData.found && previewData.tickets.length ?
+      previewData.tickets[0] : null;
+    const classes = 'strategy-ticket-row' + (index >= 3 ? ' is-extra' : '');
+    return [
+      '<button class="' + classes + '" type="button" data-strategy="' + strategy.id + '"' +
+        (ticket ? '' : ' disabled') + '>',
+        '<span class="strategy-name">' + strategyName(strategy.id) + '</span>',
+        '<span class="draw-balls">' + (ticket ?
+          ballsHTML([ticket.n1, ticket.n2, ticket.n3, ticket.n4, ticket.n5], ticket.extra) :
+          '<span class="summary-secondary">Not generated yet</span>') + '</span>',
+        '<span class="ticket-action">' + (ticket ? 'View 20' : 'Unavailable') + '</span>',
+      '</button>'
+    ].join('');
+  }).join('');
+
+  list.querySelectorAll('.strategy-ticket-row:not([disabled])').forEach(function (button) {
+    button.addEventListener('click', function () {
+      openTicketsModal(button.dataset.strategy);
+    });
+  });
+
+  if (strategies.length > 3) {
+    toggle.hidden = false;
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+}
+
+function initTicketToggle() {
+  const toggle = document.getElementById('tickets-toggle');
+  const list = document.getElementById('next-tickets-grid');
+  toggle.addEventListener('click', function () {
+    const showAll = list.classList.toggle('show-all');
+    toggle.textContent = showAll ? 'Show fewer strategies' : 'View all strategies';
+    toggle.setAttribute('aria-expanded', String(showAll));
   });
 }
 
 async function openTicketsModal(strategyId) {
   const overlay = document.getElementById('tickets-modal-overlay');
-  const title   = document.getElementById('tickets-modal-title');
-  const sub     = document.getElementById('tickets-modal-sub');
-  const list    = document.getElementById('tickets-modal-list');
+  const close = document.getElementById('tickets-modal-close');
+  const title = document.getElementById('tickets-modal-title');
+  const sub = document.getElementById('tickets-modal-sub');
+  const list = document.getElementById('tickets-modal-list');
 
-  title.textContent = strategyNamesCache?.[strategyId] || titleCase(strategyId);
-  sub.textContent = 'Loading tickets…';
+  lastFocusedElement = document.activeElement;
+  title.textContent = strategyNamesCache[strategyId] || strategyName(strategyId);
+  sub.textContent = 'Loading upcoming combinations...';
   list.innerHTML = '';
   overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  close.focus();
 
-  const data = await api(`/api/upcoming-tickets?game=${GAME}&strategy=${strategyId}`);
+  const data = await api('/api/upcoming-tickets?game=' + GAME + '&strategy=' + strategyId);
   if (!data || !data.found || !data.tickets.length) {
-    sub.textContent = 'No tickets generated yet for the next draw.';
+    sub.textContent = 'No tickets have been generated for the next draw.';
     return;
   }
 
-  sub.textContent = `20 tickets for ${data.draw_date} — sorted best to worst by model confidence`;
-  list.innerHTML = data.tickets.map((t, i) => `
-    <div class="ticket-row">
-      <span class="ticket-rank">#${i + 1}</span>
-      <div class="ticket-balls">${ballsHTML([t.n1, t.n2, t.n3, t.n4, t.n5], t.extra)}</div>
-      <span class="ticket-confidence">${((t.confidence ?? 0) * 100).toFixed(0)}%</span>
-    </div>`).join('');
+  sub.textContent = '20 tickets for ' + dateLabel(data.draw_date) +
+    '. Confidence reflects each model score.';
+  list.innerHTML = data.tickets.map(function (ticket, index) {
+    return [
+      '<div class="modal-ticket-row">',
+        '<span class="ticket-rank">' + (index + 1) + '</span>',
+        '<span class="draw-balls">' +
+          ballsHTML([ticket.n1, ticket.n2, ticket.n3, ticket.n4, ticket.n5], ticket.extra) +
+        '</span>',
+        '<span class="ticket-confidence">' +
+          Math.round(Number(ticket.confidence || 0) * 100) + '%</span>',
+      '</div>'
+    ].join('');
+  }).join('');
 }
 
 function closeTicketsModal() {
-  document.getElementById('tickets-modal-overlay').classList.remove('open');
+  const overlay = document.getElementById('tickets-modal-overlay');
+  if (!overlay.classList.contains('open')) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+  if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+    lastFocusedElement.focus();
+  }
 }
 
 function initTicketsModal() {
-  document.getElementById('tickets-modal-close').addEventListener('click', closeTicketsModal);
-  document.getElementById('tickets-modal-overlay').addEventListener('click', e => {
-    if (e.target.id === 'tickets-modal-overlay') closeTicketsModal();
+  const overlay = document.getElementById('tickets-modal-overlay');
+  const close = document.getElementById('tickets-modal-close');
+
+  close.addEventListener('click', closeTicketsModal);
+  overlay.addEventListener('click', function (event) {
+    if (event.target === overlay) closeTicketsModal();
   });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeTicketsModal();
+  document.addEventListener('keydown', function (event) {
+    if (!overlay.classList.contains('open')) return;
+    if (event.key === 'Escape') closeTicketsModal();
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      close.focus();
+    }
   });
 }
 
-// ── Nav highlight on scroll ────────────────────────────────
 function initScrollSpy() {
-  const sections = document.querySelectorAll('section[id], .draw-banner[id]');
-  const links    = document.querySelectorAll('.nav-link');
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        const id = e.target.id;
-        links.forEach(a => {
-          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
-        });
-      }
+  const links = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('#overview, #rankings, #next-tickets, #wins');
+  const observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      links.forEach(function (link) {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+      });
     });
-  }, { threshold: 0.4 });
-
-  sections.forEach(s => observer.observe(s));
+  }, { rootMargin: '-20% 0px -65% 0px', threshold: 0 });
+  sections.forEach(function (section) { observer.observe(section); });
 }
 
-// ── Boot ───────────────────────────────────────────────────
-(async function init() {
+async function init() {
   initTicketsModal();
-  initInfoTooltips();
+  initTicketToggle();
   await Promise.all([
     renderGameIdentity(),
     renderCountdown(),
     renderJackpot(),
     renderDraw(),
-    renderRankingPodium(),
-    renderStrategies(),
+    renderRankings(),
+    renderTechnicalStrategies(),
     renderNextTickets(),
     renderLastCycle(),
-    renderWins(),
+    renderWins()
   ]);
   initScrollSpy();
-})();
+}
+
+init();

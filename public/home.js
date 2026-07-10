@@ -1,116 +1,98 @@
-/**
- * SHIOL+ v9 — Home (selector de juegos)
- * Lista todos los juegos que conoce SHIOL+ (vía /api/games) con un breve
- * resumen de cada uno, y linkea al dashboard de detalle (game.html?game=id)
- * para los que ya están activos.
- */
-
-const API = ''; // mismo origen — Worker maneja /api/*
+const API = '';
 
 async function api(path) {
   try {
-    const res = await fetch(API + path);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch (e) {
-    console.error('API error:', path, e);
+    const response = await fetch(API + path);
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    return await response.json();
+  } catch (error) {
+    console.error('API error:', path, error);
     return null;
   }
 }
 
-const fmt$ = n => n >= 1_000_000
-  ? '$' + (n / 1_000_000).toFixed(1) + 'M'
-  : n >= 1_000
-    ? '$' + (n / 1_000).toFixed(0) + 'K'
-    : '$' + n.toLocaleString();
+function money(value) {
+  const number = Number(value || 0);
+  if (number >= 1000000000) return '$' + (number / 1000000000).toFixed(1) + 'B';
+  if (number >= 1000000) return '$' + (number / 1000000).toFixed(1) + 'M';
+  if (number >= 1000) return '$' + (number / 1000).toFixed(0) + 'K';
+  return '$' + number.toLocaleString();
+}
 
-const titleCase = s => s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+function strategyName(value) {
+  const normalized = String(value || '').replace(/_mega_millions$/, '');
+  const names = {
+    xgboost_ml: 'XGBoost ML',
+    hybrid_ensemble: 'Hybrid Ensemble',
+    frequency_weighted: 'Frequency Weighted',
+    intelligent_scoring: 'Intelligent Scoring',
+    coverage_optimizer: 'Coverage Optimizer',
+    cooccurrence: 'Cooccurrence',
+    range_balanced: 'Range Balanced',
+    random_baseline: 'Random Baseline'
+  };
+  return names[normalized] || normalized.replace(/_/g, ' ').replace(/\b\w/g, function (character) {
+    return character.toUpperCase();
+  });
+}
 
-// Ícono puramente decorativo por juego -- no viene de D1 (el schema no tiene
-// un campo de color/ícono por lotería), es solo un mapa chico en el cliente
-// para diferenciar las cards a simple vista. Fallback genérico para
-// cualquier juego futuro que no esté en la lista.
-const GAME_ICON = {
-  powerball: '🔴',
-  mega_millions: '🟡',
-};
+function drawDays(value) {
+  const labels = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
+  return String(value || '').split(',').map(function (day) {
+    return labels[day.trim()] || day.trim();
+  }).join(' / ');
+}
 
-// ── Resumen de un juego activo: top estrategia + total ganado ──
-async function loadActiveGameStats(gameId) {
-  const [strategies, wins] = await Promise.all([
-    api(`/api/strategies?game=${gameId}`),
-    api(`/api/wins?game=${gameId}`),
+async function loadGameStats(gameId) {
+  const results = await Promise.all([
+    api('/api/strategies?game=' + gameId),
+    api('/api/wins?game=' + gameId),
+    api('/api/jackpot?game=' + gameId)
   ]);
-
-  const top = strategies && strategies.length ? strategies[0] : null;
-  const totalWon = wins && wins.length
-    ? wins.reduce((sum, w) => sum + (w.prize_amount || 0), 0)
-    : 0;
+  const strategies = results[0] || [];
+  const wins = results[1] || {};
+  const jackpot = results[2] || {};
+  const top = strategies.length ? strategies[0] : null;
 
   return {
-    topStrategyName: top ? titleCase(top.name) : null,
-    topStrategyWeight: top ? top.current_weight : null,
-    strategiesCount: strategies ? strategies.length : 0,
-    totalWon,
-    winsCount: wins ? wins.length : 0,
+    topStrategy: top ? strategyName(top.id || top.name) : 'Not available',
+    strategiesCount: strategies.length,
+    totalWon: Number(wins.total_amount || 0),
+    winsCount: Number(wins.total_count || 0),
+    jackpot: jackpot.found ? Number(jackpot.amount || 0) : 0
   };
 }
 
-function activeCardHTML(game, stats) {
-  const icon = GAME_ICON[game.id] || '🎲';
-  const days = game.draw_days.split(',').map(d => titleCase(d)).join('/');
-
-  return `
-    <a class="game-card" href="game.html?game=${game.id}">
-      <div class="game-card-head">
-        <span class="game-card-icon">${icon}</span>
-        <div>
-          <div class="game-card-title">${game.name}</div>
-          <div class="game-card-days">${days}</div>
-        </div>
-        <span class="pill pill-active game-card-badge">active</span>
-      </div>
-      <div class="game-card-stats">
-        <div class="game-card-stat">
-          <div class="stat-label">Top Strategy</div>
-          <div class="stat-value">
-            ${stats.topStrategyName || '—'}
-            ${stats.topStrategyWeight != null ? `<span class="stat-sub">weight ${stats.topStrategyWeight.toFixed(3)}</span>` : ''}
-          </div>
-        </div>
-        <div class="game-card-stat">
-          <div class="stat-label">Total Won</div>
-          <div class="stat-value">${stats.totalWon > 0 ? fmt$(stats.totalWon) : '—'}</div>
-        </div>
-        <div class="game-card-stat">
-          <div class="stat-label">Strategies</div>
-          <div class="stat-value">${stats.strategiesCount || '—'}</div>
-        </div>
-      </div>
-      <div class="game-card-cta">View details →</div>
-    </a>`;
+function activeReport(game, stats) {
+  const gameClass = game.id === 'powerball' ? 'powerball' : 'mega';
+  return [
+    '<a class="game-report ' + gameClass + '" href="game.html?game=' + game.id + '">',
+      '<div class="game-report-head">',
+        '<div>',
+          '<span class="game-marker" aria-hidden="true"></span>',
+          '<h3>' + game.name + '</h3>',
+          '<p>' + drawDays(game.draw_days) + '</p>',
+        '</div>',
+        '<span class="report-arrow" aria-hidden="true">&rarr;</span>',
+      '</div>',
+      '<div class="game-report-metrics">',
+        '<div><span>Current jackpot</span><strong>' + (stats.jackpot ? money(stats.jackpot) : 'Not available') + '</strong></div>',
+        '<div><span>Top strategy</span><strong>' + stats.topStrategy + '</strong></div>',
+        '<div><span>Total won</span><strong>' + money(stats.totalWon) + '</strong><small>' + stats.winsCount + ' verified wins</small></div>',
+      '</div>',
+    '</a>'
+  ].join('');
 }
 
-function comingSoonCardHTML(game) {
-  const icon = GAME_ICON[game.id] || '🎲';
-  const days = game.draw_days.split(',').map(d => titleCase(d)).join('/');
-
-  return `
-    <div class="game-card game-card-disabled">
-      <div class="game-card-head">
-        <span class="game-card-icon">${icon}</span>
-        <div>
-          <div class="game-card-title">${game.name}</div>
-          <div class="game-card-days">${days}</div>
-        </div>
-        <span class="pill pill-archived game-card-badge">coming soon</span>
-      </div>
-      <div class="game-card-stats">
-        <div class="game-card-stat game-card-stat-full">
-          <div class="stat-value stat-muted">Not tracked yet — will appear here once activated.</div>
-        </div>
-      </div>
-    </div>`;
+function inactiveReport(game) {
+  return [
+    '<div class="game-report is-inactive">',
+      '<div class="game-report-head">',
+        '<div><h3>' + game.name + '</h3><p>' + drawDays(game.draw_days) + '</p></div>',
+        '<span class="muted-status">Coming soon</span>',
+      '</div>',
+    '</div>'
+  ].join('');
 }
 
 async function renderGames() {
@@ -118,21 +100,20 @@ async function renderGames() {
   const games = await api('/api/games');
 
   if (!games || !games.length) {
-    grid.innerHTML = '<p style="color:var(--muted);font-style:italic">No games registered yet.</p>';
+    grid.innerHTML = '<p class="empty-state">Reports are temporarily unavailable.</p>';
     return;
   }
 
-  // Estadísticas de los juegos activos en paralelo (son pocos -- no hace
-  // falta un endpoint agregado nuevo para esto).
-  const activeGames = games.filter(g => g.active);
-  const statsList = await Promise.all(activeGames.map(g => loadActiveGameStats(g.id)));
-  const statsByGame = Object.fromEntries(activeGames.map((g, i) => [g.id, statsList[i]]));
+  const activeGames = games.filter(function (game) { return game.active; });
+  const stats = await Promise.all(activeGames.map(function (game) {
+    return loadGameStats(game.id);
+  }));
+  const statsByGame = {};
+  activeGames.forEach(function (game, index) { statsByGame[game.id] = stats[index]; });
 
-  grid.innerHTML = games.map(g =>
-    g.active ? activeCardHTML(g, statsByGame[g.id]) : comingSoonCardHTML(g)
-  ).join('');
+  grid.innerHTML = games.map(function (game) {
+    return game.active ? activeReport(game, statsByGame[game.id]) : inactiveReport(game);
+  }).join('');
 }
 
-(async function init() {
-  await renderGames();
-})();
+renderGames();

@@ -3,7 +3,7 @@
 Contexto persistente del proyecto. Actualizar esta lista al cerrar cada sesion de trabajo
 para que una conversacion nueva pueda retomar sin perder contexto.
 
-Ultima actualizacion: 2026-07-09 (sesion 24 -- respaldo GitHub v8/v9 y plan de migracion)
+Ultima actualizacion: 2026-07-09 (sesion 25 -- rediseño minimalista completo del frontend)
 
 ## Estado actual
 
@@ -29,6 +29,36 @@ Ultima actualizacion: 2026-07-09 (sesion 24 -- respaldo GitHub v8/v9 y plan de m
   Mega Millions hizo el catch-up (Opción B) contra el sorteo 2026-07-03 (primera
   evaluación real desde la activación) y ya generó el siguiente ciclo (2026-07-10).
   El pendiente de la sesión 19 ("no se puede confirmar hasta que pase") queda cerrado.
+
+## Hecho (2026-07-09, sesion 25 - rediseno minimalista completo del frontend)
+
+- [x] **Direccion visual aprobada e implementada**: reemplazo del dashboard oscuro
+      con multiples tarjetas, colores e iconos por una interfaz editorial minimalista
+      en fondo calido claro, texto de alto contraste, un solo azul de acento y color
+      reservado para la bola extra y valores positivos. Sin gradientes, glassmorphism,
+      iconografia decorativa ni apariencia generica de dashboard AI.
+- [x] **Portada reconstruida** (`public/index.html`, `public/home.js`): nueva
+      introduccion del producto, reportes por juego con jackpot, estrategia lider,
+      total ganado y cantidad de premios, mas una explicacion compacta del metodo.
+      Corregido el bug de `Total Won`: `/api/wins` devuelve un objeto
+      `{total_amount,total_count,wins}`, no un arreglo.
+- [x] **Dashboard reconstruido** (`public/game.html`, `public/game.js`):
+      selector Powerball/Mega Millions, encabezado de reporte, banda resumen con
+      jackpot/proximo sorteo/ultimo resultado, ranking principal con win rate,
+      tickets evaluados y total ganado, lista compacta de tickets, premios recientes
+      en lenguaje claro y laboratorio tecnico colapsable.
+- [x] **Responsive y accesibilidad** (`public/styles.css`): navegacion inferior
+      movil, layout sin overflow horizontal a 390 px, tipografia legible, estados de
+      foco visibles, soporte `prefers-reduced-motion`, modal con `role=dialog`,
+      `aria-modal`, bloqueo del fondo, Escape, foco inicial y restauracion del foco.
+- [x] **QA local con datos reales de produccion**: portada cargo ambos juegos con
+      jackpots y totales correctos; Powerball cargo 8 rankings, 8 estrategias de
+      tickets y 4 wins. Modal XGBoost mostro los 20 tickets. Verificado desktop y
+      viewport movil 390x844, sin desbordamiento horizontal. `node --check` limpio
+      en `home.js` y `game.js`; IDs de HTML/JS y llaves CSS balanceados.
+- [ ] **Deploy pendiente**: este cambio solo actualiza la rama `agent/publish-v9`
+      y el PR #40. No fusionar ni desplegar antes de completar el cambio de dominio
+      y desactivar el workflow automatico del VPS documentado en la sesion 24.
 
 ## Hecho (2026-07-09, sesion 24 - respaldo GitHub v8/v9 y plan de migracion)
 

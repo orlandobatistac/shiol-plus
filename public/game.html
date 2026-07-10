@@ -3,169 +3,160 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SHIOL+ · Strategy Analytics</title>
+  <meta name="description" content="SHIOL+ strategy rankings, tickets, and verified lottery outcomes."/>
+  <title>SHIOL+ | Strategy report</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
-<body>
-  <header>
-    <div class="logo-group">
-      <a href="index.html" class="back-link" title="Volver a Home">← Home</a>
-      <div class="logo">SHIOL<span>+</span> <span class="logo-game" id="logo-game"></span></div>
+<body class="report-page">
+  <header class="topbar report-topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="SHIOL+ home">SHIOL<span>+</span></a>
+      <nav class="desktop-nav" aria-label="Report sections">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#rankings" class="nav-link">Rankings</a>
+        <a href="#next-tickets" class="nav-link">Tickets</a>
+        <a href="#wins" class="nav-link">Winners</a>
+      </nav>
+      <div class="data-status"><span class="status-dot"></span>Data current</div>
     </div>
-    <nav>
-      <a href="#rankings" class="nav-link active">Rankings</a>
-      <a href="#next-tickets" class="nav-link">Next Tickets</a>
-      <a href="#wins" class="nav-link">Hall of Wins</a>
-    </nav>
   </header>
 
-  <main>
+  <main class="report-shell">
+    <div class="game-switcher" aria-label="Select game">
+      <a href="game.html?game=powerball" data-game="powerball">Powerball</a>
+      <a href="game.html?game=mega_millions" data-game="mega_millions">Mega Millions</a>
+    </div>
 
-    <!-- ── Hero: Countdown + Current Jackpot ── -->
-    <section class="hero" id="hero">
-      <div class="hero-card countdown-card">
-        <div class="card-label">Next Draw In</div>
-        <div class="countdown" id="countdown">
-          <div class="countdown-unit"><span id="cd-days">–</span><small>days</small></div>
-          <div class="countdown-unit"><span id="cd-hours">–</span><small>hrs</small></div>
-          <div class="countdown-unit"><span id="cd-mins">–</span><small>min</small></div>
-          <div class="countdown-unit"><span id="cd-secs">–</span><small>sec</small></div>
+    <section class="report-intro">
+      <div>
+        <p class="eyebrow">Live strategy report</p>
+        <h1 id="report-title">Strategy report</h1>
+        <p id="report-description" class="report-lead">
+          Eight strategies measured by win rate and total prizes across evaluated tickets.
+        </p>
+      </div>
+      <a class="text-action" href="#analytics-lab">View full analysis <span aria-hidden="true">&rarr;</span></a>
+    </section>
+
+    <section class="summary-band" id="overview" aria-label="Game overview">
+      <div class="summary-item jackpot-summary">
+        <span class="summary-label">Current jackpot</span>
+        <strong id="jackpot-amount" class="summary-primary">Loading...</strong>
+        <span id="jackpot-sub" class="summary-secondary">Estimated next draw</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Next draw</span>
+        <strong id="countdown-value" class="summary-value">Loading...</strong>
+        <span id="next-draw-label" class="summary-secondary">Loading schedule...</span>
+      </div>
+      <div class="summary-item latest-summary">
+        <span class="summary-label">Latest result <span id="draw-date"></span></span>
+        <div class="draw-balls" id="draw-balls" aria-label="Latest draw numbers">
+          <span class="ball skeleton"></span><span class="ball skeleton"></span>
+          <span class="ball skeleton"></span><span class="ball skeleton"></span>
+          <span class="ball skeleton"></span><span class="ball extra skeleton"></span>
         </div>
-        <div class="hero-sub" id="next-draw-label">Loading schedule…</div>
-      </div>
-
-      <div class="hero-card jackpot-card">
-        <div class="card-label">Current Jackpot</div>
-        <div class="jackpot-amount" id="jackpot-amount">Loading…</div>
-        <div class="hero-sub" id="jackpot-sub">Estimated, next draw</div>
       </div>
     </section>
 
-    <!-- ── Last Draw ── -->
-    <section class="draw-banner" id="draw-banner">
-      <div class="draw-label">Latest Draw</div>
-      <div class="draw-balls" id="draw-balls">
-        <span class="ball skeleton"></span>
-        <span class="ball skeleton"></span>
-        <span class="ball skeleton"></span>
-        <span class="ball skeleton"></span>
-        <span class="ball skeleton"></span>
-        <span class="ball pb skeleton"></span>
+    <section id="rankings" class="report-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Performance</p>
+          <h2>Strategy rankings</h2>
+        </div>
+        <p class="section-note">Ranked by total verified prizes.</p>
       </div>
-      <div class="draw-date" id="draw-date">—</div>
+      <div class="ranking-table" role="table" aria-label="Strategy rankings">
+        <div class="ranking-header" role="row">
+          <span>Rank</span><span>Strategy</span><span>Win rate</span>
+          <span class="desktop-only">Tickets evaluated</span><span>Won</span>
+        </div>
+        <div id="podium" class="ranking-body">
+          <div class="loading">Loading rankings...</div>
+        </div>
+      </div>
     </section>
 
-    <!-- ── Rankings: podio simple + detalle técnico colapsado (sesión 23) ── -->
-    <section id="rankings">
-      <h2>Who's Winning? 🏆</h2>
-      <p class="section-sub">Real win rate and $ won, counted across every single ticket ever played — not just big prizes.</p>
-      <div id="podium">
-        <div class="loading">Loading...</div>
+    <section id="next-tickets" class="report-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Upcoming draw</p>
+          <h2>Next draw tickets</h2>
+        </div>
+        <p class="section-note">Open a strategy to review all 20 combinations.</p>
       </div>
+      <div id="next-tickets-grid" class="ticket-list">
+        <div class="loading">Loading tickets...</div>
+      </div>
+      <button id="tickets-toggle" class="text-button" type="button" hidden>View all strategies</button>
+    </section>
 
+    <section id="wins" class="report-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Verified outcomes</p>
+          <h2>Recent wins</h2>
+        </div>
+        <div class="wins-total" id="wins-total"></div>
+      </div>
+      <div id="wins-grid" class="wins-list">
+        <div class="loading">Loading wins...</div>
+      </div>
+    </section>
+
+    <section id="analytics-lab" class="report-section analytics-lab">
       <details id="rankings-details">
-        <summary>See all 8 strategies (technical detail)</summary>
-        <p class="section-sub" style="margin-top:1rem">
-          Sorted by adaptive
-          <span class="info-wrap">
-            <button type="button" class="info-icon" aria-label="What is weight?">?</button>
-            <span class="info-popover">How much the system currently trusts this strategy, based on its real track record. It goes up after wins, down after misses — recalculated automatically after every draw.</span>
-          </span>
-          weight.
+        <summary>Full rankings and model metrics</summary>
+        <p class="details-intro">
+          Weight is the system's current trust in a strategy. ROI compares prizes
+          with the cost of evaluated tickets.
         </p>
         <div class="table-wrap">
           <table id="strategies-table">
             <thead>
-              <tr>
-                <th>#</th>
-                <th>Strategy</th>
-                <th>Status</th>
-                <th>Weight</th>
-                <th>Trend</th>
-                <th>Avg ROI
-                  <span class="info-wrap">
-                    <button type="button" class="info-icon" aria-label="What is ROI?">?</button>
-                    <span class="info-popover">Return on investment: prize money won minus money spent on tickets, as a percentage of money spent.</span>
-                  </span>
-                </th>
-                <th>Total Prize</th>
-              </tr>
+              <tr><th>#</th><th>Strategy</th><th>Status</th><th>Weight</th><th>Trend</th><th>Avg ROI</th><th>Total prize</th></tr>
             </thead>
-            <tbody id="strategies-body">
-              <tr><td colspan="7" class="loading">Loading...</td></tr>
-            </tbody>
+            <tbody id="strategies-body"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody>
           </table>
         </div>
       </details>
-    </section>
 
-    <!-- ── Next Draw Tickets ── -->
-    <section id="next-tickets">
-      <h2>Next Draw Tickets 🎟️</h2>
-      <p class="section-sub">The 20 tickets each strategy is playing for the upcoming draw. Click a strategy to see all of them.</p>
-      <div id="next-tickets-grid">
-        <div class="loading">Loading...</div>
-      </div>
-    </section>
-
-    <!-- ── Last Cycle (detalle técnico colapsado, sesión 23) ── -->
-    <section id="last-cycle">
-      <details>
-        <summary>Last cycle — technical breakdown</summary>
-        <p class="section-sub" id="cycle-meta" style="margin-top:1rem">—</p>
+      <details id="last-cycle">
+        <summary>Latest cycle breakdown</summary>
+        <p class="details-intro" id="cycle-meta">Loading...</p>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr>
-                <th>Strategy</th>
-                <th>Tickets</th>
-                <th>3-Match</th>
-                <th>4-Match</th>
-                <th>5-Match</th>
-                <th>Prize</th>
-                <th>ROI</th>
-                <th>Weight Δ</th>
-              </tr>
+              <tr><th>Strategy</th><th>Tickets</th><th>3 match</th><th>4 match</th><th>5 match</th><th>Prize</th><th>ROI</th><th>Weight change</th></tr>
             </thead>
-            <tbody id="cycle-body">
-              <tr><td colspan="8" class="loading">Loading...</td></tr>
-            </tbody>
+            <tbody id="cycle-body"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
           </table>
         </div>
       </details>
     </section>
-
-    <!-- ── Hall of Wins ── -->
-    <section id="wins">
-      <h2>Hall of Wins 🏆</h2>
-      <p class="section-sub">Real prizes obtained through strategy experimentation.</p>
-      <div class="wins-total" id="wins-total"></div>
-      <div id="wins-grid">
-        <div class="loading">Loading...</div>
-      </div>
-    </section>
-
   </main>
 
-  <!-- ── Modal: 20 tickets de una estrategia ── -->
-  <div class="modal-overlay" id="tickets-modal-overlay">
-    <div class="modal-card">
-      <button class="modal-close" id="tickets-modal-close" aria-label="Close">×</button>
-      <h3 id="tickets-modal-title">—</h3>
-      <p class="section-sub" id="tickets-modal-sub">—</p>
-      <p class="section-sub" style="margin-top:-0.7rem">
-        <span class="info-wrap">
-          <button type="button" class="info-icon" aria-label="What is confidence?">?</button>
-          <span class="info-popover">How sure the algorithm is about this specific combination, from 0-100%. Higher confidence tickets are shown first.</span>
-        </span>
-        What does "confidence" mean?
-      </p>
-      <div id="tickets-modal-list"></div>
+  <nav class="mobile-nav" aria-label="Mobile report sections">
+    <a href="#overview" class="nav-link active"><span>Overview</span></a>
+    <a href="#rankings" class="nav-link"><span>Rankings</span></a>
+    <a href="#next-tickets" class="nav-link"><span>Tickets</span></a>
+    <a href="#wins" class="nav-link"><span>Winners</span></a>
+  </nav>
+
+  <div class="modal-overlay" id="tickets-modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tickets-modal-title" aria-describedby="tickets-modal-sub">
+      <button class="modal-close" id="tickets-modal-close" type="button" aria-label="Close ticket list">&times;</button>
+      <p class="eyebrow">Upcoming combinations</p>
+      <h2 id="tickets-modal-title">Strategy tickets</h2>
+      <p id="tickets-modal-sub" class="modal-sub">Loading tickets...</p>
+      <div id="tickets-modal-list" class="modal-ticket-list"></div>
     </div>
   </div>
 
-  <footer id="page-footer">
-    <p>SHIOL+ v9 · Strategy Analytics Engine</p>
+  <footer class="site-footer" id="page-footer">
+    <span>SHIOL+ v9</span>
+    <span>Data updated after every published draw.</span>
   </footer>
 
   <script src="game.js"></script>
