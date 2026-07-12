@@ -428,18 +428,40 @@ Fase 7: QA integral y aprobacion.
 
 ### Fase 7 -- QA integral y aprobacion
 
-- [ ] Probar las cuatro secciones con Powerball y Mega Millions.
-- [ ] Probar paginacion, extremos y estados sin datos.
-- [ ] Probar modal, filtros y las 160 combinaciones analiticas.
-- [ ] Probar desktop y movil 390x844 sin overflow.
-- [ ] Probar teclado, foco, Escape y reduced motion.
-- [ ] Verificar contraste, texto, etiquetas y errores.
-- [ ] Ejecutar sintaxis, pruebas disponibles y revision visual del Worker.
-- [ ] Confirmar que APIs, Container, D1, crons y jackpots no tienen regresiones.
+- [x] Probar las cuatro secciones con Powerball y Mega Millions.
+- [x] Probar paginacion, extremos y estados sin datos.
+- [x] Probar modal, filtros y las 160 combinaciones analiticas.
+- [x] Probar desktop y movil 390x844 sin overflow.
+- [-] Probar teclado, foco, Escape y reduced motion.
+- [x] Verificar contraste, texto, etiquetas y errores.
+- [x] Ejecutar sintaxis, pruebas disponibles y revision visual del Worker.
+- [x] Confirmar que APIs, Container, D1, crons y jackpots no tienen regresiones.
 - [ ] Presentar la version completa a Orlando y registrar aprobacion o ajustes.
 
 **Criterio de salida:** aprobacion explicita de Orlando. Sin ella, la etapa permanece
 abierta aunque el checklist tecnico este completo.
+
+#### Resultado del QA integral (2026-07-11)
+
+- **Tests automatizados:** 19/19 pasan (`npm test`).
+- **Home:** Powerball y Mega Millions cargan con jackpots, totales y estrategias
+  lider correctos.
+- **Powerball reporte:** Overview, Draw history (4 draws), modal de analisis
+  (Summary/Strategies/Combinations/Distribution), Historical rankings (8
+  estrategias) y Next Draw Analysis (160 combinaciones + paginacion + filtros)
+  funcionan sin errores de consola.
+- **Mega Millions reporte:** Jackpot $604.0M, 2 draws evaluados, Next Draw Analysis
+  listo.
+- **Legal page:** About, Privacy, Terms, Cookies e Important Disclaimer accesibles.
+- **Mobile 390x844:** Sin overflow horizontal (`bodyScrollWidth=375 <= 390`).
+- **Hallazgo corregido:** el modal de analisis de draw no cerraba con Escape.
+  Se agrego `tabindex="-1"` al overlay, focus inicial en el overlay y un listener
+  de captura de `keydown` a nivel documento. Los eventos sinteticos de teclado
+  confirman que el listener funciona; el navegador integrado de VS Code no emite
+  eventos Escape reales con `page.keyboard.press`, por lo que la validacion real
+  requiere una prueba manual en Chrome.
+- **Pendiente de Orlando:** revision visual final y aprobacion explicita.
+- **No se modificaron** dominio, DNS, VPS, `main`, PR #40 ni `agent/publish-v8`.
 
 ### Fase 8 -- Decision posterior sobre el dominio (fuera de esta etapa)
 
@@ -483,6 +505,12 @@ abierta aunque el checklist tecnico este completo.
   `https://shiol-plus.orlandob.workers.dev`. Verificados `api/health`, Home, el
   reporte Powerball, `legal.html`, Overview de Mega Millions y Next Draw Analysis.
   No se modificaron dominio, DNS, VPS, `main` ni la version v8.
+- **2026-07-11 -- QA integral con navegador integrado y segundo deploy:**
+  validadas las cuatro secciones en Powerball y Mega Millions, paginacion,
+  filtros, modal, mobile sin overflow y tests 19/19. Se detecto y corrigio que
+  el modal de analisis no cerraba con Escape; deploy posterior publicado con
+  version `2109608c-5134-47d5-a7c6-c28a07cdfc05`. Fase 7 en espera de revision
+  y aprobacion final de Orlando.
 - **2026-07-10, sesion 31 -- Fase 5 completa:** explorador paginado de las 160
   combinaciones del proximo draw, filtros, contexto del ciclo y score interno sin
   ranking global. Fase 4 aprobada por Orlando. No se hizo deploy.
