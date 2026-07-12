@@ -3,7 +3,7 @@
 Contexto persistente del proyecto. Actualizar esta lista al cerrar cada sesion de trabajo
 para que una conversacion nueva pueda retomar sin perder contexto.
 
-Ultima actualizacion: 2026-07-09 (sesion 26 -- deploy Cloudflare del rediseño minimalista)
+Ultima actualizacion: 2026-07-10 (sesion 32 -- Fase 6 cerrada)
 
 ## Estado actual
 
@@ -29,6 +29,463 @@ Ultima actualizacion: 2026-07-09 (sesion 26 -- deploy Cloudflare del rediseño m
   Mega Millions hizo el catch-up (Opción B) contra el sorteo 2026-07-03 (primera
   evaluación real desde la activación) y ya generó el siguiente ciclo (2026-07-10).
   El pendiente de la sesión 19 ("no se puede confirmar hasta que pase") queda cerrado.
+
+## Etapa activa (sesion 27) -- Roadmap de mejora UI/UX v9
+
+### Objetivo y regla de salida
+
+Transformar la v9 en una experiencia tan intuitiva como la v8, manteniendo el
+lenguaje visual editorial y minimalista ya aprobado. El recorrido principal debe
+responder, en este orden:
+
+1. Como esta el juego ahora.
+2. Que ocurrio en los sorteos evaluados anteriormente.
+3. Que estrategia ha rendido mejor durante todo el periodo productivo.
+4. Cual es el analisis de IA para el proximo sorteo y cuales son sus 160
+   combinaciones analiticas.
+
+Esta etapa termina solamente cuando Orlando revise y apruebe la experiencia completa
+en desktop y movil. **Hasta esa aprobacion no se migra `shiolplus.com`, no se cambia
+el DNS, no se desactiva el VPS, no se fusiona el PR #40 y no se modifica la rama de
+respaldo `agent/publish-v8`.** El Worker de Cloudflare puede seguir usandose como
+entorno de vista previa de v9.
+
+### Como mantener actualizado este roadmap
+
+- Estados: `[ ]` pendiente, `[-]` en progreso, `[x]` completado y `[!]` bloqueado.
+- Al cerrar cada sesion, actualizar la fecha superior, marcar solo trabajo verificado
+  y agregar una nota breve en "Registro de avance".
+- Si cambia una decision, actualizar primero "Decisiones fijadas" y despues el
+  checklist afectado; no dejar instrucciones contradictorias.
+- Una fase requiere implementacion y sus criterios de aceptacion; no basta con crear
+  solamente el HTML o el endpoint.
+- Los valores de produccion son variables; el UI debe consumir las APIs reales.
+
+### Decisiones fijadas
+
+- [x] Conservar la identidad clara, editorial y minimalista de v9; usar v8 como
+      referencia de flujo, no como plantilla visual literal.
+- [x] Organizar la pagina como `Overview -> Draw history -> Rankings -> Next draw
+      analysis`.
+- [x] Usar listas verticales y paginacion consistente de 10 en 10.
+- [x] Mostrar como historicos solo los sorteos realmente evaluados por SHIOL+.
+- [x] Separar el ranking historico general del ranking de cada sorteo.
+- [x] Calcular el total historico desde `SUM(strategy_stats.total_prize)`; las tablas
+      `tickets` y `wins` tienen cobertura parcial y no representan el acumulado.
+- [x] No crear un "Top 10 global" comparando directamente `confidence` entre
+      estrategias hasta definir una puntuacion comparable.
+- [x] La cuarta seccion recupera el concepto `AI Insights for Next Drawing` de v8;
+      no es un validador de tickets; los resultados premiados viven en el historial.
+- [x] En el UI usar "analisis", "combinaciones analiticas" o "AI insights" para
+      las 160 salidas, segun el contexto.
+- [x] Presentar SHIOL+ como entretenimiento y analisis estadistico, sin promesas.
+
+### Fase 0 -- Contrato de datos y arquitectura de presentacion
+
+- [x] Auditar tablas y endpoints actuales para Powerball y Mega Millions.
+- [x] Documentar la fuente y formula exacta de cada metrica visible.
+- [x] Definir contratos y errores para:
+      - `GET /api/overview?game=...`
+      - `GET /api/analyses?game=...&limit=10&offset=...`
+      - `GET /api/analyses/:drawDate?game=...`
+      - `GET /api/strategy-rankings?game=...`
+      - `GET /api/next-draw-analysis?game=...&limit=10&offset=...`
+- [x] Confirmar total ganado, tickets premiados, ROI, mejor coincidencia, estrategia
+      ganadora y cantidad de sorteos evaluados.
+- [x] Unificar fechas y zonas horarias entre API y frontend.
+- [x] Conservar compatibilidad con los endpoints actuales durante la transicion.
+
+**Criterio de salida:** contratos definidos para ambos juegos, sin metricas ambiguas
+ni combinaciones incompatibles realizadas por el frontend.
+
+#### Resultado de la auditoria (2026-07-10)
+
+Fuentes de verdad:
+
+- `Overview`: `lotteries`, `jackpots`, ultimo `draws`, `cycles` evaluados y
+  agregados de `strategy_stats`.
+- `Draw history`: `cycles.status='evaluated'` unido a `draws` y `strategy_stats`;
+  `tickets` se usa solo cuando existe detalle individual para ese ciclo.
+- `Historical rankings`: `strategy_stats` agrupado por estrategia. `current_weight`
+  es una senal actual del motor, no determina por si sola el lider historico.
+- `Next draw analysis`: ciclo `generated`, sus 160 filas de `tickets` y metadatos de
+  `strategies`; no necesita llamar ocho veces a `/api/upcoming-tickets`.
+
+Cobertura comprobada contra el Worker de vista previa:
+
+- Powerball: 4 draws evaluados, 32 filas de estrategia y 640 combinaciones evaluadas
+  segun `strategy_stats`; solo 320 tickets individuales permanecen en D1 (50% de
+  cobertura). Total historico real: `$132`; el subtotal de tickets disponibles es
+  `$43` y `wins` solo conserva `$16` recientes. Proximo ciclo: 160 combinaciones para
+  2026-07-11.
+- Mega Millions: 2 draws evaluados, 16 filas de estrategia y 320/320 tickets
+  individuales (100% de cobertura). Total historico: `$24`; `wins` conserva `$14`
+  recientes. Proximo ciclo: 160 combinaciones para 2026-07-10.
+- Los primeros dos ciclos de Powerball no pueden recuperar sus combinaciones exactas:
+  la generacion es no deterministica. Se mostrara resumen y ranking agregado, con
+  `combinations_available=false`, sin inventar ni regenerar datos.
+
+Reglas de calculo:
+
+- `evaluated_draws = COUNT(DISTINCT strategy_stats.draw_date)`.
+- `total_won = SUM(strategy_stats.total_prize)`.
+- `evaluated_combinations = SUM(strategy_stats.tickets_count)`.
+- `total_cost = evaluated_combinations * ticket_cost`; ambos juegos usan `$2.00` en
+  la configuracion actual del motor.
+- `lifetime_roi = (total_won - total_cost) / total_cost`, no el promedio simple de
+  porcentajes si en el futuro cambia el volumen por ciclo.
+- Lider historico: `total_won DESC`, luego `lifetime_roi DESC`, luego id estable.
+- `winning_tickets`, win rate y mejor coincidencia se calculan desde `tickets` solo
+  para el periodo cubierto. La API debe devolver `detail_coverage` y no presentarlos
+  como metricas de toda la vida cuando la cobertura sea menor de 100%.
+- `strategies.total_cycles` y `cycles.strategies_run` no se usaran para conteos de UI:
+  hoy Powerball reporta 5 y 0 respectivamente, mientras la evidencia real son 4 draws
+  y 8 resultados por draw.
+- `draw_date` es fecha calendario del sorteo en `America/New_York` (`YYYY-MM-DD`);
+  timestamps operativos se devuelven como ISO-8601 UTC.
+
+Contratos de presentacion acordados:
+
+- `/api/overview`: juego, jackpot y stale status, proximo draw, ultimo resultado,
+  total ganado, costo, ROI, draws/combinaciones evaluadas, cobertura de detalle y
+  estrategia lider historica.
+- `/api/analyses`: una fila agregada por draw con resultado, total ganado, costo,
+  ROI, mejor estrategia, conteo de premios cuando exista detalle y
+  `combinations_available`; paginacion real `limit/offset/total`.
+- `/api/analyses/:drawDate`: resumen, ranking de ocho estrategias, distribucion y
+  combinaciones si existen; devuelve 404 si el ciclo no fue evaluado y nunca incluye
+  un draw oficial que SHIOL+ no analizo.
+- `/api/strategy-rankings`: acumulados completos desde `strategy_stats` mas metricas
+  de tickets acompanadas por su cobertura; orden historico estable.
+- `/api/next-draw-analysis`: las 160 combinaciones en una sola API, con filtros por
+  estrategia y paginacion. Cada combinacion recibe `pool_position`, un identificador
+  numerico unico por draw (1-160), calculado por `confidence` bruto descendente e
+  `id` ascendente para desempates. La vista base usa ese orden global del pool.
+- Errores comunes: 400 para juego/fecha/paginacion invalida, 404 para ciclo ausente y
+  200 con `found=false` cuando el siguiente ciclo aun no fue generado.
+- Los endpoints actuales permanecen activos durante la implementacion; el frontend
+  migrara a los agregados antes de considerar cualquier retiro futuro.
+
+### Fase 0.5 -- Implementacion de APIs agregadas
+
+- [x] Crear `src/presentation-api.js` como capa de consultas de presentacion,
+      separada del pipeline y del Container Python.
+- [x] Conectar la capa nueva desde `src/worker.js` sin retirar ni modificar los
+      contratos de los endpoints anteriores.
+- [x] Implementar `GET /api/overview?game=...` con acumulados completos de
+      `strategy_stats`, jackpot, ultimo resultado, proximo draw, cobertura de detalle
+      y lider historico.
+- [x] Implementar `GET /api/analyses?game=...&limit=...&offset=...` con una fila por
+      draw evaluado, paginacion real y metricas nulas cuando el detalle individual no
+      tiene cobertura completa.
+- [x] Implementar `GET /api/analyses/:drawDate?game=...` con resumen, ranking del
+      draw, distribucion y hasta 160 combinaciones; los ciclos antiguos sin tickets
+      devuelven el resumen honesto con `combinations_available=false`.
+- [x] Implementar `GET /api/strategy-rankings?game=...` con total historico, costo,
+      ROI, tendencia y cobertura explicita. El win rate de toda la vida queda `null`
+      cuando D1 solo conserva parte de los tickets individuales.
+- [x] Implementar `GET /api/next-draw-analysis?game=...&strategy=...&limit=...&offset=...`
+      en una sola consulta paginada, con `pool_position` global por score interno
+      bruto descendente y desempate estable por `id`.
+- [x] Validar juego, estrategia, fecha, limit y offset con respuestas 400/404 o
+      `found=false` segun el contrato de Fase 0.
+- [x] Agregar siete pruebas de contrato con el runner nativo de Node y script
+      `npm test`; todas pasan.
+- [x] Agregar fixture D1 y Worker minimo de prueba para validar SQL real local sin
+      depender del Container, que Wrangler no puede ejecutar localmente en Windows.
+- [x] Verificar de extremo a extremo sobre D1 local: Overview 200, dos analyses
+      paginados, draw antiguo con 0 combinaciones, draw completo con 160, ocho
+      rankings y Next Draw Analysis con 160 elementos paginados de 10 en 10.
+- [x] Ejecutar `wrangler deploy --dry-run`: bundle del Worker, cinco assets y build
+      cacheado del Container completaron correctamente sin publicar produccion.
+- [x] Mantener dominio, DNS, VPS, `main`, PR #40 y `agent/publish-v8` sin cambios.
+
+**Criterio de salida:** los cinco contratos estan implementados, probados contra D1
+local y empaquetados correctamente. **Fase 0.5 completa.** Siguiente paso: Fase 1,
+sistema visual, navegacion y componentes compartidos del frontend.
+
+### Fase 1 -- Sistema visual, navegacion y componentes compartidos
+
+- [x] Crear navegacion `Overview`, `Draw history`, `Rankings` y `Next draw analysis`.
+- [x] Unificar encabezados, metricas, listas, filas, botones, filtros, paginadores y
+      mensajes `Showing X-Y of Z`.
+- [x] Definir estados compartidos de carga, error, reintento y contenido vacio.
+- [x] Garantizar contraste, texto legible y foco visible.
+- [x] Evitar tablas horizontales y overflow en movil, incluido 390 px.
+- [x] Mantener un solo idioma y terminologia consistente.
+
+**Criterio de salida:** las cuatro secciones usan el mismo sistema visual y funcional
+en desktop y movil. **Fase 1 completa, QA local aprobado y revision visual aprobada
+por Orlando el 2026-07-10.**
+
+#### Resultado de Fase 1 y QA rapido (2026-07-10)
+
+- Los cuatro stages comparten superficie, borde, radio, sombra, encabezado, nota,
+  estados y footer de cobertura. `Draw history` queda marcado honestamente como base
+  preparada para Fase 3, sin simular filas o modales que aun no existen.
+- Navegacion desktop y barra movil usan las cuatro etapas aprobadas, con
+  `aria-current`, scroll activo corregido y enlaces ancla que respetan el encabezado.
+- Agregados componentes reutilizables para loading, empty, error, planned, controles,
+  filtros, botones de paginacion y mensajes `Showing X-Y of Z`.
+- Terminologia visible cambiada de `Tickets` a `Next draw analysis`, `Analytical
+  combinations` y score interno por estrategia; no se presenta como prediccion ni
+  ranking global.
+- Agregado skip link en portada y reporte, status accesible, foco visible y soporte
+  previo de reduced motion conservado.
+- QA automatico: 12 pruebas pasan (5 de frontend + 7 de contratos API); sintaxis JS,
+  IDs HTML/JS, tags de seccion y llaves CSS verificados.
+- QA visual desktop: cuatro stages alineados, datos reales cargados, cero overflow de
+  pagina y navegacion activa correcta al cargar y al saltar entre secciones.
+- QA visual movil 390x844: cero overflow de pagina; 3 de 8 estrategias visibles al
+  inicio, 8 de 8 al expandir, contador sincronizado, modal con 20 combinaciones,
+  bloqueo/restauracion de scroll y barra inferior funcional.
+- Powerball y Mega Millions verificados con datos publicos reales; Mega Millions cargo
+  `$604.0M`, ocho rankings y tres estrategias iniciales sin errores de consola.
+- Hallazgos corregidos durante QA: activacion prematura de `Draw history` y regla
+  movil que mostraba ocho estrategias mientras el contador indicaba tres.
+- No se hizo deploy ni se modificaron dominio, DNS, VPS, `main`, PR #40 o
+  `agent/publish-v8`.
+
+### Fase 2 -- Overview del juego
+
+- [x] Mostrar jackpot, proximo sorteo y cuenta regresiva.
+- [x] Mostrar ultimo resultado y cantidad de sorteos evaluados.
+- [x] Mostrar total ganado acumulado desde el inicio de la evaluacion.
+- [x] Mostrar estrategia lider historica y explicar la metrica.
+- [x] Agregar CTA `View past analyses`.
+- [x] Manejar la ausencia temporal de jackpot sin romper el resumen.
+
+**Criterio de salida:** el estado del juego y el rendimiento global se entienden sin
+conocer la arquitectura interna de SHIOL+. **Fase 2 completa, QA local aprobado y
+revision visual aprobada por Orlando el 2026-07-10.**
+
+#### Resultado de Fase 2 y QA rapido (2026-07-10)
+
+- El Overview y las tarjetas de Home consumen `/api/overview` como fuente agregada,
+  eliminando la mezcla anterior de acumulados parciales de `/api/wins`, jackpot y
+  peso actual de estrategias.
+- Home conserva el UI/copy aprobado y ahora muestra acumulados historicos completos:
+  Powerball `$132` en 4 draws y Mega Millions `$24` en 2 draws.
+- El resumen de cada juego muestra jackpot, cash value, proximo draw con cuenta
+  regresiva, ultimo resultado, total ganado, costo evaluado, draws, combinaciones y
+  estrategia lider por premios acumulados desde el inicio.
+- El CTA `View past analyses` conecta Overview con `Draw history`, sin implementar
+  anticipadamente las filas de Fase 3.
+- El jackpot ausente fue simulado en la copia local de QA: se muestra `Not available`
+  y las metricas historicas siguen cargando sin romper el resumen.
+- QA visual aprobado en desktop y movil 390x844 para Powerball y Mega Millions, sin
+  overflow horizontal ni errores/warnings de consola.
+- QA automatico: 13 pruebas pasan; sintaxis JS y dry-run de Wrangler aprobados.
+- Se agrego un Worker/configuracion de QA que combina assets locales, contratos de
+  presentacion y una copia local de solo lectura de D1 para revisar fases futuras sin
+  desplegar cambios incompletos.
+- No se hizo deploy ni se modificaron dominio, DNS, VPS, `main`, PR #40 o
+  `agent/publish-v8`.
+
+### Fase 3 -- Draw history y modal de analisis
+
+- [x] Listar sorteos evaluados, 10 por pagina.
+- [x] Mostrar fecha, numeros, total ganado, tickets premiados, mejor estrategia,
+      mejor coincidencia y `View analysis`.
+- [x] Crear modal con `Summary`, `Strategies`, `Combinations` y `Distribution`.
+- [x] Mostrar el ranking de las ocho estrategias solo para el draw seleccionado.
+- [x] Mostrar las 160 combinaciones evaluadas, resaltando premios.
+- [x] Agregar filtros por estrategia y resultado.
+- [x] Implementar `role=dialog`, `aria-modal`, Escape, bloqueo del fondo, foco
+      inicial y restauracion del foco.
+- [x] Usar un patron adecuado de pantalla completa en movil.
+
+**Criterio de salida:** cualquier sorteo evaluado puede abrirse, entenderse y cerrarse
+por mouse, touch o teclado sin perder el contexto. **Fase 3 completa, QA local
+aprobado y revision visual aprobada por Orlando el 2026-07-10.**
+
+#### Resultado de Fase 3 y QA rapido (2026-07-10)
+
+- `Draw history` lista hasta 10 analisis por pagina con fecha, resultado, total
+  ganado, combinaciones premiadas, mejor estrategia, mejor coincidencia y CTA
+  `View analysis`; Powerball muestra 4 draws y Mega Millions 2 con los datos actuales.
+- Los sorteos con detalle historico incompleto muestran `Not retained` y `Partial
+  detail`, mientras preservan los totales completos por estrategia y por draw.
+- El modal carga bajo demanda `Summary`, ranking de 8 `Strategies`, hasta 160
+  `Combinations` y `Distribution`; las combinaciones premiadas se resaltan.
+- Los filtros de estrategia y resultado se combinan correctamente: QA de Powerball
+  redujo 160 combinaciones a 1 premio de Cooccurrence; QA de Mega Millions mostro 7
+  combinaciones premiadas y uso correctamente el termino `Mega Ball`. El filtro de
+  resultado abre por defecto en `Winning combinations`, con `All results` disponible.
+- Accesibilidad verificada: `role=dialog`, `aria-modal`, tablist, navegacion de tabs,
+  Escape, bloqueo del fondo, trap de foco y restauracion al boton del draw original.
+- En movil el modal ocupa 390x844 completo, los cuatro tabs caben sin scrollbar, los
+  filtros quedan en dos columnas y no existe overflow horizontal.
+- Corregido el scroll-spy movil para activar `History` al navegar a la seccion.
+- Corregido el calculo de `best match` en los contratos agregados: ahora el maximo de
+  bolas blancas y bola especial siempre pertenece a una misma combinacion evaluada.
+- QA automatico: 15 pruebas pasan; D1 local E2E, sintaxis JS, `git diff --check` y
+  dry-run de Wrangler aprobados. Navegador sin errores ni warnings de consola.
+- No se hizo deploy ni se modificaron dominio, DNS, VPS, `main`, PR #40 o
+  `agent/publish-v8`.
+
+### Fase 4 -- Ranking historico de estrategias
+
+- [x] Mostrar posicion, total ganado, tickets premiados, win rate, tickets y sorteos
+      evaluados, ROI, mejor resultado y tendencia.
+- [x] Explicar que representa todo el periodo productivo.
+- [x] Diferenciarlo del ranking de un draw.
+- [x] Mantener las metricas tecnicas en una segunda capa.
+- [x] Verificar orden estable y empates reproducibles.
+
+**Criterio de salida:** queda claro que estrategia lidera historicamente, por que y
+con que volumen de evidencia. **Fase 4 completa, QA local aprobado y revision visual
+aprobada por Orlando el 2026-07-10.**
+
+#### Resultado de Fase 4 y QA rapido (2026-07-10)
+
+- La seccion principal consume `/api/strategy-rankings` y muestra las ocho estrategias
+  ordenadas por premios historicos, ROI como desempate y `strategy_id` como desempate
+  final reproducible.
+- Cada tarjeta muestra posicion, total ganado, combinaciones premiadas, win rate,
+  combinaciones y draws evaluados, ROI historico, mejor resultado y tendencia contra
+  el draw anterior.
+- Powerball comunica que las metricas de combinaciones cubren 50% del periodo:
+  premios, costo, ROI y volumen siguen siendo completos; win rate, premios y mejor
+  resultado se etiquetan como `covered` o `retained`.
+- Mega Millions comunica cobertura completa y muestra sus metricas sin calificadores;
+  Cooccurrence lidera con `$8`, 2 combinaciones premiadas y win rate de 5.0%.
+- La seccion se titula `Historical strategy ranking` y explica que cubre todos los
+  draws, no el ranking interno de un solo sorteo.
+- Las descripciones visibles se normalizaron a ingles; pesos, sparklines y diagnostico
+  de modelos permanecen en la segunda capa enlazada por `View technical metrics`.
+- QA desktop 1280x900 y movil 390x844 aprobado en ambos juegos: ocho tarjetas, orden
+  estable, navegacion activa correcta y cero overflow horizontal.
+- Ajuste posterior a revision: cada estrategia usa una tarjeta independiente con
+  espacio, borde completo, fondo y sombra propios para separar visualmente sus datos.
+- QA automatico: 16 pruebas pasan; contrato de orden y `covered_best_match` cubiertos.
+- No se hizo deploy ni se modificaron dominio, DNS, VPS, `main`, PR #40 o
+  `agent/publish-v8`.
+
+### Fase 5 -- Next Draw Analysis (AI Insights)
+
+Esta seccion recupera el objetivo de `AI Insights for Next Drawing` de v8. Presenta
+el trabajo analitico de las ocho estrategias para el siguiente sorteo; no comprueba
+si un ticket del usuario obtuvo premio y no funciona como validador.
+
+- [x] Mostrar las 160 combinaciones analiticas del proximo draw, 20 por estrategia.
+- [x] Paginar de 10 en 10 con posicion global, estrategia, numeros y score
+      interno visible para verificar el orden.
+- [x] Agregar filtro por estrategia y vista `All 160`, paginada de 10 en 10; los
+      filtros conservan la posicion global original de cada combinacion.
+- [x] Presentar contexto util del siguiente sorteo: fecha, jackpot y estado del ciclo.
+- [x] Explicar brevemente que metodo o senal aporta cada estrategia, sin convertir la
+      seccion principal en un laboratorio tecnico.
+- [x] Ordenar el pool completo por `confidence` bruto conforme a la decision de
+      producto, usando `pool_position` como identificador unico del draw.
+- [x] Manejar claramente el estado en que el proximo ciclo aun no se ha generado.
+**Criterio de salida:** un usuario puede explorar y entender las 160 combinaciones
+analiticas preparadas por la IA para el proximo sorteo, sin confundir esta seccion
+con un validador de tickets ni sugerir resultados garantizados. **Fase 5 completa y
+QA local aprobado; detenerse para revision de Orlando antes de comenzar Fase 6.**
+
+#### Resultado de Fase 5 y QA rapido (2026-07-10)
+
+- La vista anterior de tres previews y modal fue retirada; `Next draw analysis` ahora
+  consume `/api/next-draw-analysis` y presenta las 160 combinaciones en la pagina.
+- Vista `All 160` paginada de 10 en 10 y filtro por las ocho estrategias; cada filtro
+  muestra sus 20 combinaciones en dos paginas.
+- Cada fila muestra la posicion global (1-160), metodo analitico, numeros y score
+  interno. La posicion 1 siempre corresponde al score interno bruto mas alto del
+  pool; el desempate estable es el `id` de la combinacion.
+- El encabezado muestra fecha del proximo draw, jackpot actual y estado `160
+  combinations ready`.
+- Estado sin ciclo generado implementado como estado temporal vacio, separado de un
+  error de servicio.
+- QA funcional Powerball: pagina 1 `1-10 of 160`, pagina 2 `11-20 of 160`; filtro
+  Hybrid Ensemble `1-10 of 20` y todas las filas pertenecen a esa estrategia.
+- QA Mega Millions: 160 combinaciones, 9 opciones de filtro, fecha, jackpot `$604.0M`
+  y terminologia propia del juego cargados correctamente.
+- QA desktop 1280x900 y movil 390x844 aprobado; score alineado en la cabecera de cada
+  fila, navegacion activa y cero overflow horizontal.
+- QA automatico: 17 pruebas pasan. El modal/previews y llamadas antiguas a
+  `/api/upcoming-tickets` ya no forman parte del flujo visible.
+- No se hizo deploy ni se modificaron dominio, DNS, VPS, `main`, PR #40 o
+  `agent/publish-v8`.
+
+### Fase 6 -- Confianza, contenido y paginas legales
+
+- [x] Agregar `About`, `Privacy Policy`, `Terms of Use`, `Cookie Policy` e
+      `Important Disclaimer` en `legal.html`, enlazados desde Home y reportes.
+- [x] Ajustar el banner superior a entretenimiento y analisis estadistico.
+- [x] Indicar que no hay garantia de premios, que el historial no garantiza resultados
+      futuros y que el contenido no es asesoramiento financiero.
+- [x] Incluir participacion responsable, edad legal y jurisdiccion.
+- [x] Auditar cookies y datos reales de v9 antes de redactar; no copiar textos
+      obsoletos de v8. No se encontraron cookies ni APIs de almacenamiento
+      persistente en el frontend; la politica refleja ese estado actual.
+
+**Criterio de salida:** enlaces funcionales y lenguaje legal coherente con el producto,
+sin promesas enganosas.
+
+**Fase 6 completa y aprobada por Orlando (2026-07-10).** La siguiente etapa es la
+Fase 7: QA integral y aprobacion.
+
+### Fase 7 -- QA integral y aprobacion
+
+- [ ] Probar las cuatro secciones con Powerball y Mega Millions.
+- [ ] Probar paginacion, extremos y estados sin datos.
+- [ ] Probar modal, filtros y las 160 combinaciones analiticas.
+- [ ] Probar desktop y movil 390x844 sin overflow.
+- [ ] Probar teclado, foco, Escape y reduced motion.
+- [ ] Verificar contraste, texto, etiquetas y errores.
+- [ ] Ejecutar sintaxis, pruebas disponibles y revision visual del Worker.
+- [ ] Confirmar que APIs, Container, D1, crons y jackpots no tienen regresiones.
+- [ ] Presentar la version completa a Orlando y registrar aprobacion o ajustes.
+
+**Criterio de salida:** aprobacion explicita de Orlando. Sin ella, la etapa permanece
+abierta aunque el checklist tecnico este completo.
+
+### Fase 8 -- Decision posterior sobre el dominio (fuera de esta etapa)
+
+- [ ] Evaluar la migracion solamente despues de aprobar el UI/UX.
+- [ ] Si se aprueba: DNS a Cloudflare, verificar el dominio, desactivar la Action del
+      VPS, fusionar PR #40 y confirmar que `main` representa v9.
+- [ ] Si no se aprueba: mantener v8 en el dominio e iterar v9 en el Worker.
+
+### Registro de avance
+
+- **2026-07-10, sesion 27:** roadmap creado; implementacion aun no iniciada. La
+  seccion 4 fue corregida a `Next Draw Analysis` (`AI Insights for Next Drawing`) y
+  se elimino por completo el concepto de validador de tickets. Dominio, DNS, VPS,
+  `main`, PR #40 y `agent/publish-v8` permanecen fuera de cambios.
+- **2026-07-10, sesion 27 -- Fase 0 completa:** auditados codigo, schema y APIs
+  reales de ambos juegos. Se fijaron fuentes, formulas, cobertura historica, contratos,
+  errores y compatibilidad. Siguiente paso: implementar los endpoints agregados antes
+  de reconstruir el frontend.
+- **2026-07-10, sesion 27 -- Fase 0.5 completa:** implementados los cinco endpoints
+  agregados en `src/presentation-api.js`, conectados al Worker con compatibilidad y
+  verificados con siete pruebas, D1 local de extremo a extremo y dry-run de Wrangler.
+  No se hizo deploy. Siguiente paso confirmado: Fase 1 del frontend.
+- **2026-07-10, sesion 27 -- Fase 1 completa:** sistema visual y navegacion de cuatro
+  stages implementados. QA automatico, desktop, movil y ambos juegos aprobado. Se
+  corrigieron scroll-spy y visibilidad movil. Trabajo detenido antes de Fase 2 para
+  revision de Orlando, como se acordo.
+- **2026-07-10, sesion 28 -- Fase 2 completa:** Home y Overview conectados al contrato
+  agregado con historicos completos, CTA al historial, fallback de jackpot y QA
+  desktop/movil en ambos juegos. Fase 1 aprobada por Orlando. No se hizo deploy.
+- **2026-07-10, sesion 29 -- Fase 3 completa:** historial paginado, modal de cuatro
+  tabs, filtros, detalle parcial honesto y patron movil full-screen implementados y
+  verificados en ambos juegos. Fase 2 aprobada por Orlando. No se hizo deploy.
+- **2026-07-10, sesion 30 -- Fase 4 completa:** ranking historico agregado con ocho
+  tarjetas, cobertura parcial honesta, tendencias, desempates estables y segunda capa
+  tecnica. Fase 3 aprobada por Orlando. No se hizo deploy.
+- **2026-07-10, sesion 32 -- Fase 6 completa:** confianza, contenido legal, disclaimer,
+  politica de cookies auditada contra el frontend real y lenguaje de juego responsable.
+  Fase 6 aprobada por Orlando. No se hizo deploy.
+- **2026-07-11 -- deploy de v9 a Cloudflare Workers:** publicada la version
+  `78ef3ef8-c79e-4cc1-8ed8-68cfe4332242` en
+  `https://shiol-plus.orlandob.workers.dev`. Verificados `api/health`, Home, el
+  reporte Powerball, `legal.html`, Overview de Mega Millions y Next Draw Analysis.
+  No se modificaron dominio, DNS, VPS, `main` ni la version v8.
+- **2026-07-10, sesion 31 -- Fase 5 completa:** explorador paginado de las 160
+  combinaciones del proximo draw, filtros, contexto del ciclo y score interno sin
+  ranking global. Fase 4 aprobada por Orlando. No se hizo deploy.
 
 ## Hecho (2026-07-09, sesiones 25-26 - rediseno minimalista y deploy Cloudflare)
 

@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body class="home-page">
+  <a class="skip-link" href="#home-content">Skip to reports</a>
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="index.html" aria-label="SHIOL+ home">SHIOL<span>+</span></a>
@@ -15,7 +16,12 @@
     </div>
   </header>
 
-  <main class="home-main">
+  <main class="home-main" id="home-content">
+    <aside class="trust-banner" aria-label="Important information">
+      <strong>For entertainment and statistical analysis.</strong>
+      <span>SHIOL+ does not guarantee prizes or future results.</span>
+      <a href="legal.html#important-disclaimer">Read the disclaimer</a>
+    </aside>
     <section class="home-hero">
       <p class="eyebrow">Strategy analytics</p>
       <h1>Lottery strategy reports</h1>
@@ -34,7 +40,10 @@
         <p class="section-note">Updated after every published draw.</p>
       </div>
       <div id="games-grid" class="games-grid">
-        <div class="loading">Loading reports...</div>
+        <div class="ui-state ui-state-loading" role="status">
+          <span class="ui-state-marker" aria-hidden="true"></span>
+          <div><strong>Loading reports</strong><p>Connecting current game data.</p></div>
+        </div>
       </div>
     </section>
 
@@ -57,6 +66,7 @@
   <footer class="site-footer">
     <span>SHIOL+ v9</span>
     <span>Strategy analytics based on historical outcomes.</span>
+    <nav aria-label="Site information"><a href="legal.html#about">About</a><a href="legal.html#privacy">Privacy</a><a href="legal.html#terms">Terms</a><a href="legal.html#cookies">Cookies</a><a href="legal.html#important-disclaimer">Disclaimer</a></nav>
   </footer>
 
   <script src="home.js"></script>

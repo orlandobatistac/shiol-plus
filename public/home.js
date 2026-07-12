@@ -1,5 +1,14 @@
 const API = '';
 
+function stateMarkup(type, title, message) {
+  return [
+    '<div class="ui-state ui-state-' + type + '" role="status">',
+      '<span class="ui-state-marker" aria-hidden="true"></span>',
+      '<div><strong>' + title + '</strong><p>' + message + '</p></div>',
+    '</div>'
+  ].join('');
+}
+
 async function api(path) {
   try {
     const response = await fetch(API + path);
@@ -44,21 +53,15 @@ function drawDays(value) {
 }
 
 async function loadGameStats(gameId) {
-  const results = await Promise.all([
-    api('/api/strategies?game=' + gameId),
-    api('/api/wins?game=' + gameId),
-    api('/api/jackpot?game=' + gameId)
-  ]);
-  const strategies = results[0] || [];
-  const wins = results[1] || {};
-  const jackpot = results[2] || {};
-  const top = strategies.length ? strategies[0] : null;
+  const overview = await api('/api/overview?game=' + gameId) || {};
+  const performance = overview.performance || {};
+  const jackpot = overview.jackpot || {};
+  const top = overview.top_strategy || null;
 
   return {
-    topStrategy: top ? strategyName(top.id || top.name) : 'Not available',
-    strategiesCount: strategies.length,
-    totalWon: Number(wins.total_amount || 0),
-    winsCount: Number(wins.total_count || 0),
+    topStrategy: top ? strategyName(top.strategy_id || top.name) : 'Not available',
+    totalWon: Number(performance.total_won || 0),
+    evaluatedDraws: Number(performance.evaluated_draws || 0),
     jackpot: jackpot.found ? Number(jackpot.amount || 0) : 0
   };
 }
@@ -78,7 +81,7 @@ function activeReport(game, stats) {
       '<div class="game-report-metrics">',
         '<div><span>Current jackpot</span><strong>' + (stats.jackpot ? money(stats.jackpot) : 'Not available') + '</strong></div>',
         '<div><span>Top strategy</span><strong>' + stats.topStrategy + '</strong></div>',
-        '<div><span>Total won</span><strong>' + money(stats.totalWon) + '</strong><small>' + stats.winsCount + ' verified wins</small></div>',
+        '<div><span>Total won</span><strong>' + money(stats.totalWon) + '</strong><small>' + stats.evaluatedDraws + ' evaluated draws</small></div>',
       '</div>',
     '</a>'
   ].join('');
@@ -100,7 +103,11 @@ async function renderGames() {
   const games = await api('/api/games');
 
   if (!games || !games.length) {
-    grid.innerHTML = '<p class="empty-state">Reports are temporarily unavailable.</p>';
+    grid.innerHTML = stateMarkup(
+      games ? 'empty' : 'error',
+      games ? 'No active reports yet' : 'Reports temporarily unavailable',
+      games ? 'Game reports will appear when a lottery is activated.' : 'Please retry when the data service is available.'
+    );
     return;
   }
 

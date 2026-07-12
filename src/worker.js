@@ -27,6 +27,7 @@ import {
   runEngineCycle, generateEngineCycle, evaluateEngineCycle, fetchDrawFromEngine,
   fetchJackpotFromEngine,
 } from './container.js';
+import { handlePresentationAPI } from './presentation-api.js';
 
 // ─────────────────────────────────────────────────────────────
 // PIPELINE ENGINE (JS — ejecuta en el cron)
@@ -567,6 +568,9 @@ function json(data, status = 200) {
 
 async function handleAPI(path, url, env) {
   const lotteryId = url.searchParams.get('game') || 'powerball';
+
+  const presentationResponse = await handlePresentationAPI(path, url, env);
+  if (presentationResponse) return presentationResponse;
 
   if (path === '/api/health') {
     return json({ status: 'ok', ts: new Date().toISOString(), version: 'v9' });
