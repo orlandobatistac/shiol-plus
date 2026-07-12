@@ -546,6 +546,7 @@ async function openAnalysisModal(drawDate) {
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
+  overlay.focus({ preventScroll: true });
   document.getElementById('analysis-modal-close').focus();
 
   const data = await api('/api/analyses/' + encodeURIComponent(drawDate) + '?game=' + GAME);
@@ -581,6 +582,14 @@ function initAnalysisModal() {
   overlay.addEventListener('click', function (event) {
     if (event.target === overlay) closeAnalysisModal();
   });
+  // Capture Escape during the capture phase so it closes the modal even if
+  // focus is inside a tab, select or other interactive element.
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && overlay.classList.contains('open')) {
+      event.stopPropagation();
+      closeAnalysisModal();
+    }
+  }, true);
   document.querySelectorAll('.analysis-tab').forEach(function (tab) {
     tab.addEventListener('click', function () { activateAnalysisTab(tab.dataset.panel, false); });
     tab.addEventListener('keydown', function (event) {
