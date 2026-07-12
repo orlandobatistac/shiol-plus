@@ -432,11 +432,11 @@ Fase 7: QA integral y aprobacion.
 - [x] Probar paginacion, extremos y estados sin datos.
 - [x] Probar modal, filtros y las 160 combinaciones analiticas.
 - [x] Probar desktop y movil 390x844 sin overflow.
-- [-] Probar teclado, foco, Escape y reduced motion.
+- [x] Probar teclado, foco, Escape y reduced motion.
 - [x] Verificar contraste, texto, etiquetas y errores.
 - [x] Ejecutar sintaxis, pruebas disponibles y revision visual del Worker.
 - [x] Confirmar que APIs, Container, D1, crons y jackpots no tienen regresiones.
-- [ ] Presentar la version completa a Orlando y registrar aprobacion o ajustes.
+- [x] Presentar la version completa a Orlando y registrar aprobacion o ajustes.
 
 **Criterio de salida:** aprobacion explicita de Orlando. Sin ella, la etapa permanece
 abierta aunque el checklist tecnico este completo.
@@ -454,21 +454,26 @@ abierta aunque el checklist tecnico este completo.
   listo.
 - **Legal page:** About, Privacy, Terms, Cookies e Important Disclaimer accesibles.
 - **Mobile 390x844:** Sin overflow horizontal (`bodyScrollWidth=375 <= 390`).
-- **Hallazgo corregido:** el modal de analisis de draw no cerraba con Escape.
-  Se agrego `tabindex="-1"` al overlay, focus inicial en el overlay y un listener
-  de captura de `keydown` a nivel documento. Los eventos sinteticos de teclado
-  confirman que el listener funciona; el navegador integrado de VS Code no emite
-  eventos Escape reales con `page.keyboard.press`, por lo que la validacion real
-  requiere una prueba manual en Chrome.
-- **Pendiente de Orlando:** revision visual final y aprobacion explicita.
+- **Teclado y Escape:** validado manualmente por Orlando; el modal de analisis
+  ahora cierra correctamente con Escape.
+- **Aprobacion:** Orlando aprobo la experiencia completa el 2026-07-11.
 - **No se modificaron** dominio, DNS, VPS, `main`, PR #40 ni `agent/publish-v8`.
 
-### Fase 8 -- Decision posterior sobre el dominio (fuera de esta etapa)
+**Fase 7 completa y aprobada.**
 
-- [ ] Evaluar la migracion solamente despues de aprobar el UI/UX.
-- [ ] Si se aprueba: DNS a Cloudflare, verificar el dominio, desactivar la Action del
-      VPS, fusionar PR #40 y confirmar que `main` representa v9.
-- [ ] Si no se aprueba: mantener v8 en el dominio e iterar v9 en el Worker.
+### Fase 8 -- Pause despues de la aprobacion (no iniciar migracion de dominio)
+
+- [x] Cerrar Fase 7 con aprobacion de Orlando.
+- [x] **Decision explicita:** no abrir la migracion de dominio/DNS/VPS en esta
+      sesion. La Fase 8 original (DNS, VPS, PR #40) queda congelada.
+- [ ] Definir el objetivo de la nueva Fase 9 en el proximo prompt.
+
+### Fase 9 -- Por definir
+
+- [ ] Registrar el objetivo, alcance y criterio de salida de la siguiente mejora.
+- [ ] Identificar los archivos y contratos afectados.
+- [ ] No modificar dominio, DNS, VPS, `main`, PR #40 ni `agent/publish-v8` hasta
+      nueva decision explicita.
 
 ### Registro de avance
 
@@ -509,8 +514,9 @@ abierta aunque el checklist tecnico este completo.
   validadas las cuatro secciones en Powerball y Mega Millions, paginacion,
   filtros, modal, mobile sin overflow y tests 19/19. Se detecto y corrigio que
   el modal de analisis no cerraba con Escape; deploy posterior publicado con
-  version `2109608c-5134-47d5-a7c6-c28a07cdfc05`. Fase 7 en espera de revision
-  y aprobacion final de Orlando.
+  version `2109608c-5134-47d5-a7c6-c28a07cdfc05`. Fase 7 aprobada por Orlando.
+  Se congelo la Fase 8 de migracion de dominio; se abre Fase 9 para la siguiente
+  mejora.
 - **2026-07-10, sesion 31 -- Fase 5 completa:** explorador paginado de las 160
   combinaciones del proximo draw, filtros, contexto del ciclo y score interno sin
   ranking global. Fase 4 aprobada por Orlando. No se hizo deploy.
