@@ -10,6 +10,10 @@ venv/
 data/*.db
 data/*.sqlite
 
+# Backfill artifacts (generated from CSV)
+data/_backfill_batches.json
+data/_batches/
+
 # Env
 .env
 .env.local
@@ -21,3 +25,7 @@ node_modules/
 # OS
 .DS_Store
 desktop.ini
+
+# Local tool directories
+.claude/
+.codex/
