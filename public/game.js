@@ -1,8 +1,8 @@
 const API = '';
 const GAME = new URLSearchParams(location.search).get('game') || 'powerball';
 const ET_TZ = 'America/New_York';
-const DRAW_HOUR_ET = 22;
-const DRAW_MIN_ET = 59;
+const DRAW_HOUR_ET = GAME === 'cash5' ? 23 : (GAME === 'mega_millions' ? 23 : 22);
+const DRAW_MIN_ET = GAME === 'cash5' ? 22 : (GAME === 'mega_millions' ? 0 : 59);
 const DAY_ABBR = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
 
 let gameInfoPromise = null;
@@ -50,7 +50,7 @@ function roi(value) {
 }
 
 function strategyName(value) {
-  const normalized = String(value || '').replace(/_mega_millions$/, '');
+  const normalized = String(value || '').replace(/_(mega_millions|cash5)$/, '');
   const names = {
     xgboost_ml: 'XGBoost ML',
     hybrid_ensemble: 'Hybrid Ensemble',
@@ -67,7 +67,7 @@ function strategyName(value) {
 }
 
 function strategyDescription(value) {
-  const normalized = String(value || '').replace(/_mega_millions$/, '');
+  const normalized = String(value || '').replace(/_(mega_millions|cash5)$/, '');
   const descriptions = {
     xgboost_ml: 'Machine-learning model trained on historical draws',
     hybrid_ensemble: '70% XGBoost + 30% co-occurrence',
@@ -137,6 +137,7 @@ async function renderGameIdentity() {
   const game = await getGameInfo();
   document.title = 'SHIOL+ | ' + game.name + ' strategy report';
   document.body.classList.toggle('game-mega', GAME === 'mega_millions');
+  document.body.classList.toggle('game-cash5', GAME === 'cash5');
 
   const title = document.getElementById('report-title');
   const description = document.getElementById('report-description');
@@ -253,7 +254,8 @@ async function renderOverview() {
 
   if (data.jackpot && data.jackpot.found) {
     amount.textContent = money(data.jackpot.amount);
-    sub.textContent = 'Cash value ' + money(data.jackpot.cash_value) +
+    sub.textContent = (data.jackpot.cash_value == null ? 'Estimated jackpot' :
+      'Cash value ' + money(data.jackpot.cash_value)) +
       (data.jackpot.stale ? ' - estimate may be outdated' : '');
   } else {
     amount.textContent = 'Not available';
@@ -959,8 +961,8 @@ async function renderNextAnalysis() {
     return [
       '<div class="next-analysis-row" role="row">',
         '<div class="next-analysis-position" role="cell"><strong>#' + item.pool_position + '</strong><small>of 160</small></div>',
-        '<div class="next-analysis-method" role="cell"><strong>' + strategyName(item.strategy_id || item.strategy_name) + '</strong><small>' + strategyDescription(item.strategy_id) + '</small></div>',
         '<div class="draw-balls" role="cell">' + ballsHTML(item.numbers, item.extra) + '</div>',
+        '<div class="next-analysis-method" role="cell"><strong>' + strategyName(item.strategy_id || item.strategy_name) + '</strong><small>' + strategyDescription(item.strategy_id) + '</small></div>',
         '<div class="next-analysis-score" role="cell"><strong>' + internalScore(item.analytical_score) + '</strong><small>raw internal score</small></div>',
       '</div>'
     ].join('');

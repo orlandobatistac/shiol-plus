@@ -7,6 +7,7 @@ const JSON_HEADERS = {
 const TICKET_COSTS = {
   powerball: 2,
   mega_millions: 2,
+  cash5: 1,
 };
 
 function json(data, status = 200) {
@@ -65,7 +66,7 @@ function jackpotPayload(row) {
   return {
     found: true,
     amount: number(row.amount),
-    cash_value: number(row.cash_value),
+    cash_value: row.cash_value == null ? null : number(row.cash_value),
     source: row.source,
     stale: row.last_status !== 'ok' || staleByTime,
     last_success_at: row.last_success_at || null,
@@ -90,7 +91,7 @@ function drawPayload(row) {
   return {
     draw_date: row.draw_date,
     numbers: [row.n1, row.n2, row.n3, row.n4, row.n5].map(number),
-    extra: number(row.extra),
+    extra: row.extra == null ? null : number(row.extra),
   };
 }
 
@@ -389,7 +390,7 @@ async function analysisDetail(drawDate, env, game) {
     strategy_name: row.strategy_name,
     strategy_position: number(row.strategy_position),
     numbers: [row.n1, row.n2, row.n3, row.n4, row.n5].map(number),
-    extra: number(row.extra),
+    extra: row.extra == null ? null : number(row.extra),
     analytical_score: number(row.confidence),
     score_scope: 'strategy_internal',
     result: {
@@ -609,7 +610,7 @@ async function nextDrawAnalysis(url, env, game) {
     pool_position: number(row.pool_position),
     strategy_position: number(row.strategy_position),
     numbers: [row.n1, row.n2, row.n3, row.n4, row.n5].map(number),
-    extra: number(row.extra),
+    extra: row.extra == null ? null : number(row.extra),
     analytical_score: number(row.confidence),
     score_scope: 'strategy_internal',
   }));

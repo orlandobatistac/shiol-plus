@@ -285,6 +285,14 @@ button, a {
   background: var(--mega);
 }
 
+.game-report.cash5 .game-marker {
+  background: #0b7a3e;
+}
+
+body.game-cash5 .ball {
+  border-color: #0b7a3e;
+}
+
 .game-report h3 {
   display: inline;
   margin: 0;
@@ -1127,7 +1135,7 @@ body.game-mega .ball.pb {
 .next-analysis-header,
 .next-analysis-row {
   display: grid;
-  grid-template-columns: 86px minmax(230px, 1.2fr) minmax(260px, 1fr) 120px;
+  grid-template-columns: 86px minmax(200px, 1fr) minmax(220px, 1.3fr) 120px;
   gap: 18px;
   align-items: center;
 }

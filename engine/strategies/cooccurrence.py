@@ -27,7 +27,7 @@ class CooccurrenceStrategy(BaseStrategy):
 
             available = [n for n in range(1, self.white_max + 1) if n not in numbers]
             numbers.extend(random.sample(available, self.white_count - len(numbers)))
-            extra = random.randint(1, self.extra_max)
+            extra = self._random_extra()
             tickets.append(self._safe_ticket(numbers, extra, 0.65))
 
         return tickets

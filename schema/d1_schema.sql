@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS lotteries (
 INSERT OR IGNORE INTO lotteries VALUES (
     'powerball', 'Powerball', 'mon,wed,sat', 5, 69, 'Powerball', 26, 1, datetime('now')
 );
+INSERT OR IGNORE INTO lotteries VALUES (
+    'cash5', 'NC Cash 5', 'sun,mon,tue,wed,thu,fri,sat', 5, 43, '', 0, 0, datetime('now')
+);
 
 -- ============================================================
 -- DRAWS — Sorteos históricos y futuros

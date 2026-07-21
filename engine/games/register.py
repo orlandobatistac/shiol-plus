@@ -29,6 +29,7 @@ import json
 import argparse
 import subprocess
 import tempfile
+import csv
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
@@ -183,8 +184,8 @@ def cmd_register(args):
         ','.join(d[:3].lower() for d in game['draw_days']),
         game['white_count'],
         game['white_max'],
-        game['extra_name'],
-        game['extra_max'],
+        game['extra_name'] or '',
+        game['extra_max'] or 0,
         1 if game['active'] else 0,
     ])
     print(f"  ✓ Lottery '{gid}' registrada")
@@ -219,6 +220,8 @@ def cmd_backfill(args):
     """
     from engine.games import get_game
     game        = get_game(args.game_id)
+    if game['id'] == 'cash5' or getattr(args, 'csv_path', None):
+        return _cmd_backfill_cash5(args, game)
     from_date   = args.from_date or '2010-01-01'
     dataset_id  = game.get('ny_dataset_id', '')
     extra_field = game.get('ny_extra_ball_field')
@@ -305,6 +308,65 @@ def cmd_backfill(args):
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
 
+def _cash5_draws_from_csv(path: Path):
+    """Lee el CSV oficial NCEL, conservando solo Cash 5 base (DP=0)."""
+    draws = []
+    double_play = invalid = 0
+    with path.open(newline='', encoding='utf-8-sig') as handle:
+        for row in csv.DictReader(handle):
+            try:
+                date = datetime.strptime(row['Date'], '%m/%d/%Y').strftime('%Y-%m-%d')
+                numbers = [int(row[f'Ball {i}']) for i in range(1, 6)]
+                if int(row['DP']) != 0:
+                    double_play += 1
+                    continue
+                if len(set(numbers)) != 5 or not all(1 <= n <= 43 for n in numbers):
+                    raise ValueError('numeros fuera de las reglas de Cash 5')
+                draws.append({'date': date, 'numbers': numbers})
+            except (KeyError, TypeError, ValueError):
+                invalid += 1
+    return draws, double_play, invalid
+
+
+def _cmd_backfill_cash5(args, game):
+    if not args.csv_path:
+        raise ValueError('Cash 5 requiere --csv con el archivo oficial descargado de NCEL')
+    csv_path = Path(args.csv_path)
+    if not csv_path.is_file():
+        raise FileNotFoundError(f'CSV no encontrado: {csv_path}')
+
+    draws, double_play, invalid = _cash5_draws_from_csv(csv_path)
+    if args.from_date:
+        draws = [draw for draw in draws if draw['date'] >= args.from_date]
+    draws.sort(key=lambda draw: draw['date'])
+    if not draws:
+        raise ValueError('El CSV no contiene sorteos Cash 5 base validos')
+
+    d1_fn = d1_local if args.local else d1
+    target = 'LOCAL' if args.local else 'PRODUCCION'
+    print(f"\nBackfill {game['name']} -> {target}")
+    print(f'   CSV: {csv_path}')
+    print(f"   Base validos: {len(draws)} ({draws[0]['date']} -> {draws[-1]['date']})")
+    print(f'   Double Play excluidos: {double_play}; filas invalidas/informativas: {invalid}')
+
+    processed = 0
+    batch_size = 500 if args.local else 100
+    for offset in range(0, len(draws), batch_size):
+        batch = draws[offset:offset + batch_size]
+        placeholders = ','.join(['(?,?,?,?,?,?,?,NULL,?)'] * len(batch))
+        params = []
+        for draw in batch:
+            params.extend([game['id'], draw['date'], *draw['numbers'], 'ncel_cash5_csv_backfill'])
+        d1_fn(f"""
+            INSERT OR IGNORE INTO draws
+                (lottery_id, draw_date, n1, n2, n3, n4, n5, extra, source)
+            VALUES {placeholders}
+        """, params)
+        processed += len(batch)
+        print(f'   -> {processed}/{len(draws)} procesados', end='\r')
+    print(f'\nBackfill Cash 5 completo: {processed} filas procesadas de forma idempotente.\n')
+
+
 def main():
     parser = argparse.ArgumentParser(description='SHIOL+ Game Manager')
     sub    = parser.add_subparsers(dest='cmd')
@@ -323,6 +385,8 @@ def main():
     p_bf.add_argument('game_id', help='ID del juego')
     p_bf.add_argument('--from', dest='from_date', default=None,
                       help='Fecha inicio YYYY-MM-DD (default: 2010-01-01)')
+    p_bf.add_argument('--csv', dest='csv_path', default=None,
+                      help='CSV oficial NCEL (requerido para Cash 5)')
     p_bf.add_argument('--local', action='store_true',
                       help='Escribe en D1 LOCAL (wrangler dev --local) en vez de producción')
 

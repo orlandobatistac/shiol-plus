@@ -168,7 +168,7 @@ def fetch_jackpot_endpoint(req: FetchJackpotRequest):
     D1 en ese caso, igual que /fetch-draw hace con 'sorteo no disponible
     todavía'.
     """
-    if req.game_id not in ("powerball", "mega_millions"):
+    if req.game_id not in ALL_GAMES:
         raise HTTPException(status_code=400, detail=f"game_id desconocido: {req.game_id!r}")
 
     result = fetch_jackpot(req.game_id)
@@ -193,7 +193,7 @@ class DrawIn(BaseModel):
     n3: int
     n4: int
     n5: int
-    extra: int
+    extra: Optional[int] = None
     source: Optional[str] = None
 
 
@@ -205,7 +205,7 @@ class HistoricalDrawIn(BaseModel):
     n3: int
     n4: int
     n5: int
-    extra: int
+    extra: Optional[int] = None
 
 
 class TicketIn(BaseModel):
@@ -217,7 +217,7 @@ class TicketIn(BaseModel):
     """
     id: Optional[int] = None
     numbers: List[int]
-    extra: int
+    extra: Optional[int] = None
     confidence: Optional[float] = 0.5
 
 

@@ -26,10 +26,10 @@ class RangeBalancedStrategy(BaseStrategy):
                 mid  = random.sample(range(self.mid_range[0],  self.mid_range[1]  + 1), 2)
                 high = random.sample(range(self.high_range[0], self.high_range[1] + 1), 1)
                 numbers = low + mid + high
-                extra = random.randint(1, self.extra_max)
+                extra = self._random_extra()
                 tickets.append(self._safe_ticket(numbers, extra, 0.68))
             except ValueError:
                 numbers = sorted(random.sample(range(1, self.white_max + 1), self.white_count))
-                extra = random.randint(1, self.extra_max)
+                extra = self._random_extra()
                 tickets.append(self._safe_ticket(numbers, extra, 0.50))
         return tickets

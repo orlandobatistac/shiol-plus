@@ -8,6 +8,8 @@ Powerball -- se saltan automaticamente para cualquier otro juego en vez de
 devolver datos incorrectos (Fase 5, ADR-0001).
 """
 import time
+import csv
+import io
 import requests
 import pandas as pd
 from typing import Optional, Dict
@@ -39,14 +41,15 @@ def fetch_draw(draw_date: str, game: Dict = None) -> Optional[Dict]:
     # Powerball). Mega Millions usa un campo aparte ('mega_ball'): ver
     # ny_extra_ball_field en engine/games/mega_millions.py.
     ny_extra_field = game.get('ny_extra_ball_field')
+    has_extra_ball = game.get('has_extra_ball', True)
 
     # nc_csv quedo 404 (NC Lottery cambio su estructura de URLs, verificado 2026-07-04).
     # ny_data_api (data.ny.gov / Socrata) es ahora la fuente primaria y confiable.
     game_id = game.get('id', 'powerball')
 
     sources = [
-        ('ny_data_api',   lambda d: _from_ny_data(d, ny_dataset_id, ny_extra_field)),
-        ('nc_csv',        lambda d: _from_nc_csv(d, nc_csv_url, nc_csv_cols, nc_csv_fmt)),
+        ('ny_data_api',   lambda d: _from_ny_data(d, ny_dataset_id, ny_extra_field, has_extra_ball)),
+        ('nc_csv',        lambda d: _from_nc_csv(d, nc_csv_url, nc_csv_cols, nc_csv_fmt, has_extra_ball)),
         ('powerball.com', lambda d: _from_powerball_web(d, game_id)),
         ('musl_api',      lambda d: _from_musl_api(d, game_id)),
     ]
@@ -66,7 +69,8 @@ def fetch_draw(draw_date: str, game: Dict = None) -> Optional[Dict]:
     return None
 
 
-def _from_ny_data(draw_date: str, dataset_id: str, extra_field: str = None) -> Optional[Dict]:
+def _from_ny_data(draw_date: str, dataset_id: str, extra_field: str = None,
+                  has_extra_ball: bool = True) -> Optional[Dict]:
     """
     NY State Open Data (Socrata, data.ny.gov) -- alimentado por NY Lottery/MUSL.
     Powerball: dataset 'd6yy-54nr'. Mega Millions: dataset '5xaw-6ayf'.
@@ -96,7 +100,13 @@ def _from_ny_data(draw_date: str, dataset_id: str, extra_field: str = None) -> O
         return None
     row = rows[0]
 
-    if extra_field:
+    if not has_extra_ball:
+        whites = [int(n) for n in row['winning_numbers'].split()]
+        if len(whites) != 5:
+            return None
+        n1, n2, n3, n4, n5 = whites
+        extra = None
+    elif extra_field:
         # Bola extra en un campo separado (Mega Millions: 'mega_ball').
         whites = [int(n) for n in row['winning_numbers'].split()]
         if len(whites) != 5:
@@ -117,7 +127,8 @@ def _from_ny_data(draw_date: str, dataset_id: str, extra_field: str = None) -> O
     }
 
 
-def _from_nc_csv(draw_date: str, url: str, cols: dict, date_fmt: str) -> Optional[Dict]:
+def _from_nc_csv(draw_date: str, url: str, cols: dict, date_fmt: str,
+                 has_extra_ball: bool = True) -> Optional[Dict]:
     """Descarga CSV de NC Lottery y busca el draw. Game-agnostic via cols/url."""
     if not url:
         return None
@@ -125,13 +136,17 @@ def _from_nc_csv(draw_date: str, url: str, cols: dict, date_fmt: str) -> Optiona
     resp.raise_for_status()
 
     c = cols  # shorthand
-    for line in resp.text.strip().split('\n'):
-        parts = [p.strip() for p in line.split(',')]
-        if len(parts) < 7:
+    for parts in csv.reader(io.StringIO(resp.text)):
+        parts = [p.strip() for p in parts]
+        if len(parts) < 6:
             continue
         try:
             parsed = pd.to_datetime(parts[c.get('date', 0)], format=date_fmt, errors='coerce')
             if pd.isna(parsed) or parsed.strftime('%Y-%m-%d') != draw_date:
+                continue
+            # El CSV oficial de Cash 5 incluye dos filas por fecha desde 2021:
+            # DP=0 es el juego base; DP=1 es Double Play.
+            if 'dp' in c and int(parts[c['dp']]) != 0:
                 continue
             return {
                 'draw_date': draw_date,
@@ -140,7 +155,7 @@ def _from_nc_csv(draw_date: str, url: str, cols: dict, date_fmt: str) -> Optiona
                 'n3': int(parts[c.get('n3', 3)]),
                 'n4': int(parts[c.get('n4', 4)]),
                 'n5': int(parts[c.get('n5', 5)]),
-                'pb': int(parts[c.get('extra', 6)]),
+                'pb': int(parts[c.get('extra', 6)]) if has_extra_ball else None,
             }
         except (ValueError, IndexError):
             continue

@@ -44,17 +44,12 @@ binding = "ASSETS"
 ENVIRONMENT = "production"
 
 # ── Cron Triggers ────────────────────────────────────────────
-# Powerball: lun/mié/sáb sorteo ~22:59 ET
-# Primario: 05:00 UTC (7h after draw) — da tiempo para que NC Lottery publique
-# Backup:   09:00 UTC (+4h) — por si el primario falló
+# El Worker corre diariamente por Cash 5 y omite operaciones ya procesadas
+# para los juegos que no tengan un sorteo nuevo.
 [triggers]
 crons = [
-  "0 5 * * TUE",   # Martes    05:00 UTC (draw lunes)
-  "0 9 * * TUE",   # Martes    09:00 UTC (backup)
-  "0 5 * * THU",   # Jueves    05:00 UTC (draw miércoles)
-  "0 9 * * THU",   # Jueves    09:00 UTC (backup)
-  "0 5 * * SUN",   # Domingo   05:00 UTC (draw sábado)
-  "0 9 * * SUN",   # Domingo   09:00 UTC (backup)
+  "0 5 * * *",     # Cash 5 diario: primario despues del sorteo 23:22 ET
+  "0 9 * * *",     # Cash 5 diario: backup
 ]
 
 # ── Dev local ─────────────────────────────────────────────────

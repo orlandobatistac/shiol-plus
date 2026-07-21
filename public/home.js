@@ -67,7 +67,8 @@ async function loadGameStats(gameId) {
 }
 
 function activeReport(game, stats) {
-  const gameClass = game.id === 'powerball' ? 'powerball' : 'mega';
+  const gameClass = game.id === 'powerball' ? 'powerball' :
+    (game.id === 'mega_millions' ? 'mega' : 'cash5');
   return [
     '<a class="game-report ' + gameClass + '" href="game.html?game=' + game.id + '">',
       '<div class="game-report-head">',

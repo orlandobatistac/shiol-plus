@@ -550,6 +550,10 @@ const GAME_CONFIGS = {
     id: 'mega_millions',
     draw_days: ['Tuesday', 'Friday'],
   },
+  cash5: {
+    id: 'cash5',
+    draw_days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  },
 };
 
 // ─────────────────────────────────────────────────────────────
