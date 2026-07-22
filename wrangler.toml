@@ -48,8 +48,10 @@ ENVIRONMENT = "production"
 # para los juegos que no tengan un sorteo nuevo.
 [triggers]
 crons = [
-  "0 5 * * *",     # Cash 5 diario: primario despues del sorteo 23:22 ET
-  "0 9 * * *",     # Cash 5 diario: backup
+  "0 5 * * *",     # Daily primary: Cash 5 + PB/MM retry si ya disponible
+  "0 9 * * *",     # Daily backup:  Cash 5 + PB/MM retry
+  "0 17 * * 3",    # Wed 17:00 UTC: evalúa MM del Tue (13h despues, Socrata ya tiene el dato)
+  "0 17 * * 6",    # Sat 17:00 UTC: evalúa MM del Fri (13h despues, Socrata ya tiene el dato)
 ]
 
 # ── Dev local ─────────────────────────────────────────────────

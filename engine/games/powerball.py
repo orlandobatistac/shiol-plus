@@ -20,9 +20,10 @@ GAME = {
     'cron_primary': ['0 5 * * 2', '0 5 * * 4', '0 5 * * 0'],
     'cron_backup':  ['0 9 * * 2', '0 9 * * 4', '0 9 * * 0'],
 
-    # nc_lottery_csv quedo 404 (NC Lottery cambio su estructura de URLs, verificado 2026-07-04).
-    # ny_data_api (data.ny.gov, Socrata, alimentado por NY Lottery/MUSL) es ahora la fuente primaria.
-    'data_sources': ['ny_data_api', 'nc_lottery_csv', 'powerball_com', 'musl_api'],
+    # Prioridad de fuentes (sesion 33, 2026-07-22): nc_web primero (mismo dia),
+    # ny_data_api fallback historico, powerball.com y musl_api como ultima opcion.
+    'nc_web_url':   'https://nclottery.com/powerball',
+    'data_sources': ['nc_web', 'ny_data_api', 'nc_lottery_csv', 'powerball_com', 'musl_api'],
     'ny_dataset_id': 'd6yy-54nr',
     # None = 'winning_numbers' del dataset de Socrata trae los 6 números
     # juntos (5 blancas + Powerball). Ver engine/pipeline/fetch_draw.py.

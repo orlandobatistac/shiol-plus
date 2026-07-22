@@ -273,10 +273,10 @@ async function insertWinsForTickets(db, { gameId, drawDate, strategyId, tickets 
  * el resultado real ya está publicado, evalúa contra él los tickets
  * pre-generados (o hace catch-up si no hay ninguno -- Opción B).
  */
-async function evaluatePastCycle(game, env, ticketsPerStrategy) {
+async function evaluatePastCycle(game, env, ticketsPerStrategy, overrideDate = null) {
   const db       = env.DB;
   const gameId   = game.id;
-  const drawDate = lastDrawDate(game.draw_days);
+  const drawDate = overrideDate ?? lastDrawDate(game.draw_days);
   if (!drawDate) return { skipped: true, reason: 'no_draw_date' };
 
   const already = await db.prepare(
@@ -515,8 +515,31 @@ async function refreshJackpot(game, env) {
   return { skipped: true, reason: 'fetch_failed' };
 }
 
+/**
+ * Si un ciclo pasado quedó con status='generated' (el draw no estaba
+ * disponible en ninguna de las dos ventanas diarias del cron), este cron
+ * lo recupera en la siguiente corrida -- sin esperar intervención manual.
+ * Solo intenta el ciclo más antiguo pendiente por juego para no alargar
+ * el tiempo de ejecución del cron.
+ */
+async function recoverOldestStrandedCycle(game, env, ticketsPerStrategy, primaryDate) {
+  const db     = env.DB;
+  const today  = new Date().toISOString().slice(0, 10);
+  const stranded = await db.prepare(
+    `SELECT draw_date FROM cycles
+     WHERE lottery_id=? AND status='generated' AND draw_date < ? AND draw_date != ?
+     ORDER BY draw_date ASC LIMIT 1`
+  ).bind(game.id, today, primaryDate ?? '').first();
+
+  if (!stranded) return { skipped: true, reason: 'no_stranded_cycles' };
+  console.log(`[pipeline] ${game.id}: recovering stranded cycle for ${stranded.draw_date}`);
+  return evaluatePastCycle(game, env, ticketsPerStrategy, stranded.draw_date);
+}
+
 async function runPipeline(game, env, ticketsPerStrategy = 20) {
+  const primaryDate = lastDrawDate(game.draw_days);
   const evaluate = await evaluatePastCycle(game, env, ticketsPerStrategy);
+  const recover  = await recoverOldestStrandedCycle(game, env, ticketsPerStrategy, primaryDate);
   const generate = await generateNextCycle(game, env, ticketsPerStrategy);
 
   // No bloqueante -- ver refreshJackpot(). Un fallo acá no debe afectar el
@@ -529,7 +552,7 @@ async function runPipeline(game, env, ticketsPerStrategy = 20) {
     jackpot = { error: e.message };
   }
 
-  return { evaluate, generate, jackpot };
+  return { evaluate, recover, generate, jackpot };
 }
 
 // ─────────────────────────────────────────────────────────────

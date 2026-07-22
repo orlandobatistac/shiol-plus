@@ -14,7 +14,8 @@ GAME = {
     'draw_time_et': '23:22',
     'cron_primary': ['0 5 * * *'],
     'cron_backup': ['0 9 * * *'],
-    'data_sources': ['nc_lottery_csv'],
+    'nc_web_url':   'https://nclottery.com/cash5',
+    'data_sources': ['nc_lottery_csv', 'nc_web'],
     'nc_csv_url': 'https://nclottery.com/cash5-download',
     'nc_csv_date_format': '%m/%d/%Y',
     'nc_csv_columns': {
