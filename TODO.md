@@ -3,7 +3,7 @@
 Contexto persistente del proyecto. Actualizar esta lista al cerrar cada sesion de trabajo
 para que una conversacion nueva pueda retomar sin perder contexto.
 
-Ultima actualizacion: 2026-07-10 (sesion 32 -- Fase 6 cerrada)
+Ultima actualizacion: 2026-07-21 (sesion 33 -- Fase 9 abierta: estrategia wheeling implementada, pendiente seed+deploy)
 
 ## Estado actual
 
@@ -468,12 +468,67 @@ abierta aunque el checklist tecnico este completo.
       sesion. La Fase 8 original (DNS, VPS, PR #40) queda congelada.
 - [ ] Definir el objetivo de la nueva Fase 9 en el proximo prompt.
 
-### Fase 9 -- Por definir
+### Fase 9 -- Estrategia 9 "Wheeling" (covering design) en los 3 juegos
 
-- [ ] Registrar el objetivo, alcance y criterio de salida de la siguiente mejora.
-- [ ] Identificar los archivos y contratos afectados.
-- [ ] No modificar dominio, DNS, VPS, `main`, PR #40 ni `agent/publish-v8` hasta
-      nueva decision explicita.
+**Objetivo.** Probar en vivo la teoria de Orlando ("los ganadores salen dispersos
+entre las jugadas premiadas -- reagruparlos daria premios mayores") en su version
+matematicamente valida: un *lottery wheel* (covering design parcial C(pool,5,t=3))
+sobre un pool de numeros calientes, como estrategia 9 junto a las 8 existentes.
+
+**Contexto analitico (sesion 33, 2026-07-21).** Antes de implementar se hizo el
+analisis estadistico completo:
+
+- La dispersion observada en el modal "Combinations" es **sesgo de seleccion
+  retrospectiva**: con 160 tickets 100% aleatorios contra los 1,375 sorteos
+  reales de Powerball (era 5/69) el mismo patron aparece en el 40% de los
+  sorteos (>=3 blancas dispersas entre premiados) y 23% (>=4 + extra). El pool
+  completo de 160 tickets contiene las 5 blancas ganadoras el 100% de las veces.
+- Entrenar XGBoost/ML con "ganadoras vs perdedoras" no es viable: los sorteos
+  son independientes; el modelo solo aprenderia sesgos de composicion de las
+  estrategias (overfitting garantizado). Se descarto el plan "Consolidador ML"
+  de 4 enfoques propuesto por otro agente.
+- Monte Carlo de 200k sorteos: el valor esperado por ticket es **identico** para
+  cualquier estructura (los marginales no cambian). El wheel solo cambia la
+  distribucion conjunta: concentra aciertos SI >=3 ganadores caen en el pool, a
+  cambio de perder algo de concentracion incondicional (P(max>=3): 3.51% wheel
+  pool-30 vs 3.59% aleatorio independiente -- diferencia real pero minima).
+- **Prediccion falsable del experimento:** ROI de `wheeling` indistinguible de
+  `random_baseline` a largo plazo; diferencia solo en la *forma* de los premios.
+  El pipeline en vivo confirma o refuta.
+
+**Implementado (sesion 33):**
+
+- [x] `engine/strategies/wheeling.py` -- pool caliente (~43% de white_max:
+      69->30, 70->30, 43->18), greedy max-coverage de triples (t=3), extra ball
+      rotando entre las top-4 calientes, game-agnostic (Cash5 sin extra).
+- [x] Registrada en `ALL_STRATEGIES` (`engine/strategies/__init__.py`).
+- [x] Seed: `schema/0003_wheeling.sql` (3 juegos: `wheeling`,
+      `wheeling_mega_millions`, `wheeling_cash5`) + seed powerball en
+      `schema/d1_schema.sql`.
+- [x] Frontend: nombre y descripcion en `public/game.js` y `public/home.js`
+      (de paso se corrigio en home.js el strip de sufijo `_cash5`, omitido en
+      el commit de Cash5).
+- [x] Tests: `tests/test_wheeling.py` (6 tests: registro, validez, pool,
+      cobertura de triples >=190/200, rotacion de extras, cash5 sin extra,
+      historico minimo). 6/6 + 3/3 de `test_cash5.py` en verde. Smoke en los
+      3 juegos: 20 tickets en ~0.15s.
+
+**Pendiente (Orlando, desde terminal Windows -- ver gotchas de deploy):**
+
+- [ ] QA local: `npx wrangler d1 execute shiol-plus-db --local --file schema/0003_wheeling.sql`
+      + `wrangler dev` y verificar que el ciclo genera 180 tickets (9 x 20).
+- [ ] Seed D1 produccion: `npx wrangler d1 execute shiol-plus-db --remote --file schema/0003_wheeling.sql`.
+- [ ] `npx wrangler deploy` (imagen del container se reconstruye con la
+      estrategia nueva).
+- [ ] Verificar tras el primer cron real que `wheeling` aparece en el dashboard
+      de los 3 juegos con sus 20 tickets y stats.
+
+**Criterio de salida.** `wheeling` corriendo en produccion en los 3 juegos
+durante >=20 ciclos, comparable en el podio contra `random_baseline`. La lectura
+del experimento (ROI y concentracion vs baseline) se documenta aqui al cierre.
+
+**Regla vigente:** no modificar dominio, DNS, VPS, `main`, PR #40 ni
+`agent/publish-v8` hasta nueva decision explicita.
 
 ### Registro de avance
 
@@ -517,6 +572,14 @@ abierta aunque el checklist tecnico este completo.
   version `2109608c-5134-47d5-a7c6-c28a07cdfc05`. Fase 7 aprobada por Orlando.
   Se congelo la Fase 8 de migracion de dominio; se abre Fase 9 para la siguiente
   mejora.
+- **2026-07-21, sesion 33 -- Fase 9 definida e implementada (sin deploy):**
+  analisis estadistico de la teoria del "consolidador" (sesgo de seleccion
+  retrospectiva demostrado con simulacion sobre 1,375 sorteos reales + Monte
+  Carlo 200k), descartado el enfoque ML, implementada la estrategia 9
+  `wheeling` (covering design) para los 3 juegos con tests 6/6 en verde.
+  Pendiente: seed 0003 en D1, deploy desde Windows y verificacion del primer
+  cron. Nota: trabajo hecho sobre la rama `codex/add-nc-cash5` (Cash5 aun sin
+  mergear a main).
 - **2026-07-10, sesion 31 -- Fase 5 completa:** explorador paginado de las 160
   combinaciones del proximo draw, filtros, contexto del ciclo y score interno sin
   ranking global. Fase 4 aprobada por Orlando. No se hizo deploy.

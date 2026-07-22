@@ -59,7 +59,8 @@ function strategyName(value) {
     coverage_optimizer: 'Coverage Optimizer',
     cooccurrence: 'Cooccurrence',
     range_balanced: 'Range Balanced',
-    random_baseline: 'Random Baseline'
+    random_baseline: 'Random Baseline',
+    wheeling: 'Wheeling'
   };
   return names[normalized] || normalized.replace(/_/g, ' ').replace(/\b\w/g, function (character) {
     return character.toUpperCase();
@@ -76,7 +77,8 @@ function strategyDescription(value) {
     coverage_optimizer: 'Maximizes coverage while reducing repetition',
     cooccurrence: 'Frequently recurring number pairs',
     range_balanced: 'Balanced low, mid and high ranges',
-    random_baseline: 'Scientific control using random selection'
+    random_baseline: 'Scientific control using random selection',
+    wheeling: 'Covering design (lottery wheel) over a hot-number pool'
   };
   return descriptions[normalized] || 'Independent analytical strategy';
 }

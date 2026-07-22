@@ -29,7 +29,7 @@ function money(value) {
 }
 
 function strategyName(value) {
-  const normalized = String(value || '').replace(/_mega_millions$/, '');
+  const normalized = String(value || '').replace(/_(mega_millions|cash5)$/, '');
   const names = {
     xgboost_ml: 'XGBoost ML',
     hybrid_ensemble: 'Hybrid Ensemble',
@@ -38,7 +38,8 @@ function strategyName(value) {
     coverage_optimizer: 'Coverage Optimizer',
     cooccurrence: 'Cooccurrence',
     range_balanced: 'Range Balanced',
-    random_baseline: 'Random Baseline'
+    random_baseline: 'Random Baseline',
+    wheeling: 'Wheeling'
   };
   return names[normalized] || normalized.replace(/_/g, ' ').replace(/\b\w/g, function (character) {
     return character.toUpperCase();

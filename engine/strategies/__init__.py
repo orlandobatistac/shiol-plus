@@ -6,6 +6,7 @@ from .xgboost_ml          import XGBoostMLStrategy
 from .hybrid_ensemble     import HybridEnsembleStrategy
 from .intelligent_scoring import IntelligentScoringStrategy
 from .random_baseline     import RandomBaselineStrategy
+from .wheeling            import WheelingStrategy
 
 ALL_STRATEGIES = {
     'frequency_weighted':  FrequencyWeightedStrategy,
@@ -16,6 +17,7 @@ ALL_STRATEGIES = {
     'hybrid_ensemble':     HybridEnsembleStrategy,
     'intelligent_scoring': IntelligentScoringStrategy,
     'random_baseline':     RandomBaselineStrategy,
+    'wheeling':            WheelingStrategy,
 }
 
 
