@@ -1,72 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" class="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="SHIOL+ compares lottery strategies against real draw results."/>
-  <title>SHIOL+ | Strategy reports</title>
+  <meta name="description" content="SHIOL+ compara estrategias probabilísticas de lotería contra resultados oficiales en tiempo real."/>
+  <title>SHIOL+ | Reportes de Estrategias y Resultados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body class="home-page">
-  <a class="skip-link" href="#home-content">Skip to reports</a>
+  <a class="skip-link" href="#home-content">Saltar a reportes</a>
+  
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="index.html" aria-label="SHIOL+ home">SHIOL<span>+</span></a>
-      <div class="data-status"><span class="status-dot"></span>Data current</div>
+      <div class="data-status" role="status" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>Datos Actualizados
+      </div>
     </div>
   </header>
 
   <main class="home-main" id="home-content">
-    <aside class="trust-banner" aria-label="Important information">
-      <strong>For entertainment and statistical analysis.</strong>
-      <span>SHIOL+ does not guarantee prizes or future results.</span>
-      <a href="legal.html#important-disclaimer">Read the disclaimer</a>
+    <aside class="trust-banner" aria-label="Información importante">
+      <strong>Aviso Estadístico</strong>
+      <span>SHIOL+ es una plataforma de análisis de datos e investigación matemática. No garantiza premios futuros.</span>
+      <a href="legal.html#important-disclaimer">Ver aviso completo</a>
     </aside>
+
     <section class="home-hero">
-      <p class="eyebrow">Strategy analytics</p>
-      <h1>Lottery strategy reports</h1>
+      <p class="eyebrow">Analítica de Estrategias</p>
+      <h1>Reportes de estrategias probabilísticas</h1>
       <p class="home-lead">
-        Eight models compete against real draw results. Choose a game to review
-        rankings, upcoming tickets, and verified outcomes.
+        Ocho modelos probabilísticos compiten continuamente contra los resultados oficiales de Powerball, Mega Millions y NC Cash 5. Selecciona un juego para analizar rankings, combinaciones y combinaciones verificadas.
       </p>
     </section>
 
     <section class="home-reports" aria-labelledby="reports-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Active games</p>
-          <h2 id="reports-title">Reports</h2>
+          <p class="eyebrow">Juegos Activos</p>
+          <h2 id="reports-title">Reportes Disponibles</h2>
         </div>
-        <p class="section-note">Updated after every published draw.</p>
+        <p class="section-note">Actualización automática tras cada sorteo publicado.</p>
       </div>
+      
       <div id="games-grid" class="games-grid">
         <div class="ui-state ui-state-loading" role="status">
           <span class="ui-state-marker" aria-hidden="true"></span>
-          <div><strong>Loading reports</strong><p>Connecting current game data.</p></div>
+          <div>
+            <strong>Cargando reportes</strong>
+            <p>Conectando con el motor de analítica en tiempo real...</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="method-strip" aria-label="How SHIOL+ works">
+    <section class="method-strip" aria-label="Cómo funciona SHIOL+">
       <div>
-        <strong>8 strategies</strong>
-        <span>evaluated independently</span>
+        <strong>8 Estrategias</strong>
+        <span>Evaluadas de forma independiente</span>
       </div>
       <div>
-        <strong>Real draws</strong>
-        <span>used for every result</span>
+        <strong>Resultados Oficiales</strong>
+        <span>Utilizados para verificar cada ticket</span>
       </div>
       <div>
-        <strong>Automatic updates</strong>
-        <span>after each game cycle</span>
+        <strong>Actualización Automática</strong>
+        <span>Sincronizado tras cada sorteo</span>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <span>SHIOL+ v9</span>
-    <span>Strategy analytics based on historical outcomes.</span>
-    <nav aria-label="Site information"><a href="legal.html#about">About</a><a href="legal.html#privacy">Privacy</a><a href="legal.html#terms">Terms</a><a href="legal.html#cookies">Cookies</a><a href="legal.html#important-disclaimer">Disclaimer</a></nav>
+    <span>SHIOL+ v9 Analytics</span>
+    <span>Plataforma de investigación matemática basada en datos históricos.</span>
+    <nav aria-label="Información del sitio">
+      <a href="legal.html#about">Acerca de</a>
+      <a href="legal.html#privacy">Privacidad</a>
+      <a href="legal.html#terms">Términos</a>
+      <a href="legal.html#cookies">Cookies</a>
+      <a href="legal.html#important-disclaimer">Descargo de responsabilidad</a>
+    </nav>
   </footer>
 
   <script src="home.js"></script>
