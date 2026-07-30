@@ -708,6 +708,46 @@ body.game-cash5 .ball.pb {
 }
 
 /* Next Draw Analysis Precision Columns: Pos (80px), Balls (240px), Strategy (180px), Score (1fr) */
+.next-analysis-context {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .next-analysis-context {
+    grid-template-columns: 1fr;
+  }
+}
+
+.next-analysis-context > div {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.next-analysis-context span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.next-analysis-context strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  display: block;
+}
 .next-analysis-header,
 .next-analysis-row {
   display: grid;

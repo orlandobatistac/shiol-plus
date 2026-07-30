@@ -937,9 +937,9 @@ function internalScore(value) {
 
 function updateNextAnalysisFilter() {
   const select = document.getElementById('next-analysis-strategy');
-  select.innerHTML = '<option value="all">All 160 combinations</option>' +
+  select.innerHTML = '<option value="all">Todas las 160 combinaciones</option>' +
     nextAnalysisStrategies.map(function (strategy) {
-      return '<option value="' + strategy.id + '">' + strategyName(strategy.id) + ' · 20</option>';
+      return '<option value="' + strategy.id + '">' + strategyName(strategy.id) + ' (20 combinaciones)</option>';
     }).join('');
   select.value = nextAnalysisStrategy;
   select.disabled = false;
@@ -951,8 +951,8 @@ function updateNextAnalysisPagination(visibleCount) {
   const page = Math.floor(nextAnalysisOffset / NEXT_ANALYSIS_LIMIT) + 1;
   const pages = Math.max(1, Math.ceil(nextAnalysisTotal / NEXT_ANALYSIS_LIMIT));
   document.getElementById('next-analysis-count').textContent =
-    'Showing ' + start + '-' + end + ' of ' + nextAnalysisTotal + ' analytical combinations';
-  document.getElementById('next-analysis-page').textContent = 'Page ' + page + ' of ' + pages;
+    'Mostrando ' + start + '-' + end + ' de ' + nextAnalysisTotal + ' combinaciones analíticas';
+  document.getElementById('next-analysis-page').textContent = 'Página ' + page + ' de ' + pages;
   document.getElementById('next-analysis-prev').disabled = nextAnalysisOffset === 0;
   document.getElementById('next-analysis-next').disabled = nextAnalysisOffset + visibleCount >= nextAnalysisTotal;
 }
@@ -962,21 +962,21 @@ async function renderNextAnalysis() {
   const list = document.getElementById('next-analysis-list');
   document.getElementById('next-analysis-prev').disabled = true;
   document.getElementById('next-analysis-next').disabled = true;
-  list.innerHTML = stateMarkup('loading', 'Loading combinations', 'Preparing this page of next-draw analysis.');
+  list.innerHTML = stateMarkup('loading', 'Cargando combinaciones', 'Preparando la primera página del análisis.');
   const strategyQuery = nextAnalysisStrategy === 'all' ? '' : '&strategy=' + encodeURIComponent(nextAnalysisStrategy);
   const data = await api('/api/next-draw-analysis?game=' + GAME + '&limit=' + NEXT_ANALYSIS_LIMIT +
     '&offset=' + nextAnalysisOffset + strategyQuery);
 
   if (!data) {
-    context.innerHTML = stateMarkup('error', 'Next drawing unavailable', 'Please retry when the data service is available.');
-    list.innerHTML = stateMarkup('error', 'Analysis unavailable', 'The analytical combinations could not be loaded.');
+    context.innerHTML = stateMarkup('error', 'Próximo sorteo no disponible', 'Reintenta cuando el servicio esté disponible.');
+    list.innerHTML = stateMarkup('error', 'Análisis no disponible', 'No se pudieron cargar las combinaciones.');
     nextAnalysisTotal = 0;
     updateNextAnalysisPagination(0);
     return;
   }
   if (!data.found) {
-    context.innerHTML = stateMarkup('empty', 'Next cycle not generated yet', 'The 160 analytical combinations will appear when the next game cycle is ready.');
-    list.innerHTML = stateMarkup('empty', 'No next-draw analysis yet', 'This is a temporary cycle state, not an error.');
+    context.innerHTML = stateMarkup('empty', 'Próximo ciclo no generado aún', 'Las 160 combinaciones aparecerán cuando el ciclo esté listo.');
+    list.innerHTML = stateMarkup('empty', 'Sin análisis aún', 'Estado temporal del ciclo.');
     document.getElementById('next-analysis-strategy').disabled = true;
     nextAnalysisTotal = 0;
     updateNextAnalysisPagination(0);
@@ -984,9 +984,9 @@ async function renderNextAnalysis() {
   }
 
   context.innerHTML = [
-    '<div><span>Next drawing</span><strong>' + dateLabel(data.draw_date) + '</strong></div>',
-    '<div><span>Current jackpot</span><strong>' + (data.jackpot && data.jackpot.found ? money(data.jackpot.amount) : 'Not available') + '</strong></div>',
-    '<div><span>Analysis status</span><strong>' + Number(data.expected_combinations || 0).toLocaleString() + ' combinations ready</strong></div>'
+    '<div><span>Próximo Sorteo</span><strong>' + dateLabel(data.draw_date) + '</strong></div>',
+    '<div><span>Jackpot Estimado</span><strong style="color: var(--mega);">' + (data.jackpot && data.jackpot.found ? money(data.jackpot.amount) : 'No disponible') + '</strong></div>',
+    '<div><span>Estado del Análisis</span><strong style="color: var(--positive);">' + Number(data.expected_combinations || 0).toLocaleString() + ' combinaciones listas</strong></div>'
   ].join('');
 
   if (nextAnalysisStrategy === 'all' && nextAnalysisOffset === 0 && !nextAnalysisStrategies.length) {
