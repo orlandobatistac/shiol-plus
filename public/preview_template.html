@@ -7,849 +7,229 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <style>
-    /* ==========================================================================
-       SHIOL+ v9 PROPOSAL DESIGN SYSTEM - MODERN ANALYTICAL SAAS (NO AI CLICHÉS)
-       ========================================================================== */
-    :root {
-      --bg-base: #090d16;
-      --bg-surface: #111726;
-      --bg-surface-elevated: #1a2336;
-      --bg-surface-hover: #222d44;
-      
-      --border-subtle: rgba(255, 255, 255, 0.07);
-      --border-medium: rgba(255, 255, 255, 0.12);
-      --border-strong: rgba(255, 255, 255, 0.2);
-      
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      
-      --brand-blue: #3b82f6;
-      --brand-blue-glow: rgba(59, 130, 246, 0.15);
-      
-      /* Lottery Theme Tokens */
-      --powerball-red: #ef4444;
-      --powerball-bg: rgba(239, 68, 68, 0.12);
-      --mega-gold: #f59e0b;
-      --mega-bg: rgba(245, 158, 11, 0.12);
-      --cash5-green: #10b981;
-      --cash5-bg: rgba(16, 185, 129, 0.12);
-
-      --active-accent: var(--powerball-red);
-      --active-bg-accent: var(--powerball-bg);
-      
-      --success: #10b981;
-      --danger: #f43f5e;
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 16px;
-      --radius-full: 9999px;
-
-      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      background-color: var(--bg-base);
-      color: var(--text-primary);
-      font-family: var(--font-main);
-      font-size: 14px;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-      padding-bottom: 60px;
-    }
-
-    a { color: inherit; text-decoration: none; }
-    button { cursor: pointer; border: none; font-family: inherit; }
-
-    /* Layout Containers */
-    .container {
-      width: min(1200px, calc(100% - 40px));
-      margin: 0 auto;
-    }
-
-    /* Top Banner / Disclaimer */
-    .disclaimer-banner {
-      background: linear-gradient(90deg, rgba(245, 158, 11, 0.08) 0%, rgba(15, 23, 42, 0.4) 100%);
-      border-bottom: 1px solid rgba(245, 158, 11, 0.2);
-      padding: 8px 0;
-      font-size: 12px;
-      color: #fbbf24;
-    }
-    .disclaimer-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .disclaimer-text {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .disclaimer-badge {
-      background: rgba(245, 158, 11, 0.2);
-      color: #fef08a;
-      padding: 2px 8px;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      font-size: 10px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    /* Header Navigation */
-    .site-header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(9, 13, 22, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .header-inner {
-      height: 68px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      font-size: 20px;
-      letter-spacing: -0.5px;
-    }
-    .brand-logo .plus {
-      color: var(--brand-blue);
-      background: rgba(59, 130, 246, 0.15);
-      padding: 0 6px;
-      border-radius: var(--radius-sm);
-    }
-    .brand-tag {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      border-left: 1px solid var(--border-medium);
-      padding-left: 10px;
-      margin-left: 2px;
-    }
-
-    /* Game Selector Pills */
-    .game-nav-tabs {
-      display: flex;
-      background: var(--bg-surface);
-      padding: 4px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-subtle);
-      gap: 4px;
-    }
-    .game-tab {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 13px;
-      transition: all 0.2s ease;
-      background: transparent;
-    }
-    .game-tab:hover {
-      color: var(--text-primary);
-      background: var(--bg-surface-elevated);
-    }
-    .game-tab.active {
-      color: #fff;
-      background: var(--bg-surface-hover);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-    .game-tab.active[data-game="powerball"] {
-      border-bottom: 2px solid var(--powerball-red);
-    }
-    .game-tab.active[data-game="mega_millions"] {
-      border-bottom: 2px solid var(--mega-gold);
-    }
-    .game-tab.active[data-game="cash5"] {
-      border-bottom: 2px solid var(--cash5-green);
-    }
-    .game-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-    .dot-powerball { background: var(--powerball-red); }
-    .dot-mega { background: var(--mega-gold); }
-    .dot-cash5 { background: var(--cash5-green); }
-
-    .header-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      background: var(--bg-surface);
-      padding: 6px 12px;
-      border-radius: var(--radius-full);
-      border: 1px solid var(--border-subtle);
-    }
-    .pulse-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 8px var(--success);
-    }
-
-    /* Main Dashboard Grid */
-    .dashboard-hero {
-      padding: 32px 0 24px;
-    }
-    .hero-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 24px;
-    }
-    .hero-title-area h1 {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .game-badge {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: var(--radius-full);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .badge-powerball { background: var(--powerball-bg); color: var(--powerball-red); border: 1px solid rgba(239,68,68,0.3); }
-    .badge-mega { background: var(--mega-bg); color: var(--mega-gold); border: 1px solid rgba(245,158,11,0.3); }
-    .badge-cash5 { background: var(--cash5-bg); color: var(--cash5-green); border: 1px solid rgba(16,185,129,0.3); }
-
-    .hero-subtitle {
-      color: var(--text-secondary);
-      font-size: 14px;
-      margin-top: 4px;
-    }
-
-    /* Key Metrics Cards Grid */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    @media (max-width: 900px) {
-      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 550px) {
-      .metrics-grid { grid-template-columns: 1fr; }
-    }
-
-    .metric-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    .metric-card:hover {
-      border-color: var(--border-medium);
-      transform: translateY(-2px);
-    }
-    .metric-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .metric-value {
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: var(--text-primary);
-      font-family: var(--font-main);
-    }
-    .metric-sub {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Accent border highlights for cards */
-    .metric-card.accent-jackpot {
-      background: linear-gradient(145deg, var(--bg-surface) 0%, rgba(245, 158, 11, 0.05) 100%);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-    }
-    .metric-card.accent-jackpot .metric-value {
-      color: var(--mega-gold);
-    }
-
-    /* Tactile Lottery Ball Display */
-    .latest-draw-section {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-    .draw-info h3 {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .draw-date-tag {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .balls-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .lotto-ball {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 16px;
-      font-family: var(--font-mono);
-      box-shadow: inset 0 -3px 6px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.3);
-      user-select: none;
-      position: relative;
-    }
-    .lotto-ball::after {
-      content: '';
-      position: absolute;
-      top: 4px;
-      left: 10px;
-      width: 14px;
-      height: 7px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.45);
-    }
-    .ball-white {
-      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
-      color: #0f172a;
-    }
-    .ball-powerball {
-      background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
-      color: #ffffff;
-      box-shadow: inset 0 -3px 6px rgba(0,0,0,0.5), 0 4px 12px rgba(220,38,38,0.4);
-    }
-    .ball-megaball {
-      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-      color: #1e1b4b;
-      box-shadow: inset 0 -3px 6px rgba(0,0,0,0.5), 0 4px 12px rgba(217,119,6,0.4);
-    }
-    .ball-cash5 {
-      background: linear-gradient(135deg, #34d399 0%, #059669 100%);
-      color: #ffffff;
-      box-shadow: inset 0 -3px 6px rgba(0,0,0,0.5), 0 4px 12px rgba(5,150,105,0.4);
-    }
-    .balls-divider {
-      width: 1px;
-      height: 32px;
-      background: var(--border-medium);
-      margin: 0 4px;
-    }
-
-    /* Section Headers */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-    }
-    .section-subtitle {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    /* Podium Leaderboard Grid */
-    .podium-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 40px;
-    }
-    @media (max-width: 850px) {
-      .podium-grid { grid-template-columns: 1fr; }
-    }
-    .podium-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      position: relative;
-      transition: all 0.2s ease;
-    }
-    .podium-card:hover {
-      border-color: var(--border-strong);
-    }
-    .podium-rank-badge {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 12px;
-    }
-    .rank-1 { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
-    .rank-2 { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid #cbd5e1; }
-    .rank-3 { background: rgba(180, 83, 9, 0.2); color: #d97706; border: 1px solid #d97706; }
-
-    .strategy-name {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      padding-right: 32px;
-    }
-    .strategy-desc {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-    }
-
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      padding: 6px 0;
-      border-top: 1px solid var(--border-subtle);
-    }
-    .stat-label { color: var(--text-secondary); }
-    .stat-val { font-weight: 700; font-family: var(--font-mono); }
-    .val-positive { color: var(--success); }
-    .val-negative { color: var(--danger); }
-
-    /* Modern Data Tables */
-    .table-container {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      margin-bottom: 40px;
-    }
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 13px;
-    }
-    .data-table th {
-      background: var(--bg-surface-elevated);
-      padding: 12px 16px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--border-medium);
-    }
-    .data-table td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-    }
-    .data-table tbody tr:hover {
-      background: var(--bg-surface-hover);
-    }
-
-    .table-balls {
-      display: flex;
-      gap: 6px;
-    }
-    .table-ball {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-    }
-
-    /* Internal score meter bar */
-    .score-meter {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .meter-bar {
-      height: 6px;
-      width: 80px;
-      background: rgba(255,255,255,0.1);
-      border-radius: var(--radius-full);
-      overflow: hidden;
-    }
-    .meter-fill {
-      height: 100%;
-      background: var(--brand-blue);
-      border-radius: var(--radius-full);
-    }
-
-    /* Control Bar Filter */
-    .filter-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      background: var(--bg-surface);
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-subtle);
-      margin-bottom: 16px;
-    }
-    .filter-select {
-      background: var(--bg-surface-elevated);
-      color: var(--text-primary);
-      border: 1px solid var(--border-medium);
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      outline: none;
-    }
-
-    /* Footer */
-    .site-footer {
-      border-top: 1px solid var(--border-subtle);
-      padding: 32px 0;
-      margin-top: 40px;
-      color: var(--text-muted);
-      font-size: 13px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .footer-links {
-      display: flex;
-      gap: 16px;
-    }
-    .footer-links a:hover {
-      color: var(--text-primary);
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body class="report-page">
 
   <!-- Top Informative Disclaimer Banner -->
-  <div class="disclaimer-banner">
-    <div class="container disclaimer-inner">
-      <div class="disclaimer-text">
-        <span class="disclaimer-badge">Aviso Estadístico</span>
-        <span>SHIOL+ es una plataforma de análisis de datos e investigación matemática. No garantiza premios ni constituye asesoría financiera.</span>
-      </div>
-      <a href="#disclaimer" style="color: #fbbf24; text-decoration: underline; font-weight: 600;">Más detalles</a>
+  <div class="trust-banner container">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <strong>Aviso Estadístico</strong>
+      <span>SHIOL+ es una plataforma de análisis de datos e investigación matemática. No garantiza premios futuros.</span>
     </div>
+    <a href="legal.html#important-disclaimer">Ver detalles</a>
   </div>
 
   <!-- Main Navigation Bar -->
-  <header class="site-header">
-    <div class="container header-inner">
-      <div class="brand-logo">
-        <span>SHIOL</span><span class="plus">+</span>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="SHIOL+ home">
+        <span>SHIOL</span><span>+</span>
         <span class="brand-tag">v9 Analytics</span>
-      </div>
+      </a>
 
-      <!-- Game Selector Switcher -->
-      <nav class="game-nav-tabs" aria-label="Seleccionar Juego">
-        <button class="game-tab active" data-game="powerball" onclick="switchGame('powerball')">
-          <span class="game-dot dot-powerball"></span>
-          <span>Powerball</span>
-        </button>
-        <button class="game-tab" data-game="mega_millions" onclick="switchGame('mega_millions')">
-          <span class="game-dot dot-mega"></span>
-          <span>Mega Millions</span>
-        </button>
-        <button class="game-tab" data-game="cash5" onclick="switchGame('cash5')">
-          <span class="game-dot dot-cash5"></span>
-          <span>NC Cash 5</span>
-        </button>
+      <nav class="desktop-nav">
+        <a href="#overview" class="active">Resumen</a>
+        <a href="#draw-history">Histórico de Sorteos</a>
+        <a href="#rankings">Ranking de Modelos</a>
+        <a href="#next-analysis">Próximo Sorteo</a>
       </nav>
 
-      <div class="header-status">
-        <span class="pulse-dot"></span>
+      <div class="data-status">
+        <span class="status-dot"></span>
         <span>Datos Actualizados</span>
       </div>
     </div>
   </header>
 
   <!-- Hero & Overview Header -->
-  <main class="container">
-    <section class="dashboard-hero">
-      <div class="hero-header">
-        <div class="hero-title-area">
-          <h1>
-            <span id="active-game-title">Powerball</span>
-            <span id="active-game-badge" class="game-badge badge-powerball">Lun / Mié / Sáb</span>
-          </h1>
-          <p class="hero-subtitle">Evaluación continua de 8 modelos probabilísticos frente a los resultados oficiales.</p>
+  <main class="report-shell">
+    <div style="margin-top: 24px;">
+      <!-- Game Selector Pills -->
+      <div class="game-switcher" aria-label="Seleccionar Juego">
+        <a class="active" data-game="powerball" onclick="switchGame('powerball')">🔴 Powerball</a>
+        <a data-game="mega_millions" onclick="switchGame('mega_millions')">🟡 Mega Millions</a>
+        <a data-game="cash5" onclick="switchGame('cash5')">🟢 NC Cash 5</a>
+      </div>
+    </div>
+
+    <section class="report-intro">
+      <div>
+        <p class="eyebrow">Reporte de Analítica en Vivo</p>
+        <h1 id="report-title">Powerball Strategy Report</h1>
+        <p id="report-description" class="report-lead">
+          Evaluación continua de 8 modelos probabilísticos frente a los resultados oficiales.
+        </p>
+      </div>
+    </section>
+
+    <!-- Key Metrics Band -->
+    <section class="report-stage" id="overview">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Juego Seleccionado</p>
+          <h2>Resumen General</h2>
         </div>
       </div>
 
-      <!-- Key Metrics Band -->
-      <div class="metrics-grid">
-        <div class="metric-card accent-jackpot">
-          <div class="metric-label">
-            <span>Jackpot Estimado</span>
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+      <div class="summary-band">
+        <div class="summary-item jackpot-summary">
+          <span class="summary-label">Jackpot Estimado</span>
+          <div class="summary-primary" id="metric-jackpot">$415,000,000</div>
+          <span class="summary-secondary">Próximo sorteo oficial</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Próximo Sorteo</span>
+          <div class="summary-value" id="metric-countdown">01d 04h 22m 15s</div>
+          <span class="summary-secondary" id="metric-draw-date">Miércoles, 23:00 ET</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Último Sorteo Verificado</span>
+          <div class="draw-balls" id="latest-balls-display">
+            <div class="ball ball-white">08</div>
+            <div class="ball ball-white">19</div>
+            <div class="ball ball-white">27</div>
+            <div class="ball ball-white">42</div>
+            <div class="ball ball-white">65</div>
+            <div class="ball ball-powerball" id="extra-ball-display">14</div>
           </div>
-          <div class="metric-value" id="metric-jackpot">$415,000,000</div>
-          <div class="metric-sub">Próximo sorteo oficial</div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-label">Tiempo para Próximo Sorteo</div>
-          <div class="metric-value" id="metric-countdown" style="font-family: var(--font-mono); font-size: 22px;">01d 04h 22m 15s</div>
-          <div class="metric-sub" id="metric-draw-date">Miércoles, 23:00 ET</div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-label">Premios Generados</div>
-          <div class="metric-value" id="metric-won">$1,840</div>
-          <div class="metric-sub" id="metric-draws-count">En 142 sorteos evaluados</div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-label">Estrategia Líder</div>
-          <div class="metric-value" id="metric-leader" style="font-size: 20px; color: var(--brand-blue);">XGBoost ML</div>
-          <div class="metric-sub" style="color: var(--success); font-weight: 600;">+34.2% ROI acumulado</div>
+          <span class="summary-secondary" id="latest-draw-date">Lunes, 27 de Julio de 2026</span>
         </div>
       </div>
 
-      <!-- Latest Draw Ball Visualizer -->
-      <div class="latest-draw-section">
-        <div class="draw-info">
-          <h3>Último Sorteo Verificado</h3>
-          <span class="draw-date-tag" id="latest-draw-date">Lunes, 27 de Julio de 2026</span>
+      <div class="performance-strip">
+        <div>
+          <span class="summary-label">Premios Generados</span>
+          <strong id="metric-won">$1,840</strong>
+          <small id="metric-draws-count">En 142 sorteos evaluados</small>
         </div>
-
-        <div class="balls-container" id="latest-balls-display">
-          <div class="lotto-ball ball-white">08</div>
-          <div class="lotto-ball ball-white">19</div>
-          <div class="lotto-ball ball-white">27</div>
-          <div class="lotto-ball ball-white">42</div>
-          <div class="lotto-ball ball-white">65</div>
-          <div class="balls-divider"></div>
-          <div class="lotto-ball ball-powerball" id="extra-ball-display">14</div>
+        <div>
+          <span class="summary-label">Historial de Evaluación</span>
+          <strong>142 Sorteos</strong>
+          <small>22,720 combinaciones probadas</small>
+        </div>
+        <div>
+          <span class="summary-label">Estrategia Líder</span>
+          <strong id="metric-leader" style="color: var(--accent);">XGBoost ML</strong>
+          <small id="metric-roi" style="color: var(--positive); font-weight: 700;">+34.2% ROI acumulado</small>
         </div>
       </div>
     </section>
 
-    <!-- Section: Strategy Ranking Leaderboard -->
-    <section>
-      <div class="section-header">
+    <!-- Draw History Section -->
+    <section class="report-stage" id="draw-history">
+      <div class="section-heading">
         <div>
-          <h2 class="section-title">Ranking de Estrategias en Vivo</h2>
-          <p class="section-subtitle">Rendimiento histórico acumulado por modelo algorítmico.</p>
+          <p class="eyebrow">Historial Evaluado</p>
+          <h2>Sorteos Verificados</h2>
         </div>
+        <p class="section-note">Organización en 1 sola línea por resultado.</p>
       </div>
 
-      <div class="podium-grid" id="podium-container">
-        <!-- Top 1 Strategy -->
-        <div class="podium-card" style="border-color: rgba(245, 158, 11, 0.4);">
-          <div class="podium-rank-badge rank-1">#1</div>
-          <div class="strategy-name">XGBoost ML</div>
-          <div class="strategy-desc">Modelo Gradient Boosting entrenado con histórico de frecuencias y patrones.</div>
-          
-          <div class="stat-row">
-            <span class="stat-label">ROI Total</span>
-            <span class="stat-val val-positive">+34.2%</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Premios Ganados</span>
-            <span class="stat-val">$890</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Aciertos Máximos</span>
-            <span class="stat-val" style="color: var(--mega-gold);">4 + PB</span>
-          </div>
+      <div class="history-table">
+        <div class="history-header">
+          <span>Fecha y Resultado</span>
+          <span>Premios</span>
+          <span>Aciertos Ganadores</span>
+          <span>Mejor Estrategia</span>
+          <span>Máximo Acierto</span>
+          <span>Acción</span>
         </div>
-
-        <!-- Top 2 Strategy -->
-        <div class="podium-card">
-          <div class="podium-rank-badge rank-2">#2</div>
-          <div class="strategy-name">Hybrid Ensemble</div>
-          <div class="strategy-desc">Mezcla ponderada de XGBoost (70%) y co-ocurrencia estadística (30%).</div>
-          
-          <div class="stat-row">
-            <span class="stat-label">ROI Total</span>
-            <span class="stat-val val-positive">+18.5%</span>
+        <div class="history-row">
+          <div class="history-result">
+            <strong class="history-date">Jul 27, 2026</strong>
+            <div class="draw-balls">
+              <div class="ball ball-sm">08</div>
+              <div class="ball ball-sm">19</div>
+              <div class="ball ball-sm">27</div>
+              <div class="ball ball-sm">42</div>
+              <div class="ball ball-sm">65</div>
+              <div class="ball ball-sm extra">14</div>
+            </div>
           </div>
-          <div class="stat-row">
-            <span class="stat-label">Premios Ganados</span>
-            <span class="stat-val">$620</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Aciertos Máximos</span>
-            <span class="stat-val">4 Números</span>
-          </div>
-        </div>
-
-        <!-- Top 3 Strategy -->
-        <div class="podium-card">
-          <div class="podium-rank-badge rank-3">#3</div>
-          <div class="strategy-name">Frequency Weighted</div>
-          <div class="strategy-desc">Ponderación histórica de caliente/frío por ventana móvil de 50 sorteos.</div>
-          
-          <div class="stat-row">
-            <span class="stat-label">ROI Total</span>
-            <span class="stat-val val-negative">-4.1%</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Premios Ganados</span>
-            <span class="stat-val">$330</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Aciertos Máximos</span>
-            <span class="stat-val">3 + PB</span>
-          </div>
+          <div style="font-weight: 700; font-family: var(--font-mono);">$1,840</div>
+          <div style="font-family: var(--font-mono);">142</div>
+          <div><strong>XGBoost ML</strong></div>
+          <div><span class="match-tag">4 aciertos + PB</span></div>
+          <div><button class="pagination-button" type="button">Ver Análisis</button></div>
         </div>
       </div>
     </section>
 
-    <!-- Section: Next Draw Predictions & Internal Scores -->
-    <section>
-      <div class="section-header">
+    <!-- Strategy Ranking Podium Section -->
+    <section class="report-stage" id="rankings">
+      <div class="section-heading">
         <div>
-          <h2 class="section-title">Análisis para el Próximo Sorteo</h2>
-          <p class="section-subtitle">160 combinaciones proyectadas ordenadas por score interno de confianza.</p>
+          <p class="eyebrow">Rendimiento Histórico</p>
+          <h2>Ranking de Modelos Algorítmicos</h2>
+        </div>
+        <p class="section-note">Top 3 destacados + Tabla compacta para el resto de estrategias.</p>
+      </div>
+
+      <!-- Top 3 Podium Cards -->
+      <div class="podium-cards-grid">
+        <div class="podium-card rank-top-1">
+          <div class="rank-badge-lg gold">#1</div>
+          <div class="podium-title">XGBoost ML</div>
+          <div class="podium-desc">Modelo Gradient Boosting entrenado con histórico de frecuencias.</div>
+          <div class="podium-stat-row"><span class="podium-stat-label">ROI Total</span><span class="podium-stat-val pos">+34.2%</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Premios Ganados</span><span class="podium-stat-val">$890</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Máximo Acierto</span><span class="podium-stat-val" style="color: var(--mega);">4 + PB</span></div>
+        </div>
+
+        <div class="podium-card">
+          <div class="rank-badge-lg silver">#2</div>
+          <div class="podium-title">Hybrid Ensemble</div>
+          <div class="podium-desc">Mezcla ponderada de XGBoost (70%) y co-ocurrencia (30%).</div>
+          <div class="podium-stat-row"><span class="podium-stat-label">ROI Total</span><span class="podium-stat-val pos">+18.5%</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Premios Ganados</span><span class="podium-stat-val">$620</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Máximo Acierto</span><span class="podium-stat-val">4 Aciertos</span></div>
+        </div>
+
+        <div class="podium-card">
+          <div class="rank-badge-lg bronze">#3</div>
+          <div class="podium-title">Frequency Weighted</div>
+          <div class="podium-desc">Ponderación de caliente/frío por ventana de 50 sorteos.</div>
+          <div class="podium-stat-row"><span class="podium-stat-label">ROI Total</span><span class="podium-stat-val neg">-4.1%</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Premios Ganados</span><span class="podium-stat-val">$330</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Máximo Acierto</span><span class="podium-stat-val">3 + PB</span></div>
         </div>
       </div>
 
-      <div class="filter-bar">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <label style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Filtrar Modelo:</label>
-          <select class="filter-select" id="strategy-filter">
-            <option value="all">Todas las 160 combinaciones</option>
-            <option value="xgboost_ml">XGBoost ML</option>
-            <option value="hybrid_ensemble">Hybrid Ensemble</option>
-            <option value="frequency_weighted">Frequency Weighted</option>
-          </select>
-        </div>
-        <span style="font-size: 12px; color: var(--text-muted);">Puntuación evaluada en tiempo real</span>
-      </div>
-
-      <div class="table-container">
-        <table class="data-table">
+      <!-- Leaderboard Table for Remaining Models -->
+      <div class="ranking-table-wrap">
+        <table class="data-table ranking-table">
           <thead>
             <tr>
-              <th>Pos</th>
-              <th>Combinación Generada</th>
-              <th>Estrategia</th>
-              <th>Score Interno</th>
-              <th>Estado</th>
+              <th style="width: 50px;">Pos</th>
+              <th>Modelo / Estrategia</th>
+              <th style="text-align: right;">Premios Ganados</th>
+              <th style="text-align: right;">ROI Acumulado</th>
+              <th style="text-align: right;">Aciertos Ganadores</th>
+              <th style="text-align: right;">Sorteos Evaluados</th>
+              <th>Máximo Acierto</th>
             </tr>
           </thead>
-          <tbody id="next-draw-tbody">
+          <tbody>
             <tr>
-              <td style="font-weight: 700; color: var(--brand-blue); font-family: var(--font-mono);">#001</td>
-              <td>
-                <div class="table-balls">
-                  <div class="table-ball ball-white">12</div>
-                  <div class="table-ball ball-white">24</div>
-                  <div class="table-ball ball-white">36</div>
-                  <div class="table-ball ball-white">48</div>
-                  <div class="table-ball ball-white">61</div>
-                  <div class="table-ball ball-powerball" style="margin-left: 4px;">09</div>
-                </div>
-              </td>
-              <td style="font-weight: 600;">XGBoost ML</td>
-              <td>
-                <div class="score-meter">
-                  <span style="font-family: var(--font-mono); font-weight: 700;">94.8</span>
-                  <div class="meter-bar"><div class="meter-fill" style="width: 95%;"></div></div>
-                </div>
-              </td>
-              <td><span style="color: var(--success); font-weight: 600; font-size: 12px;">Generado</span></td>
+              <td><span class="rank-badge rank-other">#4</span></td>
+              <td><strong>Intelligent Scoring</strong><small style="display:block; color: var(--muted); font-size: 11px;">Scoring temporal con bono por vacíos</small></td>
+              <td style="text-align: right; font-weight: 700; font-family: var(--font-mono);">$210</td>
+              <td style="text-align: right;"><span class="neg">-8.2%</span></td>
+              <td style="text-align: right; font-family: var(--font-mono);">28</td>
+              <td style="text-align: right; font-family: var(--font-mono);">142</td>
+              <td><span class="match-tag">3 Aciertos</span></td>
             </tr>
             <tr>
-              <td style="font-weight: 700; color: var(--brand-blue); font-family: var(--font-mono);">#002</td>
-              <td>
-                <div class="table-balls">
-                  <div class="table-ball ball-white">05</div>
-                  <div class="table-ball ball-white">18</div>
-                  <div class="table-ball ball-white">31</div>
-                  <div class="table-ball ball-white">44</div>
-                  <div class="table-ball ball-white">59</div>
-                  <div class="table-ball ball-powerball" style="margin-left: 4px;">17</div>
-                </div>
-              </td>
-              <td style="font-weight: 600;">Hybrid Ensemble</td>
-              <td>
-                <div class="score-meter">
-                  <span style="font-family: var(--font-mono); font-weight: 700;">91.2</span>
-                  <div class="meter-bar"><div class="meter-fill" style="width: 91%;"></div></div>
-                </div>
-              </td>
-              <td><span style="color: var(--success); font-weight: 600; font-size: 12px;">Generado</span></td>
-            </tr>
-            <tr>
-              <td style="font-weight: 700; color: var(--brand-blue); font-family: var(--font-mono);">#003</td>
-              <td>
-                <div class="table-balls">
-                  <div class="table-ball ball-white">03</div>
-                  <div class="table-ball ball-white">15</div>
-                  <div class="table-ball ball-white">28</div>
-                  <div class="table-ball ball-white">52</div>
-                  <div class="table-ball ball-white">67</div>
-                  <div class="table-ball ball-powerball" style="margin-left: 4px;">22</div>
-                </div>
-              </td>
-              <td style="font-weight: 600;">Intelligent Scoring</td>
-              <td>
-                <div class="score-meter">
-                  <span style="font-family: var(--font-mono); font-weight: 700;">88.6</span>
-                  <div class="meter-bar"><div class="meter-fill" style="width: 88%;"></div></div>
-                </div>
-              </td>
-              <td><span style="color: var(--success); font-weight: 600; font-size: 12px;">Generado</span></td>
+              <td><span class="rank-badge rank-other">#5</span></td>
+              <td><strong>Coverage Optimizer</strong><small style="display:block; color: var(--muted); font-size: 11px;">Maximiza cobertura reduciendo repeticiones</small></td>
+              <td style="text-align: right; font-weight: 700; font-family: var(--font-mono);">$160</td>
+              <td style="text-align: right;"><span class="neg">-14.5%</span></td>
+              <td style="text-align: right; font-family: var(--font-mono);">19</td>
+              <td style="text-align: right; font-family: var(--font-mono);">142</td>
+              <td><span class="match-tag">3 Aciertos</span></td>
             </tr>
           </tbody>
         </table>
@@ -860,27 +240,23 @@
     <footer class="site-footer" id="disclaimer">
       <div>
         <strong>SHIOL+ v9 Architecture</strong> &bull; Cloudflare Workers + D1 + Python Container Engine.
-        <p style="margin-top: 4px; color: var(--text-muted); font-size: 12px;">Desarrollado exclusivamente para fines de análisis estadístico e investigación de datos.</p>
+        <p style="margin-top: 4px; color: var(--muted); font-size: 12px;">Desarrollado exclusivamente para fines de análisis estadístico e investigación de datos.</p>
       </div>
-      <div class="footer-links">
-        <a href="#">Términos de uso</a>
-        <a href="#">Política de privacidad</a>
+      <nav>
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
         <a href="#">Documentación API</a>
-      </div>
+      </nav>
     </footer>
   </main>
 
   <script>
-    // Mock Data Store for Interactive Game Switcher Preview
     const gameData = {
       powerball: {
-        title: "Powerball",
-        badge: "Lun / Mié / Sáb",
-        badgeClass: "badge-powerball",
+        title: "Powerball Strategy Report",
         jackpot: "$415,000,000",
         nextDraw: "Miércoles, 23:00 ET",
         won: "$1,840",
-        draws: "142 sorteos evaluados",
         leader: "XGBoost ML",
         roi: "+34.2% ROI acumulado",
         latestDate: "Lunes, 27 de Julio de 2026",
@@ -889,13 +265,10 @@
         extraClass: "ball-powerball"
       },
       mega_millions: {
-        title: "Mega Millions",
-        badge: "Mar / Vie",
-        badgeClass: "badge-mega",
+        title: "Mega Millions Strategy Report",
         jackpot: "$520,000,000",
         nextDraw: "Viernes, 23:00 ET",
         won: "$2,450",
-        draws: "118 sorteos evaluados",
         leader: "Hybrid Ensemble",
         roi: "+28.7% ROI acumulado",
         latestDate: "Martes, 28 de Julio de 2026",
@@ -904,13 +277,10 @@
         extraClass: "ball-megaball"
       },
       cash5: {
-        title: "NC Cash 5",
-        badge: "Todos los Días",
-        badgeClass: "badge-cash5",
+        title: "NC Cash 5 Strategy Report",
         jackpot: "$340,000",
         nextDraw: "Hoy, 23:22 ET",
         won: "$4,120",
-        draws: "310 sorteos evaluados",
         leader: "Intelligent Scoring",
         roi: "+41.5% ROI acumulado",
         latestDate: "Martes, 28 de Julio de 2026",
@@ -921,33 +291,24 @@
     };
 
     function switchGame(gameKey) {
-      // Update Tab Styles
-      document.querySelectorAll('.game-tab').forEach(tab => {
+      document.querySelectorAll('.game-switcher a').forEach(tab => {
         tab.classList.toggle('active', tab.dataset.game === gameKey);
       });
 
       const data = gameData[gameKey];
       if (!data) return;
 
-      // Update UI Text
-      document.getElementById('active-game-title').innerText = data.title;
-      const badgeEl = document.getElementById('active-game-badge');
-      badgeEl.innerText = data.badge;
-      badgeEl.className = 'game-badge ' + data.badgeClass;
-
+      document.getElementById('report-title').innerText = data.title;
       document.getElementById('metric-jackpot').innerText = data.jackpot;
       document.getElementById('metric-draw-date').innerText = data.nextDraw;
       document.getElementById('metric-won').innerText = data.won;
-      document.getElementById('metric-draws-count').innerText = data.draws;
       document.getElementById('metric-leader').innerText = data.leader;
       document.getElementById('latest-draw-date').innerText = data.latestDate;
 
-      // Render Balls
       const ballsContainer = document.getElementById('latest-balls-display');
-      let ballsHTML = data.balls.map(n => `<div class="lotto-ball ball-white">${String(n).padStart(2, '0')}</div>`).join('');
-      
+      let ballsHTML = data.balls.map(n => `<div class="ball ball-white">${String(n).padStart(2, '0')}</div>`).join('');
       if (data.extra !== null) {
-        ballsHTML += `<div class="balls-divider"></div><div class="lotto-ball ${data.extraClass}">${String(data.extra).padStart(2, '0')}</div>`;
+        ballsHTML += `<div class="ball ${data.extraClass}">${String(data.extra).padStart(2, '0')}</div>`;
       }
       ballsContainer.innerHTML = ballsHTML;
     }

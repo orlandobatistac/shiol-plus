@@ -13,9 +13,10 @@
 <body class="report-page">
   <a class="skip-link" href="#main-report">Saltar al reporte</a>
 
+  <!-- Main Top Bar -->
   <header class="topbar report-topbar">
     <div class="topbar-inner">
-      <a class="brand" href="index.html" aria-label="SHIOL+ home">SHIOL<span>+</span></a>
+      <a class="brand" href="index.html" aria-label="SHIOL+ home">SHIOL<span>+</span><span class="brand-tag">v9 Analytics</span></a>
       <nav class="desktop-nav" aria-label="Secciones del reporte">
         <a href="#overview" class="nav-link active" aria-current="location">Resumen</a>
         <a href="#draw-history" class="nav-link">Histórico de Sorteos</a>
@@ -29,18 +30,21 @@
   </header>
 
   <main class="report-shell" id="main-report">
+    <!-- Disclaimer Banner -->
     <aside class="trust-banner report-trust-banner" aria-label="Información importante">
       <strong>Aviso Estadístico</strong>
       <span>Análisis probabilístico descriptivo. Los resultados pasados no garantizan premios futuros.</span>
       <a href="legal.html#important-disclaimer">Ver descargo de responsabilidad</a>
     </aside>
 
+    <!-- Game Switcher Pills Bar -->
     <div class="game-switcher" aria-label="Seleccionar juego">
-      <a href="game.html?game=powerball" data-game="powerball">Powerball</a>
-      <a href="game.html?game=mega_millions" data-game="mega_millions">Mega Millions</a>
-      <a href="game.html?game=cash5" data-game="cash5">NC Cash 5</a>
+      <a href="game.html?game=powerball" data-game="powerball">🔴 Powerball</a>
+      <a href="game.html?game=mega_millions" data-game="mega_millions">🟡 Mega Millions</a>
+      <a href="game.html?game=cash5" data-game="cash5">🟢 NC Cash 5</a>
     </div>
 
+    <!-- Intro Headline -->
     <section class="report-intro">
       <div>
         <p class="eyebrow">Reporte de Analítica en Vivo</p>
@@ -49,9 +53,10 @@
           Evaluación continua de rendimiento histórico y combinaciones analíticas preparadas para el próximo sorteo.
         </p>
       </div>
-      <button class="text-action" type="button" data-report-details-open>Ver detalles técnicos <span aria-hidden="true">&rarr;</span></button>
+      <button class="text-action" type="button" data-report-details-open style="margin-top: 12px;">Ver detalles técnicos <span aria-hidden="true">&rarr;</span></button>
     </section>
 
+    <!-- Overview Metrics Stage -->
     <section class="report-section report-stage report-stage-overview" id="overview" aria-labelledby="overview-title">
       <div class="section-heading">
         <div>
@@ -60,7 +65,6 @@
         </div>
         <div class="section-heading-actions">
           <p class="section-note">Métricas del sorteo actual e histórico acumulado.</p>
-          <a class="text-action" href="#draw-history">Ver sorteos anteriores <span aria-hidden="true">&rarr;</span></a>
         </div>
       </div>
 
@@ -104,19 +108,20 @@
       </div>
     </section>
 
+    <!-- Draw History Section -->
     <section id="draw-history" class="report-section report-stage" aria-labelledby="draw-history-title">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Historial Evaluado</p>
           <h2 id="draw-history-title">Sorteos Verificados</h2>
         </div>
-        <p class="section-note">Diez análisis por página con detalle retendido claramente marcado.</p>
+        <p class="section-note">Diez análisis por página con detalle retenido claramente marcado.</p>
       </div>
 
       <div class="history-table" role="table" aria-label="Historial de sorteos evaluados">
         <div class="history-header" role="row">
           <span>Fecha y Resultado</span><span>Premios</span><span>Combinaciones Ganadoras</span>
-          <span>Mejor Estrategia</span><span>Máximo Acierto</span><span>Acciones</span>
+          <span>Mejor Estrategia</span><span>Máximo Acierto</span><span>Acción</span>
         </div>
         <div id="history-body" class="history-body">
           <div class="ui-state ui-state-loading" role="status">
@@ -136,6 +141,7 @@
       </div>
     </section>
 
+    <!-- Historical Strategy Ranking Section -->
     <section id="rankings" class="report-section report-stage" aria-labelledby="rankings-title">
       <div class="section-heading">
         <div>
@@ -145,7 +151,8 @@
         <p class="section-note">Acumulado en todos los sorteos evaluados.</p>
       </div>
 
-      <div id="podium" class="historical-ranking-list" role="list" aria-label="Ranking de estrategias">
+      <!-- Historical Strategy Ranking Container (Rendered by JS) -->
+      <div id="podium" class="historical-ranking-container" aria-label="Ranking de estrategias">
         <div class="ui-state ui-state-loading" role="status">
           <span class="ui-state-marker" aria-hidden="true"></span>
           <div><strong>Cargando ranking histórico</strong><p>Comparando resultados de modelos probabilísticos...</p></div>
@@ -161,6 +168,7 @@
       </div>
     </section>
 
+    <!-- Next Draw Analysis Section -->
     <section id="next-analysis" class="report-section report-stage" aria-labelledby="next-analysis-title">
       <div class="section-heading">
         <div>
@@ -188,7 +196,7 @@
 
       <div class="next-analysis-table" role="table" aria-label="Combinaciones para el próximo sorteo">
         <div class="next-analysis-header" role="row">
-          <span>Posición</span><span>Combinación</span><span>Modelo</span><span>Score Interno</span>
+          <span>Posición</span><span>Combinación Generada</span><span>Modelo</span><span>Score Interno</span>
         </div>
         <div id="next-analysis-list" class="next-analysis-list">
           <div class="ui-state ui-state-loading" role="status">
@@ -207,45 +215,16 @@
         </div>
       </div>
     </section>
-
-    <section id="analytics-lab" class="report-section analytics-lab" style="margin-top: 24px;">
-      <details id="rankings-details">
-        <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Métricas extendidas y pesos de modelos</summary>
-        <p class="details-intro" style="margin-top: 8px; color: var(--muted); font-size: 13px;">
-          El peso asignado representa la confianza del motor en el modelo actual. El ROI compara los premios con el costo teórico de los tickets.
-        </p>
-        <div class="table-wrap" style="margin-top: 12px; overflow-x: auto;">
-          <table id="strategies-table" class="data-table">
-            <thead>
-              <tr><th>#</th><th>Modelo</th><th>Estado</th><th>Peso</th><th>Tendencia</th><th>ROI Prom.</th><th>Total Premio</th></tr>
-            </thead>
-            <tbody id="strategies-body"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody>
-          </table>
-        </div>
-      </details>
-
-      <details id="last-cycle" style="margin-top: 12px;">
-        <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Desglose del último ciclo</summary>
-        <p class="details-intro" id="cycle-meta" style="margin-top: 8px; color: var(--muted); font-size: 13px;">Cargando...</p>
-        <div class="table-wrap" style="margin-top: 12px; overflow-x: auto;">
-          <table class="data-table">
-            <thead>
-              <tr><th>Estrategia</th><th>Tickets</th><th>3 Aciertos</th><th>4 Aciertos</th><th>5 Aciertos</th><th>Premio</th><th>ROI</th><th>Ajuste de Peso</th></tr>
-            </thead>
-            <tbody id="cycle-body"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody>
-          </table>
-        </div>
-      </details>
-    </section>
   </main>
 
-  <!-- Technical Modal Details -->
+  <!-- Technical Details Modal Overlay (Hidden by default via .modal-overlay CSS) -->
   <div class="modal-overlay report-details-overlay" id="report-details-modal" aria-hidden="true">
-    <div class="modal-card report-details-card" role="dialog" aria-modal="true" aria-labelledby="report-details-title" aria-describedby="report-details-subtitle">
+    <div class="modal-card report-details-card" role="dialog" aria-modal="true" aria-labelledby="report-details-title">
       <button class="modal-close" id="report-details-close" type="button" aria-label="Cerrar detalles del reporte">&times;</button>
       <p class="eyebrow">Datos de Respaldo</p>
       <h2 id="report-details-title">Detalles Técnicos del Reporte</h2>
       <p class="modal-sub" id="report-details-subtitle">Resultados verificados, métricas completas de modelos y último ciclo de evaluación.</p>
+      
       <div id="report-details-content">
         <section class="report-details-wins">
           <div class="section-heading">
@@ -254,13 +233,41 @@
           </div>
           <div id="wins-grid" class="wins-list"><div class="loading">Cargando aciertos...</div></div>
         </section>
+
+        <details id="rankings-details" style="margin-top: 20px;">
+          <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Métricas extendidas y pesos de modelos</summary>
+          <p class="details-intro" style="margin-top: 8px; color: var(--muted); font-size: 12.5px;">
+            El peso asignado representa la confianza del motor en el modelo actual. El ROI compara los premios con el costo teórico de los tickets.
+          </p>
+          <div class="table-wrap" style="margin-top: 12px; overflow-x: auto;">
+            <table id="strategies-table" class="data-table">
+              <thead>
+                <tr><th>#</th><th>Modelo</th><th>Estado</th><th>Peso</th><th>Tendencia</th><th>ROI Prom.</th><th>Total Premio</th></tr>
+              </thead>
+              <tbody id="strategies-body"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </details>
+
+        <details id="last-cycle" style="margin-top: 16px;">
+          <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Desglose del último ciclo</summary>
+          <p class="details-intro" id="cycle-meta" style="margin-top: 8px; color: var(--muted); font-size: 12.5px;">Cargando...</p>
+          <div class="table-wrap" style="margin-top: 12px; overflow-x: auto;">
+            <table class="data-table">
+              <thead>
+                <tr><th>Estrategia</th><th>Tickets</th><th>3 Aciertos</th><th>4 Aciertos</th><th>5 Aciertos</th><th>Premio</th><th>ROI</th><th>Ajuste de Peso</th></tr>
+              </thead>
+              <tbody id="cycle-body"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </details>
       </div>
     </div>
   </div>
 
-  <!-- Draw Analysis Modal -->
+  <!-- Draw Analysis Modal Overlay (Hidden by default via .modal-overlay CSS) -->
   <div class="modal-overlay analysis-modal-overlay" id="analysis-modal-overlay" aria-hidden="true" tabindex="-1">
-    <div class="modal-card analysis-modal-card" role="dialog" aria-modal="true" aria-labelledby="analysis-modal-title" aria-describedby="analysis-modal-sub">
+    <div class="modal-card analysis-modal-card" role="dialog" aria-modal="true" aria-labelledby="analysis-modal-title">
       <button class="modal-close" id="analysis-modal-close" type="button" aria-label="Cerrar análisis de sorteo">&times;</button>
       <p class="eyebrow">Sorteo Evaluado</p>
       <h2 id="analysis-modal-title">Análisis Detallado</h2>

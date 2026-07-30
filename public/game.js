@@ -671,7 +671,35 @@ async function renderRankings() {
     return;
   }
 
-  body.innerHTML = [
+  const top3 = rankings.slice(0, 3);
+  const rest = rankings.slice(3);
+
+  const podiumHTML = [
+    '<div class="podium-cards-grid">',
+      top3.map(function (strategy, index) {
+        const totalWon = Number(strategy.total_won || 0);
+        const roiVal = Number(strategy.lifetime_roi || 0);
+        const roiClass = roiVal >= 0 ? 'pos' : 'neg';
+        const roiText = (roiVal * 100).toFixed(1) + '%';
+        const rankClass = index === 0 ? 'gold' : (index === 1 ? 'silver' : 'bronze');
+        const bestMatch = strategy.best_match || strategy.covered_best_match;
+        const bestResult = bestMatch ? matchLabel(bestMatch, data.game.extra_ball_name) : 'No retenido';
+
+        return [
+          '<div class="podium-card ' + (index === 0 ? 'rank-top-1' : '') + '">',
+            '<div class="rank-badge-lg ' + rankClass + '">#' + strategy.rank + '</div>',
+            '<div class="podium-title">' + strategyName(strategy.strategy_id || strategy.name) + '</div>',
+            '<div class="podium-desc">' + strategyDescription(strategy.strategy_id || strategy.name) + '</div>',
+            '<div class="podium-stat-row"><span class="podium-stat-label">ROI Total</span><span class="podium-stat-val ' + roiClass + '">' + (roiVal >= 0 ? '+' : '') + roiText + '</span></div>',
+            '<div class="podium-stat-row"><span class="podium-stat-label">Premios Ganados</span><span class="podium-stat-val">' + money(totalWon) + '</span></div>',
+            '<div class="podium-stat-row"><span class="podium-stat-label">Máximo Acierto</span><span class="podium-stat-val" style="color: var(--mega);">' + bestResult + '</span></div>',
+          '</div>'
+        ].join('');
+      }).join(''),
+    '</div>'
+  ].join('');
+
+  const restHTML = rest.length ? [
     '<div class="ranking-table-wrap">',
       '<table class="data-table ranking-table">',
         '<thead>',
@@ -686,7 +714,7 @@ async function renderRankings() {
           '</tr>',
         '</thead>',
         '<tbody>',
-          rankings.map(function (strategy, index) {
+          rest.map(function (strategy) {
             const totalWon = Number(strategy.total_won || 0);
             const coverage = Number(strategy.detail_coverage && strategy.detail_coverage.ratio || 0);
             const complete = coverage === 1;
@@ -697,13 +725,12 @@ async function renderRankings() {
             const roiVal = Number(strategy.lifetime_roi || 0);
             const roiClass = roiVal >= 0 ? 'pos' : 'neg';
             const roiText = (roiVal * 100).toFixed(1) + '%';
-            const rankClass = index === 0 ? 'rank-1' : (index === 1 ? 'rank-2' : (index === 2 ? 'rank-3' : 'rank-other'));
 
             return [
-              '<tr class="' + (index === 0 ? 'top-rank-row' : '') + '">',
-                '<td><span class="rank-badge ' + rankClass + '">#' + strategy.rank + '</span></td>',
+              '<tr>',
+                '<td><span class="rank-badge rank-other">#' + strategy.rank + '</span></td>',
                 '<td>',
-                  '<strong style="font-size: 14px; display: block; color: var(--ink);">' + strategyName(strategy.strategy_id || strategy.name) + '</strong>',
+                  '<strong style="font-size: 13.5px; display: block; color: var(--ink);">' + strategyName(strategy.strategy_id || strategy.name) + '</strong>',
                   '<small style="color: var(--muted); font-size: 11px;">' + strategyDescription(strategy.strategy_id || strategy.name) + '</small>',
                 '</td>',
                 '<td style="text-align: right; font-weight: 700; font-family: var(--font-mono);">' + money(totalWon) + '</td>',
@@ -717,7 +744,9 @@ async function renderRankings() {
         '</tbody>',
       '</table>',
     '</div>'
-  ].join('');
+  ].join('') : '';
+
+  body.innerHTML = podiumHTML + restHTML;
 
   const expected = rankings.reduce(function (sum, strategy) {
     return sum + Number(strategy.detail_coverage && strategy.detail_coverage.expected_combinations || 0);
