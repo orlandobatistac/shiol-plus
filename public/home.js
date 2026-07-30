@@ -29,7 +29,7 @@ function money(value) {
 }
 
 function strategyName(value) {
-  const normalized = String(value || '').replace(/_mega_millions$/, '');
+  const normalized = String(value || '').replace(/_(mega_millions|cash5)$/, '');
   const names = {
     xgboost_ml: 'XGBoost ML',
     hybrid_ensemble: 'Hybrid Ensemble',
@@ -38,7 +38,8 @@ function strategyName(value) {
     coverage_optimizer: 'Coverage Optimizer',
     cooccurrence: 'Cooccurrence',
     range_balanced: 'Range Balanced',
-    random_baseline: 'Random Baseline'
+    random_baseline: 'Random Baseline',
+    wheeling: 'Wheeling'
   };
   return names[normalized] || normalized.replace(/_/g, ' ').replace(/\b\w/g, function (character) {
     return character.toUpperCase();
@@ -46,9 +47,11 @@ function strategyName(value) {
 }
 
 function drawDays(value) {
+  const str = String(value || '').toLowerCase();
+  if (str.includes('sun') && str.includes('mon') && str.includes('sat')) return 'Every Day';
   const labels = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
   return String(value || '').split(',').map(function (day) {
-    return labels[day.trim()] || day.trim();
+    return labels[day.trim().toLowerCase()] || day.trim();
   }).join(' / ');
 }
 
@@ -67,21 +70,40 @@ async function loadGameStats(gameId) {
 }
 
 function activeReport(game, stats) {
-  const gameClass = game.id === 'powerball' ? 'powerball' : 'mega';
+  stats = stats || {};
+  const gameClass = game.id === 'powerball' ? 'powerball' :
+    (game.id === 'mega_millions' ? 'mega' : 'cash5');
+  const jackpotText = stats.jackpot ? money(stats.jackpot) : 'Not available';
+  const wonText = money(stats.totalWon || 0);
+  const topStrategyText = stats.topStrategy || 'Not available';
+  const evaluatedDrawsText = stats.evaluatedDraws || 0;
+  
   return [
     '<a class="game-report ' + gameClass + '" href="game.html?game=' + game.id + '">',
       '<div class="game-report-head">',
-        '<div>',
+        '<div class="game-title-group">',
           '<span class="game-marker" aria-hidden="true"></span>',
           '<h3>' + game.name + '</h3>',
-          '<p>' + drawDays(game.draw_days) + '</p>',
         '</div>',
-        '<span class="report-arrow" aria-hidden="true">&rarr;</span>',
+        '<span class="game-days-badge">' + drawDays(game.draw_days) + '</span>',
+      '</div>',
+      '<div class="game-jackpot-block">',
+        '<span class="card-label">Estimated Jackpot</span>',
+        '<strong class="jackpot-value">' + jackpotText + '</strong>',
       '</div>',
       '<div class="game-report-metrics">',
-        '<div><span>Current jackpot</span><strong>' + (stats.jackpot ? money(stats.jackpot) : 'Not available') + '</strong></div>',
-        '<div><span>Top strategy</span><strong>' + stats.topStrategy + '</strong></div>',
-        '<div><span>Total won</span><strong>' + money(stats.totalWon) + '</strong><small>' + stats.evaluatedDraws + ' evaluated draws</small></div>',
+        '<div class="metric-col">',
+          '<span class="card-label">Top Strategy</span>',
+          '<strong class="metric-val">' + topStrategyText + '</strong>',
+        '</div>',
+        '<div class="metric-col">',
+          '<span class="card-label">Total Won</span>',
+          '<strong class="metric-val">' + wonText + ' <small>(' + evaluatedDrawsText + ' draws)</small></strong>',
+        '</div>',
+      '</div>',
+      '<div class="game-report-footer">',
+        '<span>Explore Strategies</span>',
+        '<span class="report-arrow" aria-hidden="true">&rarr;</span>',
       '</div>',
     '</a>'
   ].join('');
@@ -91,8 +113,8 @@ function inactiveReport(game) {
   return [
     '<div class="game-report is-inactive">',
       '<div class="game-report-head">',
-        '<div><h3>' + game.name + '</h3><p>' + drawDays(game.draw_days) + '</p></div>',
-        '<span class="muted-status">Coming soon</span>',
+        '<div class="game-title-group"><h3>' + game.name + '</h3></div>',
+        '<span class="game-days-badge">Coming Soon</span>',
       '</div>',
     '</div>'
   ].join('');
@@ -106,7 +128,7 @@ async function renderGames() {
     grid.innerHTML = stateMarkup(
       games ? 'empty' : 'error',
       games ? 'No active reports yet' : 'Reports temporarily unavailable',
-      games ? 'Game reports will appear when a lottery is activated.' : 'Please retry when the data service is available.'
+      games ? 'Reports will appear once a game is activated.' : 'Please retry when the service is available.'
     );
     return;
   }
@@ -124,3 +146,31 @@ async function renderGames() {
 }
 
 renderGames();
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').catch(function (err) {
+      console.log('Service Worker reg error:', err);
+    });
+  });
+}
+
+// PWA Install Handler
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function (event) {
+  event.preventDefault();
+  deferredPrompt = event;
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) {
+    btn.style.display = 'inline-flex';
+    btn.addEventListener('click', function () {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function () {
+        deferredPrompt = null;
+        btn.style.display = 'none';
+      });
+    });
+  }
+});

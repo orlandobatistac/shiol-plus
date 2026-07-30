@@ -32,7 +32,8 @@ class BaseStrategy(ABC):
         self.config = lottery_config
         self.white_count = lottery_config.get('white_count', 5)
         self.white_max = lottery_config.get('white_max', 69)
-        self.extra_max = lottery_config.get('extra_max', 26)
+        self.has_extra_ball = lottery_config.get('has_extra_ball', True)
+        self.extra_max = lottery_config.get('extra_max') if self.has_extra_ball else None
 
     @abstractmethod
     def generate(self, draws: pd.DataFrame, count: int = 10) -> List[Dict]:
@@ -51,7 +52,7 @@ class BaseStrategy(ABC):
             }
         """
 
-    def validate(self, numbers: List[int], extra: int) -> bool:
+    def validate(self, numbers: List[int], extra: int = None) -> bool:
         """Valida que un ticket cumple las reglas del juego."""
         if len(numbers) != self.white_count:
             return False
@@ -59,7 +60,10 @@ class BaseStrategy(ABC):
             return False
         if not all(1 <= n <= self.white_max for n in numbers):
             return False
-        if not 1 <= extra <= self.extra_max:
+        if self.has_extra_ball:
+            if extra is None or not 1 <= extra <= self.extra_max:
+                return False
+        elif extra is not None:
             return False
         return True
 
@@ -68,10 +72,15 @@ class BaseStrategy(ABC):
         import random
         if not self.validate(numbers, extra):
             numbers = sorted(random.sample(range(1, self.white_max + 1), self.white_count))
-            extra = random.randint(1, self.extra_max)
+            extra = self._random_extra()
             confidence = 0.5
         return {
             'numbers': sorted(numbers),
             'extra': extra,
             'confidence': round(confidence, 4)
         }
+
+    def _random_extra(self):
+        """Genera la bola adicional o None para juegos que no la usan."""
+        import random
+        return random.randint(1, self.extra_max) if self.has_extra_ball else None

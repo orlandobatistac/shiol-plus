@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16"/>
+      <stop offset="100%" stop-color="#162032"/>
+    </linearGradient>
+    <linearGradient id="plusGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <filter id="glowFilter">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#3b82f6" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  
+  <rect width="100" height="100" rx="26" fill="url(#bgGrad)"/>
+  <rect x="2" y="2" width="96" height="96" rx="24" fill="none" stroke="#3b82f6" stroke-width="3.5" stroke-opacity="0.4"/>
+  
+  <g filter="url(#glowFilter)">
+    <text x="36" y="68" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="54" fill="#ffffff" text-anchor="middle" letter-spacing="-2">S</text>
+    <text x="72" y="58" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="44" fill="url(#plusGrad)" text-anchor="middle">+</text>
+  </g>
+</svg>

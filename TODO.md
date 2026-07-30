@@ -3,7 +3,7 @@
 Contexto persistente del proyecto. Actualizar esta lista al cerrar cada sesion de trabajo
 para que una conversacion nueva pueda retomar sin perder contexto.
 
-Ultima actualizacion: 2026-07-10 (sesion 32 -- Fase 6 cerrada)
+Ultima actualizacion: 2026-07-22 (sesion 34 -- Fase 9 cerrada: wheeling seeded en D1, incidente de cron diagnosticado y corregido, CLAUDE.md creado)
 
 ## Estado actual
 
@@ -13,22 +13,21 @@ Ultima actualizacion: 2026-07-10 (sesion 32 -- Fase 6 cerrada)
   conectado a nclottery.com), con `wins` automático + Next Draw Tickets (sesión
   21), el fix de colisión de números en `wins` (sesión 22), y el rediseño UX del
   dashboard con podio + tooltips + detalle técnico colapsable (sesión 23, ver
-  "Hecho" abajo). Versión activa en producción:
-  `362a9b54-2c37-49c0-8d01-c2ebb086c960` (2026-07-09, sesión 26).
+  "Hecho" abajo), Cash5 activado (sesión 33), wheeling (Fase 9, sesión 33),
+  fix de cron timing + stranded cycle recovery (sesión 34).
+  Versión activa en producción: `f333ba4b-adc6-49f0-9986-8d609d7685b1` (2026-07-22, sesión 34).
   URL: https://shiol-plus.orlandob.workers.dev
 - Container `shiol-plus-enginecontainer` (Application ID `a03cfd96-a494-4a00-a00e-86a5832e9678`)
   en estado `ready` en producción. Imagen ~1.1GB (reducida de 1.83GB en sesión 10).
-- D1 `shiol-plus-db`: `draws` tiene 2352 sorteos de Powerball (2006-05-31 -> 2026-07-06) y
-  906 de Mega Millions (2017-10-31 -> 2026-07-03, activado en producción en sesión 16).
-  Ambos juegos activos (`lotteries.active=1`), 16 estrategias sembradas (8 por juego).
-  Tabla nueva `jackpots` (sesión 20, ver abajo) ya migrada en D1 real.
-- Cron triggers activos: TUE/THU/SUN a las 05:00 y 09:00 UTC (6 triggers). **Confirmado
-  en sesión 20 (2026-07-07), vía query directa a D1 de producción: el pipeline de dos
-  fases YA corrió de punta a punta con un cron real** -- Powerball en flujo normal
-  (cycle 2026-07-06 evaluado, cycle 2026-07-08 generado por adelantado, `total_cycles=4`),
-  Mega Millions hizo el catch-up (Opción B) contra el sorteo 2026-07-03 (primera
-  evaluación real desde la activación) y ya generó el siguiente ciclo (2026-07-10).
-  El pendiente de la sesión 19 ("no se puede confirmar hasta que pase") queda cerrado.
+  Container NO se reconstruyó en sesión 34 (solo cambió worker.js/wrangler.toml).
+- D1 `shiol-plus-db`: 3 juegos activos (powerball, mega_millions, cash5). 27 estrategias
+  sembradas: 9 por juego (8 base + wheeling). `schema/0003_wheeling.sql` ejecutado
+  2026-07-22. Ciclos varados a 22-jul: cash5 y MM Jul 21 (timing de fuente, no bug de
+  código) — se recuperan automáticamente en el cron de 05:00 UTC Jul 23 vía
+  `recoverOldestStrandedCycle`.
+- Cron triggers activos: `0 5 * * *`, `0 9 * * *`, `0 17 * * 3`, `0 17 * * 6` (4 triggers).
+  Los dos últimos son nuevos (sesión 34): resuelven el lag de Socrata para MM que dejaba
+  los sorteos del martes y viernes sin evaluar. Ver CLAUDE.md para el razonamiento.
 
 ## Etapa activa (sesion 27) -- Roadmap de mejora UI/UX v9
 
@@ -468,12 +467,136 @@ abierta aunque el checklist tecnico este completo.
       sesion. La Fase 8 original (DNS, VPS, PR #40) queda congelada.
 - [ ] Definir el objetivo de la nueva Fase 9 en el proximo prompt.
 
-### Fase 9 -- Por definir
+### Fase 9 -- Estrategia 9 "Wheeling" (covering design) en los 3 juegos
 
-- [ ] Registrar el objetivo, alcance y criterio de salida de la siguiente mejora.
-- [ ] Identificar los archivos y contratos afectados.
-- [ ] No modificar dominio, DNS, VPS, `main`, PR #40 ni `agent/publish-v8` hasta
-      nueva decision explicita.
+**Objetivo.** Probar en vivo la teoria de Orlando ("los ganadores salen dispersos
+entre las jugadas premiadas -- reagruparlos daria premios mayores") en su version
+matematicamente valida: un *lottery wheel* (covering design parcial C(pool,5,t=3))
+sobre un pool de numeros calientes, como estrategia 9 junto a las 8 existentes.
+
+**Contexto analitico (sesion 33, 2026-07-21).** Antes de implementar se hizo el
+analisis estadistico completo:
+
+- La dispersion observada en el modal "Combinations" es **sesgo de seleccion
+  retrospectiva**: con 160 tickets 100% aleatorios contra los 1,375 sorteos
+  reales de Powerball (era 5/69) el mismo patron aparece en el 40% de los
+  sorteos (>=3 blancas dispersas entre premiados) y 23% (>=4 + extra). El pool
+  completo de 160 tickets contiene las 5 blancas ganadoras el 100% de las veces.
+- Entrenar XGBoost/ML con "ganadoras vs perdedoras" no es viable: los sorteos
+  son independientes; el modelo solo aprenderia sesgos de composicion de las
+  estrategias (overfitting garantizado). Se descarto el plan "Consolidador ML"
+  de 4 enfoques propuesto por otro agente.
+- Monte Carlo de 200k sorteos: el valor esperado por ticket es **identico** para
+  cualquier estructura (los marginales no cambian). El wheel solo cambia la
+  distribucion conjunta: concentra aciertos SI >=3 ganadores caen en el pool, a
+  cambio de perder algo de concentracion incondicional (P(max>=3): 3.51% wheel
+  pool-30 vs 3.59% aleatorio independiente -- diferencia real pero minima).
+- **Prediccion falsable del experimento:** ROI de `wheeling` indistinguible de
+  `random_baseline` a largo plazo; diferencia solo en la *forma* de los premios.
+  El pipeline en vivo confirma o refuta.
+
+**Implementado (sesion 33):**
+
+- [x] `engine/strategies/wheeling.py` -- pool caliente (~43% de white_max:
+      69->30, 70->30, 43->18), greedy max-coverage de triples (t=3), extra ball
+      rotando entre las top-4 calientes, game-agnostic (Cash5 sin extra).
+- [x] Registrada en `ALL_STRATEGIES` (`engine/strategies/__init__.py`).
+- [x] Seed: `schema/0003_wheeling.sql` (3 juegos: `wheeling`,
+      `wheeling_mega_millions`, `wheeling_cash5`) + seed powerball en
+      `schema/d1_schema.sql`.
+- [x] Frontend: nombre y descripcion en `public/game.js` y `public/home.js`
+      (de paso se corrigio en home.js el strip de sufijo `_cash5`, omitido en
+      el commit de Cash5).
+- [x] Tests: `tests/test_wheeling.py` (6 tests: registro, validez, pool,
+      cobertura de triples >=190/200, rotacion de extras, cash5 sin extra,
+      historico minimo). 6/6 + 3/3 de `test_cash5.py` en verde. Smoke en los
+      3 juegos: 20 tickets en ~0.15s.
+
+**Pendiente (Orlando, desde terminal Windows -- ver gotchas de deploy):**
+
+- [ ] QA local: `npx wrangler d1 execute shiol-plus-db --local --file schema/0003_wheeling.sql`
+      + `wrangler dev` y verificar que el ciclo genera 180 tickets (9 x 20).
+- [ ] Seed D1 produccion: `npx wrangler d1 execute shiol-plus-db --remote --file schema/0003_wheeling.sql`.
+- [ ] `npx wrangler deploy` (imagen del container se reconstruye con la
+      estrategia nueva).
+- [ ] Verificar tras el primer cron real que `wheeling` aparece en el dashboard
+      de los 3 juegos con sus 20 tickets y stats.
+
+**Criterio de salida.** `wheeling` corriendo en produccion en los 3 juegos
+durante >=20 ciclos, comparable en el podio contra `random_baseline`. La lectura
+del experimento (ROI y concentracion vs baseline) se documenta aqui al cierre.
+
+**Regla vigente:** no modificar dominio, DNS, VPS, `main`, PR #40 ni
+`agent/publish-v8` hasta nueva decision explicita.
+
+### Fase 10 -- PLAN: familia "digit games" (NC Pick 3 / Pick 4) + home por jurisdiccion
+
+Planificada en sesion 33 (2026-07-21). Implementacion NO iniciada. Reglas
+verificadas contra nclottery.com el 2026-07-21.
+
+**Por que NO es "otro Cash5".** Cash5 encajo en el modelo lotto existente
+(5 numeros unicos 1..N, un sorteo/dia, premio por interseccion). Pick 3/4
+rompen cuatro supuestos del core:
+
+1. **Digitos 0-9 CON repeticion y CON orden** (ej. Pick 4 real del 21-jul:
+   "2 7 2 5"). `BaseStrategy.validate()` rechaza duplicados y exige 1..max;
+   `_safe_ticket()` ordena los numeros (destruye el orden posicional).
+2. **Dos sorteos por dia** (Daytime ~15:00 ET, Evening ~23:22 ET) --
+   `UNIQUE(lottery_id, draw_date)` en `draws` y `cycles` colapsa.
+3. **Premios posicionales** (straight/box/pairs) -- `prize_table` por
+   `(matches_white, extra)` y `evaluate_ticket` por interseccion no aplican.
+4. **Fireball / Double Draw** (add-ons). Precedente cash5: Double Play se
+   ignora. v1 los ignora tambien.
+
+**Decisiones de alcance propuestas (confirmar antes de empezar):**
+
+- (a) Multi-draw: agregar `draw_number INTEGER DEFAULT 1` a `draws`/`cycles`
+  (+ ajustar UNIQUE y worker/API). Alternativa barata "solo Evening" se
+  descarta: duele al agregar mas estados con multi-draw.
+- (b) Apuesta modelada en v1: solo **straight** ($1 -> $500 Pick3 / $5000
+  Pick4, premio fijo). Box/pairs despues.
+- (c) Fireball y Double Draw: fuera de v1.
+- (d) `wheeling` NO es compatible con digit games (no hay combinatoria de
+  subconjuntos); usar `compatible_strategies` del GAME dict (ya existe).
+
+**Sub-fases:**
+
+- [ ] 10.0 Confirmar decisiones (a)-(d) con Orlando.
+- [ ] 10.1 Modelo: `game_type: 'lotto'|'digit'` en GAME dict + BaseStrategy
+      consciente del tipo (validate 0-9 con repeticion, sin sort posicional)
+      o clase hermana `BaseDigitStrategy`. Estrategias v1: `random_baseline`
+      (control) + `frequency_weighted` posicional (frecuencia por digito por
+      posicion). Resto por fase posterior.
+- [ ] 10.2 Schema: migracion 0004 (`draw_number`, `lotteries.game_type`,
+      `lotteries.jurisdiction`), fetch CSV oficial (pick3-download /
+      pick4-download: fecha + draw time + digitos + fireball), backfill
+      (--local primero, como siempre).
+- [ ] 10.3 Engine: `evaluate_digit` (match posicional straight), pipeline
+      multi-draw, crones: los existentes (05:00/09:00 UTC) cubren Evening;
+      agregar ~20:00 UTC para Daytime.
+- [ ] 10.4 Frontend: render de digitos (cajas ordenadas, no bolas), etiqueta
+      Day/Evening, premios fijos. game.js/home.js.
+- [ ] 10.5 QA local + seed + deploy + verificacion primer cron.
+
+**Nota cientifica.** Pick 3 straight es el control mas limpio del portafolio:
+espacio muestral de exactamente 1,000 combinaciones, premio fijo $500, EV
+constante -50%. `random_baseline` debe converger a ROI -50% -- benchmark
+perfecto para calibrar el sistema de pesos.
+
+**Parte B -- Home agrupada por jurisdiccion (independiente y pequena, puede
+ir antes que la Parte A):**
+
+- [ ] `lotteries.jurisdiction` ('national' | 'NC' | futuros 'SC', 'VA'...)
+      + `sort_order` (migracion 0004 o propia), campo en GAME dicts y en el
+      seed de register.py.
+- [ ] presentation-api: exponer jurisdiction en el payload del home.
+- [ ] home.js/index.html: secciones por grupo ("National Games", "North
+      Carolina", ...) generadas desde los datos -- estados nuevos aparecen
+      solos, sin tocar codigo.
+
+**Orden recomendado:** cerrar Fase 9 (seed+deploy wheeling) -> mergear
+`codex/add-nc-cash5` a main (arreglando el test roto de
+frontend-foundation) -> Parte B -> Parte A (10.0-10.5).
 
 ### Registro de avance
 
@@ -517,6 +640,14 @@ abierta aunque el checklist tecnico este completo.
   version `2109608c-5134-47d5-a7c6-c28a07cdfc05`. Fase 7 aprobada por Orlando.
   Se congelo la Fase 8 de migracion de dominio; se abre Fase 9 para la siguiente
   mejora.
+- **2026-07-21, sesion 33 -- Fase 9 definida e implementada (sin deploy):**
+  analisis estadistico de la teoria del "consolidador" (sesgo de seleccion
+  retrospectiva demostrado con simulacion sobre 1,375 sorteos reales + Monte
+  Carlo 200k), descartado el enfoque ML, implementada la estrategia 9
+  `wheeling` (covering design) para los 3 juegos con tests 6/6 en verde.
+  Pendiente: seed 0003 en D1, deploy desde Windows y verificacion del primer
+  cron. Nota: trabajo hecho sobre la rama `codex/add-nc-cash5` (Cash5 aun sin
+  mergear a main).
 - **2026-07-10, sesion 31 -- Fase 5 completa:** explorador paginado de las 160
   combinaciones del proximo draw, filtros, contexto del ciclo y score interno sin
   ranking global. Fase 4 aprobada por Orlando. No se hizo deploy.

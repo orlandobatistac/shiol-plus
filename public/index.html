@@ -1,72 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="SHIOL+ compares lottery strategies against real draw results."/>
-  <title>SHIOL+ | Strategy reports</title>
+  <meta name="description" content="SHIOL+ compares probabilistic lottery strategies against official draw results in real time."/>
+  <title>SHIOL+ | Strategy Reports &amp; Results</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0b0f19"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="SHIOL+"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="alternate icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2226%22 fill=%22%23090d16%22/><text x=%2236%22 y=%2268%22 font-family=%22sans-serif%22 font-weight=%22900%22 font-size=%2254%22 fill=%22%23ffffff%22 text-anchor=%22middle%22>S</text><text x=%2272%22 y=%2258%22 font-family=%22sans-serif%22 font-weight=%22900%22 font-size=%2244%22 fill=%22%233b82f6%22 text-anchor=%22middle%22>+</text></svg>">
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body class="home-page">
   <a class="skip-link" href="#home-content">Skip to reports</a>
+  
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="index.html" aria-label="SHIOL+ home">SHIOL<span>+</span></a>
-      <div class="data-status"><span class="status-dot"></span>Data current</div>
+      <a class="brand" href="/" aria-label="SHIOL+ home">
+        <span class="brand-text">SHIOL</span>
+        <span class="brand-plus">+</span>
+        <span class="brand-tag">v9 Analytics</span>
+      </a>
+      <div class="data-status" role="status" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>Data Current
+      </div>
     </div>
   </header>
 
   <main class="home-main" id="home-content">
-    <aside class="trust-banner" aria-label="Important information">
-      <strong>For entertainment and statistical analysis.</strong>
-      <span>SHIOL+ does not guarantee prizes or future results.</span>
-      <a href="legal.html#important-disclaimer">Read the disclaimer</a>
+    <aside class="trust-banner" aria-label="Important notice">
+      <strong>Statistical Notice</strong>
+      <span>SHIOL+ is a data analytics and mathematical research platform. It does not guarantee future prizes.</span>
+      <a href="legal.html#important-disclaimer">Read full disclaimer</a>
     </aside>
+
     <section class="home-hero">
-      <p class="eyebrow">Strategy analytics</p>
-      <h1>Lottery strategy reports</h1>
+      <p class="eyebrow">Strategy Analytics</p>
+      <h1>Probabilistic strategy reports</h1>
       <p class="home-lead">
-        Eight models compete against real draw results. Choose a game to review
-        rankings, upcoming tickets, and verified outcomes.
+        Eight probabilistic models compete continuously against official Powerball, Mega Millions, and NC Cash 5 results. Choose a game to review rankings, combinations, and verified outcomes.
       </p>
     </section>
 
     <section class="home-reports" aria-labelledby="reports-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Active games</p>
-          <h2 id="reports-title">Reports</h2>
+          <p class="eyebrow">Active Games</p>
+          <h2 id="reports-title">Available Reports</h2>
         </div>
-        <p class="section-note">Updated after every published draw.</p>
+        <p class="section-note">Auto-updated after every published draw.</p>
       </div>
+
       <div id="games-grid" class="games-grid">
         <div class="ui-state ui-state-loading" role="status">
           <span class="ui-state-marker" aria-hidden="true"></span>
-          <div><strong>Loading reports</strong><p>Connecting current game data.</p></div>
+          <div>
+            <strong>Loading reports</strong>
+            <p>Connecting to the real-time analytics engine...</p>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="method-strip" aria-label="How SHIOL+ works">
       <div>
-        <strong>8 strategies</strong>
-        <span>evaluated independently</span>
+        <strong>8 Strategies</strong>
+        <span>Evaluated independently</span>
       </div>
       <div>
-        <strong>Real draws</strong>
-        <span>used for every result</span>
+        <strong>Official Results</strong>
+        <span>Used to verify every ticket</span>
       </div>
       <div>
-        <strong>Automatic updates</strong>
-        <span>after each game cycle</span>
+        <strong>Auto-Updated</strong>
+        <span>Synced after every draw</span>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <span>SHIOL+ v9</span>
-    <span>Strategy analytics based on historical outcomes.</span>
-    <nav aria-label="Site information"><a href="legal.html#about">About</a><a href="legal.html#privacy">Privacy</a><a href="legal.html#terms">Terms</a><a href="legal.html#cookies">Cookies</a><a href="legal.html#important-disclaimer">Disclaimer</a></nav>
+    <div class="footer-content">
+      <a class="brand" href="/" aria-label="SHIOL+ home">
+        <span class="brand-text">SHIOL</span>
+        <span class="brand-plus">+</span>
+      </a>
+      <p class="footer-copy">&copy; 2026 SHIOL+ v9 Analytics. All rights reserved.</p>
+    </div>
   </footer>
 
   <script src="home.js"></script>

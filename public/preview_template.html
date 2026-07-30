@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHIOL+ v9 | Strategy Analytics & Outcomes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0b0f19"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="SHIOL+"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="alternate icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2226%22 fill=%22%23090d16%22/><text x=%2236%22 y=%2268%22 font-family=%22sans-serif%22 font-weight=%22900%22 font-size=%2254%22 fill=%22%23ffffff%22 text-anchor=%22middle%22>S</text><text x=%2272%22 y=%2258%22 font-family=%22sans-serif%22 font-weight=%22900%22 font-size=%2244%22 fill=%22%233b82f6%22 text-anchor=%22middle%22>+</text></svg>">
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body class="report-page">
+
+  <!-- Top Informative Disclaimer Banner -->
+  <div class="trust-banner container">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <strong>Statistical Notice</strong>
+      <span>SHIOL+ is a data analytics and mathematical research platform. It does not guarantee future prizes.</span>
+    </div>
+    <a href="legal.html#important-disclaimer">Read disclaimer</a>
+  </div>
+
+  <!-- Main Navigation Bar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/" aria-label="SHIOL+ home">
+        <span class="brand-text">SHIOL</span>
+        <span class="brand-plus">+</span>
+        <span class="brand-tag">v9 Analytics</span>
+      </a>
+
+      <nav class="desktop-nav">
+        <a href="#overview" class="active">Overview</a>
+        <a href="#draw-history">Draw History</a>
+        <a href="#rankings">Rankings</a>
+        <a href="#next-analysis">Next Draw</a>
+      </nav>
+
+      <div class="data-status">
+        <span class="status-dot"></span>
+        <span>Data Current</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero & Overview Header -->
+  <main class="report-shell">
+    <div style="margin-top: 24px;">
+      <!-- Game Selector Pills -->
+      <div class="game-switcher" aria-label="Select game">
+        <a class="active" data-game="powerball" onclick="switchGame('powerball')">🔴 Powerball</a>
+        <a data-game="mega_millions" onclick="switchGame('mega_millions')">🟡 Mega Millions</a>
+        <a data-game="cash5" onclick="switchGame('cash5')">🟢 NC Cash 5</a>
+      </div>
+    </div>
+
+    <section class="report-intro">
+      <div>
+        <p class="eyebrow">Live Strategy Report</p>
+        <h1 id="report-title">Powerball Strategy Report</h1>
+        <p id="report-description" class="report-lead">
+          Continuous evaluation of 8 probabilistic models against official draw results.
+        </p>
+      </div>
+    </section>
+
+    <!-- Key Metrics Band -->
+    <section class="report-stage" id="overview">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Selected Game</p>
+          <h2>Overview</h2>
+        </div>
+      </div>
+
+      <div class="summary-band">
+        <div class="summary-item jackpot-summary">
+          <span class="summary-label">Estimated Jackpot</span>
+          <div class="summary-primary" id="metric-jackpot">$415,000,000</div>
+          <span class="summary-secondary">Next official draw</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Next Draw</span>
+          <div class="summary-value" id="metric-countdown">01d 04h 22m 15s</div>
+          <span class="summary-secondary" id="metric-draw-date">Wednesday, 11:00 PM ET</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Latest Verified Draw</span>
+          <div class="draw-balls" id="latest-balls-display">
+            <div class="ball ball-white">08</div>
+            <div class="ball ball-white">19</div>
+            <div class="ball ball-white">27</div>
+            <div class="ball ball-white">42</div>
+            <div class="ball ball-white">65</div>
+            <div class="ball ball-powerball" id="extra-ball-display">14</div>
+          </div>
+          <span class="summary-secondary" id="latest-draw-date">Mon, Jul 27, 2026</span>
+        </div>
+      </div>
+
+      <div class="performance-strip">
+        <div>
+          <span class="summary-label">Total Won</span>
+          <strong id="metric-won">$1,840</strong>
+          <small id="metric-draws-count">Across 142 evaluated draws</small>
+        </div>
+        <div>
+          <span class="summary-label">Evaluation History</span>
+          <strong>142 Draws</strong>
+          <small>22,720 combinations tested</small>
+        </div>
+        <div>
+          <span class="summary-label">Leading Strategy</span>
+          <strong id="metric-leader" style="color: var(--accent);">XGBoost ML</strong>
+          <small id="metric-roi" style="color: var(--positive); font-weight: 700;">+34.2% lifetime ROI</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- Draw History Section -->
+    <section class="report-stage" id="draw-history">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Evaluated Draws</p>
+          <h2>Draw History</h2>
+        </div>
+        <p class="section-note">One row per draw result.</p>
+      </div>
+
+      <div class="history-table">
+        <div class="history-header">
+          <span>Date &amp; Result</span>
+          <span>Won</span>
+          <span>Winning Combinations</span>
+          <span>Best Strategy</span>
+          <span>Best Match</span>
+          <span>Action</span>
+        </div>
+        <div class="history-row">
+          <div class="history-result">
+            <strong class="history-date">Jul 27, 2026</strong>
+            <div class="draw-balls">
+              <div class="ball ball-sm">08</div>
+              <div class="ball ball-sm">19</div>
+              <div class="ball ball-sm">27</div>
+              <div class="ball ball-sm">42</div>
+              <div class="ball ball-sm">65</div>
+              <div class="ball ball-sm extra">14</div>
+            </div>
+          </div>
+          <div style="font-weight: 700; font-family: var(--font-mono);">$1,840</div>
+          <div style="font-family: var(--font-mono);">142</div>
+          <div><strong>XGBoost ML</strong></div>
+          <div><span class="match-tag">4 matches + PB</span></div>
+          <div><button class="pagination-button" type="button">View Analysis</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Strategy Ranking Podium Section -->
+    <section class="report-stage" id="rankings">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Lifetime Performance</p>
+          <h2>Historical Strategy Rankings</h2>
+        </div>
+        <p class="section-note">Top 3 highlighted + compact table for remaining strategies.</p>
+      </div>
+
+      <!-- Top 3 Podium Cards -->
+      <div class="podium-cards-grid">
+        <div class="podium-card rank-top-1">
+          <div class="rank-badge-lg gold">#1</div>
+          <div class="podium-title">XGBoost ML</div>
+          <div class="podium-desc">Gradient Boosting model trained on historical draw frequencies.</div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Lifetime ROI</span><span class="podium-stat-val pos">+34.2%</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Total Won</span><span class="podium-stat-val">$890</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Best Match</span><span class="podium-stat-val" style="color: var(--mega);">4 + PB</span></div>
+        </div>
+
+        <div class="podium-card">
+          <div class="rank-badge-lg silver">#2</div>
+          <div class="podium-title">Hybrid Ensemble</div>
+          <div class="podium-desc">Weighted blend of XGBoost (70%) and co-occurrence (30%).</div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Lifetime ROI</span><span class="podium-stat-val pos">+18.5%</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Total Won</span><span class="podium-stat-val">$620</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Best Match</span><span class="podium-stat-val">4 matches</span></div>
+        </div>
+
+        <div class="podium-card">
+          <div class="rank-badge-lg bronze">#3</div>
+          <div class="podium-title">Frequency Weighted</div>
+          <div class="podium-desc">Hot/cold weighting over a 50-draw window.</div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Lifetime ROI</span><span class="podium-stat-val neg">-4.1%</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Total Won</span><span class="podium-stat-val">$330</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Best Match</span><span class="podium-stat-val">3 + PB</span></div>
+        </div>
+      </div>
+
+      <!-- Leaderboard Table for Remaining Models -->
+      <div class="ranking-table-wrap">
+        <table class="data-table ranking-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">Pos</th>
+              <th>Model / Strategy</th>
+              <th style="text-align: right;">Total Won</th>
+              <th style="text-align: right;">Lifetime ROI</th>
+              <th style="text-align: right;">Winning Combinations</th>
+              <th style="text-align: right;">Evaluated Draws</th>
+              <th>Best Match</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="rank-badge rank-other">#4</span></td>
+              <td><strong>Intelligent Scoring</strong><small style="display:block; color: var(--muted); font-size: 11px;">Time-decay scoring with gap bonus</small></td>
+              <td style="text-align: right; font-weight: 700; font-family: var(--font-mono);">$210</td>
+              <td style="text-align: right;"><span class="neg">-8.2%</span></td>
+              <td style="text-align: right; font-family: var(--font-mono);">28</td>
+              <td style="text-align: right; font-family: var(--font-mono);">142</td>
+              <td><span class="match-tag">3 matches</span></td>
+            </tr>
+            <tr>
+              <td><span class="rank-badge rank-other">#5</span></td>
+              <td><strong>Coverage Optimizer</strong><small style="display:block; color: var(--muted); font-size: 11px;">Maximizes coverage while reducing repetition</small></td>
+              <td style="text-align: right; font-weight: 700; font-family: var(--font-mono);">$160</td>
+              <td style="text-align: right;"><span class="neg">-14.5%</span></td>
+              <td style="text-align: right; font-family: var(--font-mono);">19</td>
+              <td style="text-align: right; font-family: var(--font-mono);">142</td>
+              <td><span class="match-tag">3 matches</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer Disclaimer -->
+    <footer class="site-footer" id="disclaimer">
+      <div class="footer-content">
+        <a class="brand" href="/" aria-label="SHIOL+ home">
+          <span class="brand-text">SHIOL</span>
+          <span class="brand-plus">+</span>
+        </a>
+        <p class="footer-copy">&copy; 2026 SHIOL+ v9 Analytics. All rights reserved.</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const gameData = {
+      powerball: {
+        title: "Powerball Strategy Report",
+        jackpot: "$415,000,000",
+        nextDraw: "Wednesday, 11:00 PM ET",
+        won: "$1,840",
+        leader: "XGBoost ML",
+        roi: "+34.2% lifetime ROI",
+        latestDate: "Mon, Jul 27, 2026",
+        balls: [8, 19, 27, 42, 65],
+        extra: 14,
+        extraClass: "ball-powerball"
+      },
+      mega_millions: {
+        title: "Mega Millions Strategy Report",
+        jackpot: "$520,000,000",
+        nextDraw: "Friday, 11:00 PM ET",
+        won: "$2,450",
+        leader: "Hybrid Ensemble",
+        roi: "+28.7% lifetime ROI",
+        latestDate: "Tue, Jul 28, 2026",
+        balls: [14, 25, 38, 49, 61],
+        extra: 8,
+        extraClass: "ball-megaball"
+      },
+      cash5: {
+        title: "NC Cash 5 Strategy Report",
+        jackpot: "$340,000",
+        nextDraw: "Tonight, 11:22 PM ET",
+        won: "$4,120",
+        leader: "Intelligent Scoring",
+        roi: "+41.5% lifetime ROI",
+        latestDate: "Tue, Jul 28, 2026",
+        balls: [4, 11, 23, 31, 39],
+        extra: null,
+        extraClass: "ball-cash5"
+      }
+    };
+
+    function switchGame(gameKey) {
+      document.querySelectorAll('.game-switcher a').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.game === gameKey);
+      });
+
+      const data = gameData[gameKey];
+      if (!data) return;
+
+      document.getElementById('report-title').innerText = data.title;
+      document.getElementById('metric-jackpot').innerText = data.jackpot;
+      document.getElementById('metric-draw-date').innerText = data.nextDraw;
+      document.getElementById('metric-won').innerText = data.won;
+      document.getElementById('metric-leader').innerText = data.leader;
+      document.getElementById('latest-draw-date').innerText = data.latestDate;
+
+      const ballsContainer = document.getElementById('latest-balls-display');
+      let ballsHTML = data.balls.map(n => `<div class="ball ball-white">${String(n).padStart(2, '0')}</div>`).join('');
+      if (data.extra !== null) {
+        ballsHTML += `<div class="ball ${data.extraClass}">${String(data.extra).padStart(2, '0')}</div>`;
+      }
+      ballsContainer.innerHTML = ballsHTML;
+    }
+  </script>
+</body>
+</html>

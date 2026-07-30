@@ -33,7 +33,9 @@ def evaluate_ticket(ticket: Dict, draw: Dict, prize_table: Dict = None) -> Dict:
     winning_extra  = draw.get('pb') or draw.get('extra')
 
     white_matches = len(set(ticket['numbers']) & winning_whites)
-    extra_match   = 1 if ticket['extra'] == winning_extra else 0
+    # En juegos sin bola adicional ambos valores son None; eso significa
+    # "no aplica", no un acierto de bola extra.
+    extra_match   = 0 if ticket.get('extra') is None else int(ticket['extra'] == winning_extra)
 
     level, amount = prize_table.get((white_matches, extra_match), ('no_prize', 0))
 

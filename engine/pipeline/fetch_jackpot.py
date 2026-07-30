@@ -56,6 +56,7 @@ BROWSER_HEADERS = {
 NC_LOTTERY_URLS = {
     "powerball": "https://nclottery.com/Powerball",
     "mega_millions": "https://nclottery.com/Mega-Millions",
+    "cash5": "https://nclottery.com/cash5",
 }
 
 # id de control ASP.NET (sufijo, único por campo) para el jackpot anunciado
@@ -63,6 +64,7 @@ NC_LOTTERY_URLS = {
 NC_LOTTERY_FIELD_IDS = {
     "powerball":     {"amount": "lblPBJackpot", "cash_value": "lblPBCash"},
     "mega_millions": {"amount": "lblMMPrize",   "cash_value": "lblMMCash"},
+    "cash5":         {"amount": "lblC5Prize",   "cash_value": None},
 }
 
 # Rango de sanidad conocido para ambos juegos: el jackpot mínimo de arranque
@@ -80,13 +82,15 @@ class JackpotValidationError(Exception):
 
 
 def _validate(amount: Optional[float], cash_value: Optional[float], game_id: str) -> None:
-    lo, hi = JACKPOT_SANITY_RANGE
+    lo, hi = (100_000, 10_000_000) if game_id == 'cash5' else JACKPOT_SANITY_RANGE
     if amount is None or not (lo <= amount <= hi):
         raise JackpotValidationError(
             f"[jackpot-scrape][ALERT] {game_id}: jackpot amount fuera de rango o no "
             f"encontrado (valor={amount!r}, rango esperado=${lo:,}-${hi:,}). "
             f"Revisar si nclottery.com cambió de estructura."
         )
+    if game_id == 'cash5':
+        return
     if cash_value is None or not (lo * 0.2 <= cash_value <= hi):
         raise JackpotValidationError(
             f"[jackpot-scrape][ALERT] {game_id}: cash_value fuera de rango o no "
@@ -108,6 +112,12 @@ def _extract_field(html: str, id_suffix: str) -> Optional[tuple]:
     pattern = rf'id="[^"]*{re.escape(id_suffix)}"[^>]*>[^<]*\$([\d,\.]+)\s*(Million|Billion)'
     m = re.search(pattern, html)
     return m.groups() if m else None
+
+
+def _extract_plain_dollars(html: str, id_suffix: str) -> Optional[float]:
+    pattern = rf'id="[^"]*{re.escape(id_suffix)}"[^>]*>[^<]*\$([\d,]+)'
+    match = re.search(pattern, html)
+    return float(match.group(1).replace(',', '')) if match else None
 
 
 def _fetch_from_nc_lottery(game_id: str) -> Dict:
@@ -135,6 +145,14 @@ def _fetch_from_nc_lottery(game_id: str) -> Dict:
             f"[jackpot-scrape][ALERT] {game_id}: no se pudo obtener HTML válido de "
             f"nclottery.com tras 3 intentos -- último error: {last_error}."
         )
+
+    if game_id == 'cash5':
+        amount = _extract_plain_dollars(html, field_ids['amount'])
+        if amount is None:
+            raise JackpotValidationError(
+                f"[jackpot-scrape][ALERT] cash5: no se encontro lblC5Prize en nclottery.com."
+            )
+        return {"amount": amount, "cash_value": None, "source": "nclottery.com"}
 
     amount_match = _extract_field(html, field_ids["amount"])
     cash_match = _extract_field(html, field_ids["cash_value"])
@@ -166,10 +184,9 @@ def fetch_jackpot(game_id: str) -> Optional[Dict]:
     try:
         result = _fetch_from_nc_lottery(game_id)
         _validate(result.get("amount"), result.get("cash_value"), game_id)
-        print(
-            f"OK Jackpot {game_id}: ${result['amount']:,.0f} "
-            f"(cash ${result['cash_value']:,.0f}) via {result['source']}"
-        )
+        cash_note = (f" (cash ${result['cash_value']:,.0f})"
+                     if result.get('cash_value') is not None else '')
+        print(f"OK Jackpot {game_id}: ${result['amount']:,.0f}{cash_note} via {result['source']}")
         return result
     except JackpotValidationError as e:
         print(str(e))

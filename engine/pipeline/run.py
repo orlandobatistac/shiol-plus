@@ -91,7 +91,8 @@ def run_pipeline(game_id: str, draw_date: str,
         return {'status': 'pending', 'draw_date': draw_date, 'game_id': game_id}
 
     winning = [draw['n1'], draw['n2'], draw['n3'], draw['n4'], draw['n5']]
-    print(f"  🎱 {winning} {game['extra_name']}:{draw['pb']} (fuente: {draw['source']})\n")
+    extra_label = f" {game['extra_name']}:{draw['pb']}" if game.get('has_extra_ball', True) else ''
+    print(f"  🎱 {winning}{extra_label} (fuente: {draw['source']})\n")
 
     # ── STEP 3: Evaluar ────────────────────────────────────────
     print("[3] Evaluando estrategias...")

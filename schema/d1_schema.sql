@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS lotteries (
 INSERT OR IGNORE INTO lotteries VALUES (
     'powerball', 'Powerball', 'mon,wed,sat', 5, 69, 'Powerball', 26, 1, datetime('now')
 );
+INSERT OR IGNORE INTO lotteries VALUES (
+    'cash5', 'NC Cash 5', 'sun,mon,tue,wed,thu,fri,sat', 5, 43, '', 0, 0, datetime('now')
+);
 
 -- ============================================================
 -- DRAWS — Sorteos históricos y futuros
@@ -64,7 +67,8 @@ INSERT OR IGNORE INTO strategies (id, lottery_id, name, description) VALUES
     ('xgboost_ml',         'powerball', 'XGBoost ML',            'Modelo XGBoost entrenado con histórico'),
     ('hybrid_ensemble',    'powerball', 'Hybrid Ensemble',       '70% XGBoost + 30% Co-occurrence'),
     ('intelligent_scoring','powerball', 'Intelligent Scoring',   'Scoring multi-criterio con decay temporal'),
-    ('random_baseline',    'powerball', 'Random Baseline',       'Control científico — aleatorio puro');
+    ('random_baseline',    'powerball', 'Random Baseline',       'Control científico — aleatorio puro'),
+    ('wheeling',           'powerball', 'Wheeling',              'Covering design (lottery wheel) sobre pool de números calientes');
 
 -- ============================================================
 -- CYCLES — Un ciclo = una ejecución del pipeline por draw

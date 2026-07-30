@@ -20,8 +20,10 @@ GAME = {
     'cron_primary': ['0 5 * * 3', '0 5 * * 6'],
     'cron_backup':  ['0 9 * * 3', '0 9 * * 6'],
 
-    # nc_lottery_csv quedo 404 (verificado 2026-07-04); ny_data_api es primaria si se activa este juego.
-    'data_sources': ['ny_data_api', 'nc_lottery_csv', 'megamillions_com'],
+    # Prioridad de fuentes (sesion 33, 2026-07-22): nc_web primero (mismo dia),
+    # ny_data_api como fallback historico (lag 6-24h en Socrata).
+    'nc_web_url':   'https://nclottery.com/mega-millions',
+    'data_sources': ['nc_web', 'ny_data_api', 'nc_lottery_csv', 'megamillions_com'],
     'ny_dataset_id': '5xaw-6ayf',
     # A diferencia de Powerball, este dataset de Socrata trae la bola extra
     # en un campo separado, NO embebida en 'winning_numbers' (verificado

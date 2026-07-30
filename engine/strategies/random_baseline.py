@@ -17,7 +17,7 @@ class RandomBaselineStrategy(BaseStrategy):
         return [
             self._safe_ticket(
                 sorted(random.sample(range(1, self.white_max + 1), self.white_count)),
-                random.randint(1, self.extra_max),
+                self._random_extra(),
                 0.50
             )
             for _ in range(count)

@@ -26,7 +26,7 @@ class CoverageOptimizerStrategy(BaseStrategy):
 
             numbers = sorted(random.sample(available, self.white_count))
             used.update(numbers)
-            extra = random.randint(1, self.extra_max)
+            extra = self._random_extra()
             tickets.append(self._safe_ticket(numbers, extra, 0.70))
 
         return tickets

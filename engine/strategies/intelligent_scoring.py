@@ -17,7 +17,7 @@ class IntelligentScoringStrategy(BaseStrategy):
 
     def generate(self, draws: pd.DataFrame, count: int = 10) -> List[Dict]:
         wb_scores = self._compute_scores(draws)
-        extra_probs = self._extra_probs(draws)
+        extra_probs = self._extra_probs(draws) if self.has_extra_ball else None
         tickets = []
 
         for _ in range(count):
@@ -32,11 +32,12 @@ class IntelligentScoringStrategy(BaseStrategy):
                     replace=False,
                     p=probs
                 ).tolist())
-                extra = int(np.random.choice(range(1, self.extra_max + 1), p=extra_probs))
+                extra = (int(np.random.choice(range(1, self.extra_max + 1), p=extra_probs))
+                         if self.has_extra_ball else None)
                 tickets.append(self._safe_ticket(numbers, extra, 0.74))
             except Exception:
                 numbers = sorted(random.sample(range(1, self.white_max + 1), self.white_count))
-                extra = random.randint(1, self.extra_max)
+                extra = self._random_extra()
                 tickets.append(self._safe_ticket(numbers, extra, 0.50))
 
         return tickets

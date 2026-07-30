@@ -1,75 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="SHIOL+ strategy rankings, tickets, and verified lottery outcomes."/>
-  <title>SHIOL+ | Strategy report</title>
+  <meta name="description" content="Probabilistic report, projected combinations, and verified results on SHIOL+ v9."/>
+  <title>SHIOL+ | Analytics Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0b0f19"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="SHIOL+"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="alternate icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2226%22 fill=%22%23090d16%22/><text x=%2236%22 y=%2268%22 font-family=%22sans-serif%22 font-weight=%22900%22 font-size=%2254%22 fill=%22%23ffffff%22 text-anchor=%22middle%22>S</text><text x=%2272%22 y=%2258%22 font-family=%22sans-serif%22 font-weight=%22900%22 font-size=%2244%22 fill=%22%233b82f6%22 text-anchor=%22middle%22>+</text></svg>">
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body class="report-page">
   <a class="skip-link" href="#main-report">Skip to report</a>
+
+  <!-- Main Top Bar -->
   <header class="topbar report-topbar">
     <div class="topbar-inner">
-      <a class="brand" href="index.html" aria-label="SHIOL+ home">SHIOL<span>+</span></a>
+      <a class="brand" href="/" aria-label="SHIOL+ home">
+        <span class="brand-text">SHIOL</span>
+        <span class="brand-plus">+</span>
+        <span class="brand-tag">v9 Analytics</span>
+      </a>
       <nav class="desktop-nav" aria-label="Report sections">
         <a href="#overview" class="nav-link active" aria-current="location">Overview</a>
-        <a href="#draw-history" class="nav-link">Draw history</a>
+        <a href="#draw-history" class="nav-link">Draw History</a>
         <a href="#rankings" class="nav-link">Rankings</a>
-        <a href="#next-analysis" class="nav-link">Next draw analysis</a>
+        <a href="#next-analysis" class="nav-link">Next Draw</a>
       </nav>
       <div class="data-status" role="status" aria-live="polite">
-        <span class="status-dot" aria-hidden="true"></span><span id="report-status">Data current</span>
+        <span class="status-dot" aria-hidden="true"></span><span id="report-status">Live data</span>
       </div>
     </div>
   </header>
 
   <main class="report-shell" id="main-report">
-    <aside class="trust-banner report-trust-banner" aria-label="Important information">
-      <strong>Entertainment and statistical analysis only.</strong>
-      <span>Historical performance does not guarantee future results.</span>
-      <a href="legal.html#important-disclaimer">Important disclaimer</a>
+    <!-- Disclaimer Banner -->
+    <aside class="trust-banner report-trust-banner" aria-label="Important notice">
+      <strong>Statistical Notice</strong>
+      <span>Descriptive probabilistic analysis. Past results do not guarantee future prizes.</span>
+      <a href="legal.html#important-disclaimer">Read disclaimer</a>
     </aside>
+
+    <!-- Game Switcher Pills Bar -->
     <div class="game-switcher" aria-label="Select game">
-      <a href="game.html?game=powerball" data-game="powerball">Powerball</a>
-      <a href="game.html?game=mega_millions" data-game="mega_millions">Mega Millions</a>
+      <a href="game.html?game=powerball" data-game="powerball">🔴 Powerball</a>
+      <a href="game.html?game=mega_millions" data-game="mega_millions">🟡 Mega Millions</a>
+      <a href="game.html?game=cash5" data-game="cash5">🟢 NC Cash 5</a>
     </div>
 
+    <!-- Intro Headline -->
     <section class="report-intro">
       <div>
-        <p class="eyebrow">Live strategy report</p>
-        <h1 id="report-title">Strategy report</h1>
+        <p class="eyebrow">Live Strategy Report</p>
+        <h1 id="report-title">Strategy Report</h1>
         <p id="report-description" class="report-lead">
-          Historical performance and analytical combinations for the next drawing.
+          Continuous evaluation of historical performance and analytical combinations prepared for the next draw.
         </p>
       </div>
-      <button class="text-action" type="button" data-report-details-open>More report details <span aria-hidden="true">&rarr;</span></button>
+      <button class="text-action" type="button" data-report-details-open style="margin-top: 12px;">View technical details <span aria-hidden="true">&rarr;</span></button>
     </section>
 
+    <!-- Overview Metrics Stage -->
     <section class="report-section report-stage report-stage-overview" id="overview" aria-labelledby="overview-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Current game</p>
+          <p class="eyebrow">Selected Game</p>
           <h2 id="overview-title">Overview</h2>
         </div>
         <div class="section-heading-actions">
-          <p class="section-note">Current draw and lifetime evaluation.</p>
-          <a class="text-action" href="#draw-history">View past analyses <span aria-hidden="true">&rarr;</span></a>
+          <p class="section-note">Current draw metrics and cumulative lifetime evaluation.</p>
         </div>
       </div>
+
       <div class="summary-band">
         <div class="summary-item jackpot-summary">
-          <span class="summary-label">Current jackpot</span>
+          <span class="summary-label">Estimated Jackpot</span>
           <strong id="jackpot-amount" class="summary-primary">Loading...</strong>
-          <span id="jackpot-sub" class="summary-secondary">Estimated next draw</span>
+          <span id="jackpot-sub" class="summary-secondary">Next official draw</span>
         </div>
         <div class="summary-item">
-          <span class="summary-label">Next draw</span>
+          <span class="summary-label">Next Draw</span>
           <strong id="countdown-value" class="summary-value">Loading...</strong>
           <span id="next-draw-label" class="summary-secondary">Loading schedule...</span>
         </div>
         <div class="summary-item latest-summary">
-          <span class="summary-label">Latest result <span id="draw-date"></span></span>
+          <span class="summary-label">Latest Result <span id="draw-date"></span></span>
           <div class="draw-balls" id="draw-balls" aria-label="Latest draw numbers">
             <span class="ball skeleton"></span><span class="ball skeleton"></span>
             <span class="ball skeleton"></span><span class="ball skeleton"></span>
@@ -77,48 +100,52 @@
           </div>
         </div>
       </div>
-      <div class="performance-strip" aria-label="Lifetime evaluation summary">
+
+      <div class="performance-strip" aria-label="Cumulative evaluation summary">
         <div>
-          <span class="summary-label">Total won since evaluation began</span>
+          <span class="summary-label">Total Won</span>
           <strong id="overview-total-won">Loading...</strong>
           <small id="overview-total-cost">Across all evaluated combinations</small>
         </div>
         <div>
-          <span class="summary-label">Evaluation history</span>
+          <span class="summary-label">Evaluation History</span>
           <strong id="overview-draws">Loading...</strong>
-          <small id="overview-combinations">Loading combination count...</small>
+          <small id="overview-combinations">Loading combination totals...</small>
         </div>
         <div>
-          <span class="summary-label">Leading strategy</span>
+          <span class="summary-label">Leading Strategy</span>
           <strong id="overview-leader">Loading...</strong>
-          <small id="overview-leader-note">Ranked by lifetime prizes</small>
+          <small id="overview-leader-note">Ranked by prizes won</small>
         </div>
       </div>
     </section>
 
+    <!-- Draw History Section -->
     <section id="draw-history" class="report-section report-stage" aria-labelledby="draw-history-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Evaluated drawings</p>
-          <h2 id="draw-history-title">Draw history</h2>
+          <p class="eyebrow">Evaluated Draws</p>
+          <h2 id="draw-history-title">Draw History</h2>
         </div>
         <p class="section-note">Ten analyses per page, with retained detail clearly marked.</p>
       </div>
+
       <div class="history-table" role="table" aria-label="Evaluated draw history">
         <div class="history-header" role="row">
-          <span>Date and result</span><span>Won</span><span>Winning combinations</span>
-          <span>Best strategy</span><span>Best match</span><span></span>
+          <span>Date &amp; Result</span><span>Won</span><span>Winning Combinations</span>
+          <span>Best Strategy</span><span>Best Match</span><span>Action</span>
         </div>
         <div id="history-body" class="history-body">
           <div class="ui-state ui-state-loading" role="status">
             <span class="ui-state-marker" aria-hidden="true"></span>
-            <div><strong>Loading draw history</strong><p>Retrieving evaluated analyses.</p></div>
+            <div><strong>Loading draw history</strong><p>Retrieving historical evaluations...</p></div>
           </div>
         </div>
       </div>
+
       <div class="list-footer history-footer">
         <span id="history-count">Loading history coverage...</span>
-        <div class="pagination" aria-label="Draw history pagination">
+        <div class="pagination" aria-label="History pagination">
           <button id="history-prev" class="pagination-button" type="button" disabled>Previous</button>
           <span id="history-page">Page 1</span>
           <button id="history-next" class="pagination-button" type="button" disabled>Next</button>
@@ -126,160 +153,165 @@
       </div>
     </section>
 
+    <!-- Historical Strategy Ranking Section -->
     <section id="rankings" class="report-section report-stage" aria-labelledby="rankings-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Lifetime performance</p>
-          <h2 id="rankings-title">Historical strategy ranking</h2>
+          <p class="eyebrow">Lifetime Performance</p>
+          <h2 id="rankings-title">Historical Strategy Rankings</h2>
         </div>
-        <p class="section-note">All evaluated draws, not the ranking inside one drawing.</p>
+        <p class="section-note">Cumulative across all evaluated draws.</p>
       </div>
-      <div id="podium" class="historical-ranking-list" role="list" aria-label="Historical strategy ranking">
-          <div class="ui-state ui-state-loading" role="status">
-            <span class="ui-state-marker" aria-hidden="true"></span>
-            <div><strong>Loading historical ranking</strong><p>Comparing lifetime strategy results.</p></div>
-          </div>
+
+      <!-- Historical Strategy Ranking Container (Rendered by JS) -->
+      <div id="podium" class="historical-ranking-container" aria-label="Strategy rankings">
+        <div class="ui-state ui-state-loading" role="status">
+          <span class="ui-state-marker" aria-hidden="true"></span>
+          <div><strong>Loading historical rankings</strong><p>Comparing probabilistic model results...</p></div>
+        </div>
       </div>
+
       <div class="list-footer rankings-footer">
         <div>
           <span id="rankings-count">Loading ranking coverage...</span>
-          <small id="rankings-coverage">Checking retained combination detail...</small>
+          <small id="rankings-coverage" style="display: block; margin-top: 2px;">Verifying retained detail...</small>
         </div>
-        <button class="text-action" type="button" data-report-details-open>View technical metrics <span aria-hidden="true">&rarr;</span></button>
+        <button class="text-action" type="button" data-report-details-open>Technical metrics <span aria-hidden="true">&rarr;</span></button>
       </div>
     </section>
 
+    <!-- Next Draw Analysis Section -->
     <section id="next-analysis" class="report-section report-stage" aria-labelledby="next-analysis-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Upcoming draw</p>
-          <h2 id="next-analysis-title">Next draw analysis</h2>
+          <p class="eyebrow">Upcoming Draw</p>
+          <h2 id="next-analysis-title">Next Draw Analysis</h2>
         </div>
-        <p class="section-note">160 analytical combinations ordered across the generated pool by raw internal score.</p>
+        <p class="section-note">160 combinations ordered by raw internal confidence score.</p>
       </div>
-      <div id="next-analysis-context" class="next-analysis-context" aria-label="Next drawing context">
+
+      <div id="next-analysis-context" class="next-analysis-context" aria-label="Next draw context">
         <div class="ui-state ui-state-loading" role="status">
           <span class="ui-state-marker" aria-hidden="true"></span>
-          <div><strong>Loading next drawing</strong><p>Checking the generated analysis cycle.</p></div>
+          <div><strong>Loading analysis</strong><p>Verifying projection cycle...</p></div>
         </div>
       </div>
+
       <div class="control-row next-analysis-controls">
-        <label>Strategy
+        <label style="font-weight: 600;">Strategy:
           <select id="next-analysis-strategy" class="filter-control" disabled>
             <option value="all">All 160 combinations</option>
           </select>
         </label>
-        <p>Position orders the 160 generated combinations by raw internal score. Scores remain visible for verification.</p>
+        <p style="margin: 0; font-size: 12px; color: var(--muted);">Position assigned by quantitative confidence score.</p>
       </div>
-      <div class="next-analysis-table" role="table" aria-label="Next draw analytical combinations">
+
+      <div class="next-analysis-table" role="table" aria-label="Combinations for the next draw">
         <div class="next-analysis-header" role="row">
-          <span>Position</span><span>Strategy and method</span><span>Combination</span><span>Internal score</span>
+          <span>Position</span><span>Generated Combination</span><span>Model</span><span>Internal Score</span>
         </div>
         <div id="next-analysis-list" class="next-analysis-list">
           <div class="ui-state ui-state-loading" role="status">
             <span class="ui-state-marker" aria-hidden="true"></span>
-            <div><strong>Loading combinations</strong><p>Preparing the first page of analysis.</p></div>
+            <div><strong>Loading combinations</strong><p>Preparing first page of projections...</p></div>
           </div>
         </div>
       </div>
+
       <div class="list-footer next-analysis-footer">
         <span id="next-analysis-count">Loading analysis coverage...</span>
-        <div class="pagination" aria-label="Next draw analysis pagination">
+        <div class="pagination" aria-label="Next draw pagination">
           <button id="next-analysis-prev" class="pagination-button" type="button" disabled>Previous</button>
           <span id="next-analysis-page">Page 1</span>
           <button id="next-analysis-next" class="pagination-button" type="button" disabled>Next</button>
         </div>
       </div>
     </section>
-
-    <section id="wins" class="report-section report-blank" aria-hidden="true"></section>
-
-    <section id="analytics-lab" class="report-section analytics-lab">
-      <button id="report-details-open" class="report-details-trigger" type="button" data-report-details-open>More report details <span aria-hidden="true">&rarr;</span></button>
-      <details id="rankings-details">
-        <summary>Full rankings and model metrics</summary>
-        <p class="details-intro">
-          Weight is the system's current trust in a strategy. ROI compares prizes
-          with the cost of evaluated tickets.
-        </p>
-        <div class="table-wrap">
-          <table id="strategies-table">
-            <thead>
-              <tr><th>#</th><th>Strategy</th><th>Status</th><th>Weight</th><th>Trend</th><th>Avg ROI</th><th>Total prize</th></tr>
-            </thead>
-            <tbody id="strategies-body"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </details>
-
-      <details id="last-cycle">
-        <summary>Latest cycle breakdown</summary>
-        <p class="details-intro" id="cycle-meta">Loading...</p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Strategy</th><th>Tickets</th><th>3 match</th><th>4 match</th><th>5 match</th><th>Prize</th><th>ROI</th><th>Weight change</th></tr>
-            </thead>
-            <tbody id="cycle-body"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </details>
-    </section>
   </main>
 
+  <!-- Technical Details Modal Overlay (Hidden by default via .modal-overlay CSS) -->
   <div class="modal-overlay report-details-overlay" id="report-details-modal" aria-hidden="true">
-    <div class="modal-card report-details-card" role="dialog" aria-modal="true" aria-labelledby="report-details-title" aria-describedby="report-details-subtitle">
+    <div class="modal-card report-details-card" role="dialog" aria-modal="true" aria-labelledby="report-details-title">
       <button class="modal-close" id="report-details-close" type="button" aria-label="Close report details">&times;</button>
-      <p class="eyebrow">Supporting data</p><h2 id="report-details-title">More report details</h2>
-      <p class="modal-sub" id="report-details-subtitle">Verified outcomes, full model metrics, and the latest evaluation cycle.</p>
+      <p class="eyebrow">Supporting Data</p>
+      <h2 id="report-details-title">Technical Report Details</h2>
+      <p class="modal-sub" id="report-details-subtitle">Verified results, full model metrics, and the latest evaluation cycle.</p>
+
       <div id="report-details-content">
-        <section class="report-details-wins"><div class="section-heading"><div><p class="eyebrow">Verified outcomes</p><h3>Recent wins</h3></div><div class="wins-total" id="wins-total"></div></div><div id="wins-grid" class="wins-list"><div class="loading">Loading wins...</div></div></section>
+        <section class="report-details-wins">
+          <div class="section-heading">
+            <div><p class="eyebrow">Verified Results</p><h3>Recent Wins</h3></div>
+            <div class="wins-total" id="wins-total"></div>
+          </div>
+          <div id="wins-grid" class="wins-list"><div class="loading">Loading wins...</div></div>
+        </section>
+
+        <details id="rankings-details" style="margin-top: 20px;">
+          <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Extended metrics and model weights</summary>
+          <p class="details-intro" style="margin-top: 8px; color: var(--muted); font-size: 12.5px;">
+            The assigned weight reflects the engine's current confidence in each model. ROI compares prizes won against the theoretical ticket cost.
+          </p>
+          <div class="table-wrap" style="margin-top: 12px; overflow-x: auto;">
+            <table id="strategies-table" class="data-table">
+              <thead>
+                <tr><th>#</th><th>Model</th><th>Status</th><th>Weight</th><th>Trend</th><th>Avg ROI</th><th>Total Won</th></tr>
+              </thead>
+              <tbody id="strategies-body"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </details>
+
+        <details id="last-cycle" style="margin-top: 16px;">
+          <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Last cycle breakdown</summary>
+          <p class="details-intro" id="cycle-meta" style="margin-top: 8px; color: var(--muted); font-size: 12.5px;">Loading...</p>
+          <div class="table-wrap" style="margin-top: 12px; overflow-x: auto;">
+            <table class="data-table">
+              <thead>
+                <tr><th>Strategy</th><th>Tickets</th><th>3 Matches</th><th>4 Matches</th><th>5 Matches</th><th>Prize</th><th>ROI</th><th>Weight Adj.</th></tr>
+              </thead>
+              <tbody id="cycle-body"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </details>
       </div>
     </div>
   </div>
 
-  <nav class="mobile-nav" aria-label="Mobile report sections">
-    <a href="#overview" class="nav-link active" aria-current="location"><span>Overview</span></a>
-    <a href="#draw-history" class="nav-link"><span>History</span></a>
-    <a href="#rankings" class="nav-link"><span>Rankings</span></a>
-    <a href="#next-analysis" class="nav-link"><span>Next draw</span></a>
-  </nav>
-
+  <!-- Draw Analysis Modal Overlay (Hidden by default via .modal-overlay CSS) -->
   <div class="modal-overlay analysis-modal-overlay" id="analysis-modal-overlay" aria-hidden="true" tabindex="-1">
-    <div class="modal-card analysis-modal-card" role="dialog" aria-modal="true"
-         aria-labelledby="analysis-modal-title" aria-describedby="analysis-modal-sub">
+    <div class="modal-card analysis-modal-card" role="dialog" aria-modal="true" aria-labelledby="analysis-modal-title">
       <button class="modal-close" id="analysis-modal-close" type="button" aria-label="Close draw analysis">&times;</button>
-      <p class="eyebrow">Evaluated drawing</p>
-      <h2 id="analysis-modal-title">Draw analysis</h2>
+      <p class="eyebrow">Evaluated Draw</p>
+      <h2 id="analysis-modal-title">Detailed Analysis</h2>
       <div class="analysis-modal-heading">
         <p id="analysis-modal-sub" class="modal-sub">Loading analysis...</p>
         <div id="analysis-modal-balls" class="draw-balls" aria-label="Selected draw numbers"></div>
       </div>
 
       <div class="analysis-tabs" role="tablist" aria-label="Analysis detail sections">
-        <button id="analysis-tab-summary" class="analysis-tab active" type="button" role="tab"
-                aria-selected="true" aria-controls="analysis-panel-summary" data-panel="summary">Summary</button>
-        <button id="analysis-tab-strategies" class="analysis-tab" type="button" role="tab"
-                aria-selected="false" aria-controls="analysis-panel-strategies" data-panel="strategies">Strategies</button>
-        <button id="analysis-tab-combinations" class="analysis-tab" type="button" role="tab"
-                aria-selected="false" aria-controls="analysis-panel-combinations" data-panel="combinations">Combinations</button>
-        <button id="analysis-tab-distribution" class="analysis-tab" type="button" role="tab"
-                aria-selected="false" aria-controls="analysis-panel-distribution" data-panel="distribution">Distribution</button>
+        <button id="analysis-tab-summary" class="analysis-tab active" type="button" role="tab" aria-selected="true" aria-controls="analysis-panel-summary" data-panel="summary">Summary</button>
+        <button id="analysis-tab-strategies" class="analysis-tab" type="button" role="tab" aria-selected="false" aria-controls="analysis-panel-strategies" data-panel="strategies">Strategies</button>
+        <button id="analysis-tab-combinations" class="analysis-tab" type="button" role="tab" aria-selected="false" aria-controls="analysis-panel-combinations" data-panel="combinations">Combinations</button>
+        <button id="analysis-tab-distribution" class="analysis-tab" type="button" role="tab" aria-selected="false" aria-controls="analysis-panel-distribution" data-panel="distribution">Distribution</button>
       </div>
 
       <div id="analysis-modal-content" class="analysis-modal-content">
         <div class="ui-state ui-state-loading" role="status">
           <span class="ui-state-marker" aria-hidden="true"></span>
-          <div><strong>Loading draw analysis</strong><p>Assembling the evaluated strategy results.</p></div>
+          <div><strong>Loading draw analysis</strong><p>Assembling verified strategy results...</p></div>
         </div>
       </div>
     </div>
   </div>
 
   <footer class="site-footer" id="page-footer">
-    <span>SHIOL+ v9</span>
-    <span>Data updated after every published draw.</span>
-    <nav aria-label="Site information"><a href="legal.html#about">About</a><a href="legal.html#privacy">Privacy</a><a href="legal.html#terms">Terms</a><a href="legal.html#cookies">Cookies</a><a href="legal.html#important-disclaimer">Disclaimer</a></nav>
+    <div class="footer-content">
+      <a class="brand" href="/" aria-label="SHIOL+ home">
+        <span class="brand-text">SHIOL</span>
+        <span class="brand-plus">+</span>
+      </a>
+      <p class="footer-copy">&copy; 2026 SHIOL+ v9 Analytics. All rights reserved.</p>
+    </div>
   </footer>
 
   <script src="game.js"></script>

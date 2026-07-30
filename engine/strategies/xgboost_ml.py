@@ -36,7 +36,8 @@ class XGBoostMLStrategy(BaseStrategy):
                     replace=False,
                     p=self._wb_probs
                 ).tolist())
-                extra = int(np.random.choice(range(1, self.extra_max + 1), p=self._extra_probs))
+                extra = (int(np.random.choice(range(1, self.extra_max + 1), p=self._extra_probs))
+                         if self.has_extra_ball else None)
                 tickets.append(self._safe_ticket(numbers, extra, 0.82))
             except Exception:
                 tickets.append(self._random_fallback(1)[0])
@@ -94,12 +95,15 @@ class XGBoostMLStrategy(BaseStrategy):
             self._wb_probs = probs_sum / total if total > 0 else np.ones(self.white_max) / self.white_max
 
             # Extra: frecuencia simple (XGBoost overkill para 26 valores)
-            extra_freq = np.zeros(self.extra_max)
-            if 'pb' in draws.columns:
+            extra_freq = np.zeros(self.extra_max) if self.has_extra_ball else None
+            if self.has_extra_ball and 'pb' in draws.columns:
                 for n in draws[(draws['pb'] >= 1) & (draws['pb'] <= self.extra_max)]['pb']:
                     extra_freq[int(n) - 1] += 1
-            t = extra_freq.sum()
-            self._extra_probs = extra_freq / t if t > 0 else np.ones(self.extra_max) / self.extra_max
+            if self.has_extra_ball:
+                t = extra_freq.sum()
+                self._extra_probs = extra_freq / t if t > 0 else np.ones(self.extra_max) / self.extra_max
+            else:
+                self._extra_probs = None
 
             self._trained_on = len(draws)
 
@@ -112,7 +116,7 @@ class XGBoostMLStrategy(BaseStrategy):
         return [
             self._safe_ticket(
                 sorted(random.sample(range(1, self.white_max + 1), self.white_count)),
-                random.randint(1, self.extra_max),
+                self._random_extra(),
                 0.50
             )
             for _ in range(count)
