@@ -1337,6 +1337,94 @@ body.game-cash5 .ball.pb {
   color: var(--muted);
 }
 
+/* Recent Wins Card Grid */
+.wins-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.win-card {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.win-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.win-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.win-card-date {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.win-card-strategy {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.win-card-amount {
+  font-size: 14px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--positive);
+  margin-left: auto;
+}
+
+.weight-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weight-bar {
+  height: 6px;
+  width: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.weight-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+}
+
+.weight-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--positive);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 /* Footer */
 .site-footer {
   border-top: 1px solid var(--line);

@@ -865,7 +865,7 @@ async function renderTechnicalStrategies() {
   const body = document.getElementById('strategies-body');
 
   if (!strategies || !strategies.length) {
-    body.innerHTML = '<tr><td colspan="7">No strategy data available.</td></tr>';
+    body.innerHTML = '<tr><td colspan="7">No hay datos de estrategias disponibles.</td></tr>';
     return;
   }
 
@@ -876,16 +876,17 @@ async function renderTechnicalStrategies() {
   body.innerHTML = strategies.map(function (strategy, index) {
     const weight = Number(strategy.current_weight || 0);
     const fill = maxWeight ? (weight / maxWeight * 100).toFixed(1) : 0;
+    const statusText = String(strategy.status || 'active') === 'active' ? 'Activo' : 'Inactivo';
     return [
       '<tr>',
-        '<td>' + (index + 1) + '</td>',
-        '<td><strong>' + strategyName(strategy.id || strategy.name) + '</strong></td>',
-        '<td><span class="pill">' + String(strategy.status || 'active') + '</span></td>',
+        '<td><strong style="color: var(--accent); font-family: var(--font-mono);">#' + (index + 1) + '</strong></td>',
+        '<td><strong style="color: var(--ink);">' + strategyName(strategy.id || strategy.name) + '</strong></td>',
+        '<td><span class="pill">' + statusText + '</span></td>',
         '<td><div class="weight-bar-wrap"><div class="weight-bar"><div class="weight-fill" style="width:' +
           fill + '%"></div></div><span class="weight-val">' + weight.toFixed(4) + '</span></div></td>',
-        '<td id="spark-' + strategy.id + '"><span class="spark-empty">Loading</span></td>',
+        '<td id="spark-' + strategy.id + '"><span class="spark-empty">Cargando</span></td>',
         '<td>' + roi(strategy.avg_roi) + '</td>',
-        '<td>' + money(strategy.lifetime_prize || 0) + '</td>',
+        '<td style="font-weight: 700; font-family: var(--font-mono); color: var(--mega);">' + money(strategy.lifetime_prize || 0) + '</td>',
       '</tr>'
     ].join('');
   }).join('');
@@ -900,26 +901,26 @@ async function renderLastCycle() {
 
   if (!data || data.message) {
     meta.textContent = '';
-    body.innerHTML = '<tr><td colspan="8">No evaluated cycle available.</td></tr>';
+    body.innerHTML = '<tr><td colspan="8">No hay ciclo evaluado disponible.</td></tr>';
     return;
   }
 
   const cycle = data.cycle;
   const results = data.strategy_results || [];
-  meta.textContent = 'Draw ' + dateLabel(cycle.draw_date) + ': ' +
+  meta.textContent = 'Sorteo del ' + dateLabel(cycle.draw_date) + ': ' +
     [cycle.n1, cycle.n2, cycle.n3, cycle.n4, cycle.n5].join(' - ') +
-    ' / ' + cycle.pb;
+    ' / PB ' + cycle.pb;
 
   body.innerHTML = results.map(function (result) {
     const delta = Number(result.weight_after || 0) - Number(result.weight_before || 0);
     return [
       '<tr>',
-        '<td>' + strategyName(result.strategy_id) + '</td>',
-        '<td>' + result.tickets_count + '</td>',
-        '<td>' + Number(result.matches_3 || 0) + '</td>',
-        '<td>' + Number(result.matches_4 || 0) + '</td>',
-        '<td>' + Number(result.matches_5 || 0) + '</td>',
-        '<td>' + money(result.total_prize || 0) + '</td>',
+        '<td><strong style="color: var(--ink);">' + strategyName(result.strategy_id) + '</strong></td>',
+        '<td style="font-family: var(--font-mono);">' + result.tickets_count + '</td>',
+        '<td style="font-family: var(--font-mono);">' + Number(result.matches_3 || 0) + '</td>',
+        '<td style="font-family: var(--font-mono);">' + Number(result.matches_4 || 0) + '</td>',
+        '<td style="font-family: var(--font-mono);">' + Number(result.matches_5 || 0) + '</td>',
+        '<td style="font-weight: 700; font-family: var(--font-mono); color: var(--mega);">' + money(result.total_prize || 0) + '</td>',
         '<td>' + roi(result.roi) + '</td>',
         '<td><span class="' + (delta >= 0 ? 'pos' : 'neg') + '">' +
           (delta >= 0 ? '+' : '') + delta.toFixed(4) + '</span></td>',
@@ -942,15 +943,15 @@ function parseNumbers(value) {
 function prizeLabel(value) {
   const normalized = String(value || '').toLowerCase().replace(/\s/g, '');
   if (normalized === 'match0+pb') return 'Powerball';
-  if (normalized === 'match1+pb') return '1 number + Powerball';
-  if (normalized === 'match2+pb') return '2 numbers + Powerball';
-  if (normalized === 'match3') return '3 numbers';
-  if (normalized === 'match3+pb') return '3 numbers + Powerball';
-  if (normalized === 'match4') return '4 numbers';
-  if (normalized === 'match4+pb') return '4 numbers + Powerball';
-  if (normalized === 'match5') return '5 numbers';
+  if (normalized === 'match1+pb') return '1 acierto + PB';
+  if (normalized === 'match2+pb') return '2 aciertos + PB';
+  if (normalized === 'match3') return '3 aciertos';
+  if (normalized === 'match3+pb') return '3 aciertos + PB';
+  if (normalized === 'match4') return '4 aciertos';
+  if (normalized === 'match4+pb') return '4 aciertos + PB';
+  if (normalized === 'match5') return '5 aciertos';
   if (normalized === 'jackpot') return 'Jackpot';
-  return titleCase(String(value || 'Verified prize').replace(/\+/g, ' + '));
+  return String(value || 'Premio verificado').replace(/\+/g, ' + ');
 }
 
 async function renderWins() {
@@ -962,27 +963,28 @@ async function renderWins() {
     total.textContent = '';
     list.innerHTML = stateMarkup(
       data ? 'empty' : 'error',
-      data ? 'No recent outcomes yet' : 'Recent outcomes unavailable',
-      data ? 'Verified outcomes will appear after an evaluated drawing.' : 'Please retry when the data service is available.'
+      data ? 'No hay aciertos recientes aún' : 'Aciertos recientes no disponibles',
+      data ? 'Los aciertos verificados aparecerán tras evaluar sorteos.' : 'Reintenta cuando el servicio esté disponible.'
     );
     return;
   }
 
-  total.innerHTML = '<strong>' + money(data.total_amount) + '</strong> across ' +
-    Number(data.total_count).toLocaleString() + ' wins';
+  total.innerHTML = '<strong style="color: var(--mega); font-size: 16px;">' + money(data.total_amount) + '</strong> acumulados en <strong style="color: var(--ink); font-size: 13.5px;">' +
+    Number(data.total_count).toLocaleString() + ' aciertos</strong>';
 
   list.innerHTML = (data.wins || []).slice(0, 6).map(function (win) {
     const numbers = parseNumbers(win.numbers);
     return [
-      '<div class="win-row">',
-        '<span class="win-date">' + dateLabel(win.draw_date || (win.created_at || '').slice(0, 10), {
-          month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC'
-        }) + '</span>',
-        '<span class="win-strategy">' + strategyName(win.strategy_id) + '</span>',
-        '<span class="win-match">' + prizeLabel(win.prize_level) + '</span>',
-        '<span class="win-numbers"><span class="draw-balls">' +
-          ballsHTML(numbers, win.extra) + '</span></span>',
-        '<span class="win-amount">' + money(win.prize_amount || 0) + '</span>',
+      '<div class="win-card">',
+        '<div class="win-card-head">',
+          '<div class="win-card-meta">',
+            '<span class="win-card-date">' + dateLabel(win.draw_date || (win.created_at || '').slice(0, 10)) + '</span>',
+            '<span class="win-card-strategy">' + strategyName(win.strategy_id) + '</span>',
+            '<span class="match-tag">' + prizeLabel(win.prize_level) + '</span>',
+          '</div>',
+          '<span class="win-card-amount">+' + money(win.prize_amount || 0) + '</span>',
+        '</div>',
+        '<div class="draw-balls">' + ballsHTML(numbers, win.extra, true) + '</div>',
       '</div>'
     ].join('');
   }).join('');
