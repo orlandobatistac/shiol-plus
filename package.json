@@ -1,0 +1,17 @@
+{
+  "name": "shiol-plus",
+  "version": "9.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --local --persist-to .wrangler/state",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "^0.2.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

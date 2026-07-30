@@ -1,0 +1,9 @@
+name = "shiol-plus-presentation-test"
+main = "presentation-worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "shiol-plus-db"
+database_id = "ad168e4c-e90c-4642-8b29-6c8d0bfc6157"
