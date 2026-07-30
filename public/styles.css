@@ -141,18 +141,15 @@ button, a {
 }
 
 .brand-plus {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 800;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  font-size: 26px;
+  font-weight: 900;
   line-height: 1;
+  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #3b82f6;
+  margin-left: -2px;
+  margin-right: 2px;
 }
 
 .brand-tag {
