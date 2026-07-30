@@ -70,10 +70,13 @@ async function loadGameStats(gameId) {
 }
 
 function activeReport(game, stats) {
+  stats = stats || {};
   const gameClass = game.id === 'powerball' ? 'powerball' :
     (game.id === 'mega_millions' ? 'mega' : 'cash5');
   const jackpotText = stats.jackpot ? money(stats.jackpot) : 'No disponible';
-  const wonText = money(stats.totalWon);
+  const wonText = money(stats.totalWon || 0);
+  const topStrategyText = stats.topStrategy || 'No disponible';
+  const evaluatedDrawsText = stats.evaluatedDraws || 0;
   
   return [
     '<a class="game-report ' + gameClass + '" href="game.html?game=' + game.id + '">',
@@ -91,11 +94,11 @@ function activeReport(game, stats) {
       '<div class="game-report-metrics">',
         '<div class="metric-col">',
           '<span class="card-label">Modelo Líder</span>',
-          '<strong class="metric-val">' + stats.topStrategy + '</strong>',
+          '<strong class="metric-val">' + topStrategyText + '</strong>',
         '</div>',
         '<div class="metric-col">',
           '<span class="card-label">Premios Generados</span>',
-          '<strong class="metric-val">' + wonText + ' <small>(' + stats.evaluatedDraws + ' sorteos)</small></strong>',
+          '<strong class="metric-val">' + wonText + ' <small>(' + evaluatedDrawsText + ' sorteos)</small></strong>',
         '</div>',
       '</div>',
       '<div class="game-report-footer">',
