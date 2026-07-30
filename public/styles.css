@@ -1437,104 +1437,29 @@ body.game-cash5 .ball.pb {
   text-transform: uppercase;
 }
 
-/* Product Footer Styling */
+/* Minimalist Centered Footer */
 .site-footer {
   border-top: 1px solid var(--line);
   background: var(--bg-base);
-  padding: 48px 0 32px;
-  margin-top: 60px;
-  color: var(--muted);
-  font-size: 13px;
+  padding: 32px 20px;
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
-.footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.footer-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 40px;
-  margin-bottom: 40px;
-}
-
-.footer-brand-col {
+.footer-content {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-
-.footer-desc {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.6;
-  max-width: 420px;
-  margin: 0;
-}
-
-.footer-status-pill {
-  display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  color: var(--positive);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  width: fit-content;
 }
 
-.footer-links-col h4 {
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 700;
-  margin: 0 0 16px;
-  letter-spacing: -0.01em;
-}
-
-.footer-links-col ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.footer-links-col a {
+.footer-copy {
   color: var(--muted);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.footer-links-col a:hover {
-  color: var(--ink);
-}
-
-.footer-bottom {
-  border-top: 1px solid var(--line);
-  padding-top: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  font-size: 12px;
-}
-
-.footer-bottom p {
+  font-size: 12.5px;
   margin: 0;
-  color: var(--muted);
-}
-
-.footer-disclaimer-mini {
-  color: rgba(148, 163, 184, 0.6);
-  font-size: 11.5px;
 }
 
 /* Legal Page Styles */
