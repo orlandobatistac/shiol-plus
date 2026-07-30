@@ -232,7 +232,8 @@ button, a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
 }
 
 .trust-banner strong {
@@ -340,7 +341,7 @@ button, a {
 /* Home Reports Grid */
 .games-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   margin-bottom: 40px;
 }
@@ -1528,6 +1529,7 @@ body.game-cash5 .ball.pb {
   .topbar-inner {
     flex-wrap: wrap;
     gap: 12px;
+    width: min(var(--content), calc(100% - 24px));
   }
 
   .desktop-nav {
@@ -1538,10 +1540,17 @@ body.game-cash5 .ball.pb {
     padding-bottom: 4px;
     gap: 16px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .desktop-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .data-status {
-    margin-left: 0;
+    margin-left: auto;
+    font-size: 11px;
+    padding: 4px 10px;
   }
 }
 
@@ -1615,6 +1624,40 @@ body.game-cash5 .ball.pb {
   .analysis-combination-row {
     grid-template-columns: 40px 140px 1fr;
   }
+
+  .ranking-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ranking-table {
+    min-width: 600px;
+  }
+
+  .list-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .pagination {
+    align-self: flex-end;
+  }
+
+  .detail-table-header,
+  .detail-table-row {
+    grid-template-columns: 50px 150px 90px 80px 1fr;
+    font-size: 12px;
+  }
+
+  .win-card-head {
+    flex-wrap: wrap;
+  }
+
+  .win-card-amount {
+    margin-left: 0;
+    align-self: flex-start;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1628,6 +1671,7 @@ body.game-cash5 .ball.pb {
 
   .draw-balls {
     gap: 3px;
+    flex-wrap: wrap;
   }
 
   .ball {
@@ -1651,12 +1695,49 @@ body.game-cash5 .ball.pb {
 
   .site-footer {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
+    padding: 32px 20px 40px;
   }
 
-  .site-footer nav {
-    flex-wrap: wrap;
+  .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .control-row {
+    flex-direction: column;
+    align-items: stretch;
     gap: 10px;
+  }
+
+  .filter-control {
+    width: 100%;
+  }
+
+  .distribution-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .distribution-row > *:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .report-stage {
+    padding: 16px;
+  }
+
+  .report-stage .section-heading {
+    margin-bottom: 12px;
+  }
+
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .method-strip {
+    gap: 16px;
   }
 }
