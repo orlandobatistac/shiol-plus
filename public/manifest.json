@@ -1,7 +1,7 @@
 {
   "name": "SHIOL+ v9 Strategy Analytics",
   "short_name": "SHIOL+",
-  "description": "Reporte probabilístico, combinaciones proyectadas y resultados verificados de lotería.",
+  "description": "Probabilistic lottery strategy reports with projected combinations and verified results.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

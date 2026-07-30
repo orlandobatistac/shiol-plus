@@ -48,8 +48,8 @@ function strategyName(value) {
 
 function drawDays(value) {
   const str = String(value || '').toLowerCase();
-  if (str.includes('sun') && str.includes('mon') && str.includes('sat')) return 'Todos los Días';
-  const labels = { mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie', sat: 'Sáb', sun: 'Dom' };
+  if (str.includes('sun') && str.includes('mon') && str.includes('sat')) return 'Every Day';
+  const labels = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
   return String(value || '').split(',').map(function (day) {
     return labels[day.trim().toLowerCase()] || day.trim();
   }).join(' / ');
@@ -62,7 +62,7 @@ async function loadGameStats(gameId) {
   const top = overview.top_strategy || null;
 
   return {
-    topStrategy: top ? strategyName(top.strategy_id || top.name) : 'No disponible',
+    topStrategy: top ? strategyName(top.strategy_id || top.name) : 'Not available',
     totalWon: Number(performance.total_won || 0),
     evaluatedDraws: Number(performance.evaluated_draws || 0),
     jackpot: jackpot.found ? Number(jackpot.amount || 0) : 0
@@ -73,9 +73,9 @@ function activeReport(game, stats) {
   stats = stats || {};
   const gameClass = game.id === 'powerball' ? 'powerball' :
     (game.id === 'mega_millions' ? 'mega' : 'cash5');
-  const jackpotText = stats.jackpot ? money(stats.jackpot) : 'No disponible';
+  const jackpotText = stats.jackpot ? money(stats.jackpot) : 'Not available';
   const wonText = money(stats.totalWon || 0);
-  const topStrategyText = stats.topStrategy || 'No disponible';
+  const topStrategyText = stats.topStrategy || 'Not available';
   const evaluatedDrawsText = stats.evaluatedDraws || 0;
   
   return [
@@ -88,21 +88,21 @@ function activeReport(game, stats) {
         '<span class="game-days-badge">' + drawDays(game.draw_days) + '</span>',
       '</div>',
       '<div class="game-jackpot-block">',
-        '<span class="card-label">Jackpot Estimado</span>',
+        '<span class="card-label">Estimated Jackpot</span>',
         '<strong class="jackpot-value">' + jackpotText + '</strong>',
       '</div>',
       '<div class="game-report-metrics">',
         '<div class="metric-col">',
-          '<span class="card-label">Modelo Líder</span>',
+          '<span class="card-label">Top Strategy</span>',
           '<strong class="metric-val">' + topStrategyText + '</strong>',
         '</div>',
         '<div class="metric-col">',
-          '<span class="card-label">Premios Generados</span>',
-          '<strong class="metric-val">' + wonText + ' <small>(' + evaluatedDrawsText + ' sorteos)</small></strong>',
+          '<span class="card-label">Total Won</span>',
+          '<strong class="metric-val">' + wonText + ' <small>(' + evaluatedDrawsText + ' draws)</small></strong>',
         '</div>',
       '</div>',
       '<div class="game-report-footer">',
-        '<span>Explorar Estrategias</span>',
+        '<span>Explore Strategies</span>',
         '<span class="report-arrow" aria-hidden="true">&rarr;</span>',
       '</div>',
     '</a>'
@@ -114,7 +114,7 @@ function inactiveReport(game) {
     '<div class="game-report is-inactive">',
       '<div class="game-report-head">',
         '<div class="game-title-group"><h3>' + game.name + '</h3></div>',
-        '<span class="game-days-badge">Próximamente</span>',
+        '<span class="game-days-badge">Coming Soon</span>',
       '</div>',
     '</div>'
   ].join('');
@@ -127,8 +127,8 @@ async function renderGames() {
   if (!games || !games.length) {
     grid.innerHTML = stateMarkup(
       games ? 'empty' : 'error',
-      games ? 'No hay reportes activos aún' : 'Reportes no disponibles temporalmente',
-      games ? 'Los reportes aparecerán cuando se active un juego.' : 'Por favor reintenta cuando el servicio esté disponible.'
+      games ? 'No active reports yet' : 'Reports temporarily unavailable',
+      games ? 'Reports will appear once a game is activated.' : 'Please retry when the service is available.'
     );
     return;
   }

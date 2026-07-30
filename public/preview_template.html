@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,10 +22,10 @@
   <!-- Top Informative Disclaimer Banner -->
   <div class="trust-banner container">
     <div style="display: flex; align-items: center; gap: 8px;">
-      <strong>Aviso Estadístico</strong>
-      <span>SHIOL+ es una plataforma de análisis de datos e investigación matemática. No garantiza premios futuros.</span>
+      <strong>Statistical Notice</strong>
+      <span>SHIOL+ is a data analytics and mathematical research platform. It does not guarantee future prizes.</span>
     </div>
-    <a href="legal.html#important-disclaimer">Ver detalles</a>
+    <a href="legal.html#important-disclaimer">Read disclaimer</a>
   </div>
 
   <!-- Main Navigation Bar -->
@@ -38,15 +38,15 @@
       </a>
 
       <nav class="desktop-nav">
-        <a href="#overview" class="active">Resumen</a>
-        <a href="#draw-history">Histórico de Sorteos</a>
-        <a href="#rankings">Ranking de Modelos</a>
-        <a href="#next-analysis">Próximo Sorteo</a>
+        <a href="#overview" class="active">Overview</a>
+        <a href="#draw-history">Draw History</a>
+        <a href="#rankings">Rankings</a>
+        <a href="#next-analysis">Next Draw</a>
       </nav>
 
       <div class="data-status">
         <span class="status-dot"></span>
-        <span>Datos Actualizados</span>
+        <span>Data Current</span>
       </div>
     </div>
   </header>
@@ -55,7 +55,7 @@
   <main class="report-shell">
     <div style="margin-top: 24px;">
       <!-- Game Selector Pills -->
-      <div class="game-switcher" aria-label="Seleccionar Juego">
+      <div class="game-switcher" aria-label="Select game">
         <a class="active" data-game="powerball" onclick="switchGame('powerball')">🔴 Powerball</a>
         <a data-game="mega_millions" onclick="switchGame('mega_millions')">🟡 Mega Millions</a>
         <a data-game="cash5" onclick="switchGame('cash5')">🟢 NC Cash 5</a>
@@ -64,10 +64,10 @@
 
     <section class="report-intro">
       <div>
-        <p class="eyebrow">Reporte de Analítica en Vivo</p>
+        <p class="eyebrow">Live Strategy Report</p>
         <h1 id="report-title">Powerball Strategy Report</h1>
         <p id="report-description" class="report-lead">
-          Evaluación continua de 8 modelos probabilísticos frente a los resultados oficiales.
+          Continuous evaluation of 8 probabilistic models against official draw results.
         </p>
       </div>
     </section>
@@ -76,26 +76,26 @@
     <section class="report-stage" id="overview">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Juego Seleccionado</p>
-          <h2>Resumen General</h2>
+          <p class="eyebrow">Selected Game</p>
+          <h2>Overview</h2>
         </div>
       </div>
 
       <div class="summary-band">
         <div class="summary-item jackpot-summary">
-          <span class="summary-label">Jackpot Estimado</span>
+          <span class="summary-label">Estimated Jackpot</span>
           <div class="summary-primary" id="metric-jackpot">$415,000,000</div>
-          <span class="summary-secondary">Próximo sorteo oficial</span>
+          <span class="summary-secondary">Next official draw</span>
         </div>
 
         <div class="summary-item">
-          <span class="summary-label">Próximo Sorteo</span>
+          <span class="summary-label">Next Draw</span>
           <div class="summary-value" id="metric-countdown">01d 04h 22m 15s</div>
-          <span class="summary-secondary" id="metric-draw-date">Miércoles, 23:00 ET</span>
+          <span class="summary-secondary" id="metric-draw-date">Wednesday, 11:00 PM ET</span>
         </div>
 
         <div class="summary-item">
-          <span class="summary-label">Último Sorteo Verificado</span>
+          <span class="summary-label">Latest Verified Draw</span>
           <div class="draw-balls" id="latest-balls-display">
             <div class="ball ball-white">08</div>
             <div class="ball ball-white">19</div>
@@ -104,25 +104,25 @@
             <div class="ball ball-white">65</div>
             <div class="ball ball-powerball" id="extra-ball-display">14</div>
           </div>
-          <span class="summary-secondary" id="latest-draw-date">Lunes, 27 de Julio de 2026</span>
+          <span class="summary-secondary" id="latest-draw-date">Mon, Jul 27, 2026</span>
         </div>
       </div>
 
       <div class="performance-strip">
         <div>
-          <span class="summary-label">Premios Generados</span>
+          <span class="summary-label">Total Won</span>
           <strong id="metric-won">$1,840</strong>
-          <small id="metric-draws-count">En 142 sorteos evaluados</small>
+          <small id="metric-draws-count">Across 142 evaluated draws</small>
         </div>
         <div>
-          <span class="summary-label">Historial de Evaluación</span>
-          <strong>142 Sorteos</strong>
-          <small>22,720 combinaciones probadas</small>
+          <span class="summary-label">Evaluation History</span>
+          <strong>142 Draws</strong>
+          <small>22,720 combinations tested</small>
         </div>
         <div>
-          <span class="summary-label">Estrategia Líder</span>
+          <span class="summary-label">Leading Strategy</span>
           <strong id="metric-leader" style="color: var(--accent);">XGBoost ML</strong>
-          <small id="metric-roi" style="color: var(--positive); font-weight: 700;">+34.2% ROI acumulado</small>
+          <small id="metric-roi" style="color: var(--positive); font-weight: 700;">+34.2% lifetime ROI</small>
         </div>
       </div>
     </section>
@@ -131,20 +131,20 @@
     <section class="report-stage" id="draw-history">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Historial Evaluado</p>
-          <h2>Sorteos Verificados</h2>
+          <p class="eyebrow">Evaluated Draws</p>
+          <h2>Draw History</h2>
         </div>
-        <p class="section-note">Organización en 1 sola línea por resultado.</p>
+        <p class="section-note">One row per draw result.</p>
       </div>
 
       <div class="history-table">
         <div class="history-header">
-          <span>Fecha y Resultado</span>
-          <span>Premios</span>
-          <span>Aciertos Ganadores</span>
-          <span>Mejor Estrategia</span>
-          <span>Máximo Acierto</span>
-          <span>Acción</span>
+          <span>Date &amp; Result</span>
+          <span>Won</span>
+          <span>Winning Combinations</span>
+          <span>Best Strategy</span>
+          <span>Best Match</span>
+          <span>Action</span>
         </div>
         <div class="history-row">
           <div class="history-result">
@@ -161,8 +161,8 @@
           <div style="font-weight: 700; font-family: var(--font-mono);">$1,840</div>
           <div style="font-family: var(--font-mono);">142</div>
           <div><strong>XGBoost ML</strong></div>
-          <div><span class="match-tag">4 aciertos + PB</span></div>
-          <div><button class="pagination-button" type="button">Ver Análisis</button></div>
+          <div><span class="match-tag">4 matches + PB</span></div>
+          <div><button class="pagination-button" type="button">View Analysis</button></div>
         </div>
       </div>
     </section>
@@ -171,10 +171,10 @@
     <section class="report-stage" id="rankings">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Rendimiento Histórico</p>
-          <h2>Ranking de Modelos Algorítmicos</h2>
+          <p class="eyebrow">Lifetime Performance</p>
+          <h2>Historical Strategy Rankings</h2>
         </div>
-        <p class="section-note">Top 3 destacados + Tabla compacta para el resto de estrategias.</p>
+        <p class="section-note">Top 3 highlighted + compact table for remaining strategies.</p>
       </div>
 
       <!-- Top 3 Podium Cards -->
@@ -182,28 +182,28 @@
         <div class="podium-card rank-top-1">
           <div class="rank-badge-lg gold">#1</div>
           <div class="podium-title">XGBoost ML</div>
-          <div class="podium-desc">Modelo Gradient Boosting entrenado con histórico de frecuencias.</div>
-          <div class="podium-stat-row"><span class="podium-stat-label">ROI Total</span><span class="podium-stat-val pos">+34.2%</span></div>
-          <div class="podium-stat-row"><span class="podium-stat-label">Premios Ganados</span><span class="podium-stat-val">$890</span></div>
-          <div class="podium-stat-row"><span class="podium-stat-label">Máximo Acierto</span><span class="podium-stat-val" style="color: var(--mega);">4 + PB</span></div>
+          <div class="podium-desc">Gradient Boosting model trained on historical draw frequencies.</div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Lifetime ROI</span><span class="podium-stat-val pos">+34.2%</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Total Won</span><span class="podium-stat-val">$890</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Best Match</span><span class="podium-stat-val" style="color: var(--mega);">4 + PB</span></div>
         </div>
 
         <div class="podium-card">
           <div class="rank-badge-lg silver">#2</div>
           <div class="podium-title">Hybrid Ensemble</div>
-          <div class="podium-desc">Mezcla ponderada de XGBoost (70%) y co-ocurrencia (30%).</div>
-          <div class="podium-stat-row"><span class="podium-stat-label">ROI Total</span><span class="podium-stat-val pos">+18.5%</span></div>
-          <div class="podium-stat-row"><span class="podium-stat-label">Premios Ganados</span><span class="podium-stat-val">$620</span></div>
-          <div class="podium-stat-row"><span class="podium-stat-label">Máximo Acierto</span><span class="podium-stat-val">4 Aciertos</span></div>
+          <div class="podium-desc">Weighted blend of XGBoost (70%) and co-occurrence (30%).</div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Lifetime ROI</span><span class="podium-stat-val pos">+18.5%</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Total Won</span><span class="podium-stat-val">$620</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Best Match</span><span class="podium-stat-val">4 matches</span></div>
         </div>
 
         <div class="podium-card">
           <div class="rank-badge-lg bronze">#3</div>
           <div class="podium-title">Frequency Weighted</div>
-          <div class="podium-desc">Ponderación de caliente/frío por ventana de 50 sorteos.</div>
-          <div class="podium-stat-row"><span class="podium-stat-label">ROI Total</span><span class="podium-stat-val neg">-4.1%</span></div>
-          <div class="podium-stat-row"><span class="podium-stat-label">Premios Ganados</span><span class="podium-stat-val">$330</span></div>
-          <div class="podium-stat-row"><span class="podium-stat-label">Máximo Acierto</span><span class="podium-stat-val">3 + PB</span></div>
+          <div class="podium-desc">Hot/cold weighting over a 50-draw window.</div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Lifetime ROI</span><span class="podium-stat-val neg">-4.1%</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Total Won</span><span class="podium-stat-val">$330</span></div>
+          <div class="podium-stat-row"><span class="podium-stat-label">Best Match</span><span class="podium-stat-val">3 + PB</span></div>
         </div>
       </div>
 
@@ -213,32 +213,32 @@
           <thead>
             <tr>
               <th style="width: 50px;">Pos</th>
-              <th>Modelo / Estrategia</th>
-              <th style="text-align: right;">Premios Ganados</th>
-              <th style="text-align: right;">ROI Acumulado</th>
-              <th style="text-align: right;">Aciertos Ganadores</th>
-              <th style="text-align: right;">Sorteos Evaluados</th>
-              <th>Máximo Acierto</th>
+              <th>Model / Strategy</th>
+              <th style="text-align: right;">Total Won</th>
+              <th style="text-align: right;">Lifetime ROI</th>
+              <th style="text-align: right;">Winning Combinations</th>
+              <th style="text-align: right;">Evaluated Draws</th>
+              <th>Best Match</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td><span class="rank-badge rank-other">#4</span></td>
-              <td><strong>Intelligent Scoring</strong><small style="display:block; color: var(--muted); font-size: 11px;">Scoring temporal con bono por vacíos</small></td>
+              <td><strong>Intelligent Scoring</strong><small style="display:block; color: var(--muted); font-size: 11px;">Time-decay scoring with gap bonus</small></td>
               <td style="text-align: right; font-weight: 700; font-family: var(--font-mono);">$210</td>
               <td style="text-align: right;"><span class="neg">-8.2%</span></td>
               <td style="text-align: right; font-family: var(--font-mono);">28</td>
               <td style="text-align: right; font-family: var(--font-mono);">142</td>
-              <td><span class="match-tag">3 Aciertos</span></td>
+              <td><span class="match-tag">3 matches</span></td>
             </tr>
             <tr>
               <td><span class="rank-badge rank-other">#5</span></td>
-              <td><strong>Coverage Optimizer</strong><small style="display:block; color: var(--muted); font-size: 11px;">Maximiza cobertura reduciendo repeticiones</small></td>
+              <td><strong>Coverage Optimizer</strong><small style="display:block; color: var(--muted); font-size: 11px;">Maximizes coverage while reducing repetition</small></td>
               <td style="text-align: right; font-weight: 700; font-family: var(--font-mono);">$160</td>
               <td style="text-align: right;"><span class="neg">-14.5%</span></td>
               <td style="text-align: right; font-family: var(--font-mono);">19</td>
               <td style="text-align: right; font-family: var(--font-mono);">142</td>
-              <td><span class="match-tag">3 Aciertos</span></td>
+              <td><span class="match-tag">3 matches</span></td>
             </tr>
           </tbody>
         </table>
@@ -252,7 +252,7 @@
           <span class="brand-text">SHIOL</span>
           <span class="brand-plus">+</span>
         </a>
-        <p class="footer-copy">&copy; 2026 SHIOL+ v9 Analytics. Todos los derechos reservados.</p>
+        <p class="footer-copy">&copy; 2026 SHIOL+ v9 Analytics. All rights reserved.</p>
       </div>
     </footer>
   </main>
@@ -262,11 +262,11 @@
       powerball: {
         title: "Powerball Strategy Report",
         jackpot: "$415,000,000",
-        nextDraw: "Miércoles, 23:00 ET",
+        nextDraw: "Wednesday, 11:00 PM ET",
         won: "$1,840",
         leader: "XGBoost ML",
-        roi: "+34.2% ROI acumulado",
-        latestDate: "Lunes, 27 de Julio de 2026",
+        roi: "+34.2% lifetime ROI",
+        latestDate: "Mon, Jul 27, 2026",
         balls: [8, 19, 27, 42, 65],
         extra: 14,
         extraClass: "ball-powerball"
@@ -274,11 +274,11 @@
       mega_millions: {
         title: "Mega Millions Strategy Report",
         jackpot: "$520,000,000",
-        nextDraw: "Viernes, 23:00 ET",
+        nextDraw: "Friday, 11:00 PM ET",
         won: "$2,450",
         leader: "Hybrid Ensemble",
-        roi: "+28.7% ROI acumulado",
-        latestDate: "Martes, 28 de Julio de 2026",
+        roi: "+28.7% lifetime ROI",
+        latestDate: "Tue, Jul 28, 2026",
         balls: [14, 25, 38, 49, 61],
         extra: 8,
         extraClass: "ball-megaball"
@@ -286,11 +286,11 @@
       cash5: {
         title: "NC Cash 5 Strategy Report",
         jackpot: "$340,000",
-        nextDraw: "Hoy, 23:22 ET",
+        nextDraw: "Tonight, 11:22 PM ET",
         won: "$4,120",
         leader: "Intelligent Scoring",
-        roi: "+41.5% ROI acumulado",
-        latestDate: "Martes, 28 de Julio de 2026",
+        roi: "+41.5% lifetime ROI",
+        latestDate: "Tue, Jul 28, 2026",
         balls: [4, 11, 23, 31, 39],
         extra: null,
         extraClass: "ball-cash5"

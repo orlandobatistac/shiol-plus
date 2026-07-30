@@ -340,7 +340,7 @@ async function renderHistory() {
     const draw = analysis.draw || {};
     const detailComplete = Number(analysis.detail_coverage || 0) === 1;
     const bestStrategy = analysis.best_strategy ?
-      strategyName(analysis.best_strategy.strategy_id || analysis.best_strategy.name) : 'No disponible';
+      strategyName(analysis.best_strategy.strategy_id || analysis.best_strategy.name) : 'Not available';
     return [
       '<div class="history-row" role="row">',
         '<div class="history-result" role="cell">',
@@ -349,12 +349,12 @@ async function renderHistory() {
         '</div>',
         '<div class="history-metric" role="cell"><strong style="font-family: var(--font-mono); font-size: 14px;">' + money(analysis.total_won) + '</strong></div>',
         '<div class="history-metric" role="cell"><span style="font-family: var(--font-mono);">' +
-          (detailComplete ? Number(analysis.winning_combinations || 0).toLocaleString() : 'No retenido') + '</span></div>',
+          (detailComplete ? Number(analysis.winning_combinations || 0).toLocaleString() : 'Not retained') + '</span></div>',
         '<div class="history-metric" role="cell"><strong>' + bestStrategy + '</strong></div>',
         '<div class="history-metric" role="cell"><span class="match-tag">' +
-          (detailComplete ? matchLabel(analysis.best_match, data.game.extra_ball_name) : 'Detalle parcial') + '</span></div>',
+          (detailComplete ? matchLabel(analysis.best_match, data.game.extra_ball_name) : 'Partial detail') + '</span></div>',
         '<div class="history-action" role="cell">',
-          '<button class="pagination-button view-analysis-button" type="button" data-draw-date="' + draw.draw_date + '">Ver Análisis</button>',
+          '<button class="pagination-button view-analysis-button" type="button" data-draw-date="' + draw.draw_date + '">View Analysis</button>',
         '</div>',
       '</div>'
     ].join('');
@@ -395,21 +395,21 @@ function summaryPanel(data) {
   const coverage = Math.round(Number(summary.detail_coverage || 0) * 100);
   const roiVal = summary.roi == null ? 0 : Number(summary.roi);
   const roiClass = roiVal >= 0 ? 'pos' : 'neg';
-  const roiText = summary.roi == null ? 'No disponible' : (roiVal * 100).toFixed(1) + '%';
+  const roiText = summary.roi == null ? 'Not available' : (roiVal * 100).toFixed(1) + '%';
 
   return [
     '<section id="analysis-panel-summary" class="analysis-panel active" role="tabpanel" aria-labelledby="analysis-tab-summary">',
       '<div class="analysis-summary-grid">',
-        '<div><span>Premios Ganados</span><strong style="color: var(--mega);">' + money(summary.total_won) + '</strong></div>',
-        '<div><span>Costo Teórico</span><strong>' + moneyExact(summary.total_cost) + '</strong></div>',
-        '<div><span>Combinaciones Evaluadas</span><strong>' + Number(summary.evaluated_combinations || 0).toLocaleString() + '</strong></div>',
-        '<div><span>Retorno / ROI</span><strong class="' + roiClass + '">' + (roiVal >= 0 ? '+' : '') + roiText + '</strong></div>',
+        '<div><span>Total Won</span><strong style="color: var(--mega);">' + money(summary.total_won) + '</strong></div>',
+        '<div><span>Theoretical Cost</span><strong>' + moneyExact(summary.total_cost) + '</strong></div>',
+        '<div><span>Evaluated Combinations</span><strong>' + Number(summary.evaluated_combinations || 0).toLocaleString() + '</strong></div>',
+        '<div><span>Return / ROI</span><strong class="' + roiClass + '">' + (roiVal >= 0 ? '+' : '') + roiText + '</strong></div>',
       '</div>',
       '<div class="coverage-note ' + (coverage < 100 ? 'is-partial' : '') + '">',
-        '<strong>' + coverage + '% de detalle retenido</strong>',
+        '<strong>' + coverage + '% detail retained</strong>',
         '<p>' + (coverage < 100 ?
-          'Los totales por estrategia son completos, aunque no se retuvieron combinaciones individuales para todos los sorteos históricos.' :
-          'Todas las combinaciones evaluadas están disponibles para este sorteo.') + '</p>',
+          'Strategy totals are complete, though individual combinations were not retained for all historical draws.' :
+          'All evaluated combinations are available for this draw.') + '</p>',
       '</div>',
     '</section>'
   ].join('');
@@ -423,10 +423,10 @@ function strategiesPanel(data) {
           '<thead>',
             '<tr>',
               '<th style="width: 50px;">Pos</th>',
-              '<th>Estrategia</th>',
-              '<th style="text-align: right;">Premios Ganados</th>',
+              '<th>Strategy</th>',
+              '<th style="text-align: right;">Total Won</th>',
               '<th style="text-align: right;">ROI</th>',
-              '<th>Máximo Acierto</th>',
+              '<th>Best Match</th>',
             '</tr>',
           '</thead>',
           '<tbody>',
@@ -458,19 +458,19 @@ function combinationsPanel(data) {
   return [
     '<section id="analysis-panel-combinations" class="analysis-panel" role="tabpanel" aria-labelledby="analysis-tab-combinations" hidden>',
       '<div class="control-row analysis-filters" style="margin-bottom: 16px;">',
-        '<label style="font-weight: 600; display: flex; align-items: center; gap: 8px;">Estrategia:',
+        '<label style="font-weight: 600; display: flex; align-items: center; gap: 8px;">Strategy:',
           '<select id="analysis-strategy-filter" class="filter-control">',
-            '<option value="all">Todas las estrategias</option>',
+            '<option value="all">All strategies</option>',
             strategies.map(function (strategy) {
               return '<option value="' + strategy.strategy_id + '">' + strategyName(strategy.strategy_id || strategy.name) + '</option>';
             }).join(''),
           '</select>',
         '</label>',
-        '<label style="font-weight: 600; display: flex; align-items: center; gap: 8px;">Resultado:',
+        '<label style="font-weight: 600; display: flex; align-items: center; gap: 8px;">Result:',
           '<select id="analysis-result-filter" class="filter-control">',
-            '<option value="all">Todos los resultados</option>',
-            '<option value="winning" selected>Combinaciones ganadoras</option>',
-            '<option value="no_prize">Sin premio</option>',
+            '<option value="all">All results</option>',
+            '<option value="winning" selected>Winning combinations</option>',
+            '<option value="no_prize">No prize</option>',
           '</select>',
         '</label>',
         '<span id="analysis-combination-count" class="filter-count" style="margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 600;"></span>',
@@ -489,7 +489,7 @@ function distributionPanel(data) {
           '<table class="data-table ranking-table">',
             '<thead>',
               '<tr>',
-                '<th>Categoría de Acierto</th>',
+                '<th>Match Category</th>',
                 '<th style="text-align: right;">Combinaciones</th>',
                 '<th style="text-align: right;">Premios Ganados</th>',
               '</tr>',
@@ -499,14 +499,14 @@ function distributionPanel(data) {
                 return [
                   '<tr>',
                     '<td><span class="match-tag">' + matchLabel({ white: row.white_matches, extra: row.extra_match }, data.game.extra_ball_name) + '</span></td>',
-                    '<td style="text-align: right; font-family: var(--font-mono);">' + Number(row.combinations || 0).toLocaleString() + ' combinaciones</td>',
+                    '<td style="text-align: right; font-family: var(--font-mono);">' + Number(row.combinations || 0).toLocaleString() + ' combinations</td>',
                     '<td style="text-align: right; font-weight: 700; font-family: var(--font-mono); color: var(--mega);">' + money(row.total_won) + '</td>',
                   '</tr>'
                 ].join('');
               }).join(''),
             '</tbody>',
           '</table>'
-        ].join('') : stateMarkup('empty', 'Sin detalle de distribución retenido', 'Los totales por estrategia permanecen disponibles en la pestaña Resumen.'),
+        ].join('') : stateMarkup('empty', 'No distribution detail retained', 'Strategy totals remain available in the Summary tab.'),
       '</div>',
     '</section>'
   ].join('');
@@ -526,12 +526,12 @@ function renderCombinationList() {
     return strategyMatch && resultMatch;
   });
 
-  count.textContent = 'Mostrando ' + items.length + ' de ' + (selectedAnalysis.combinations || []).length + ' combinaciones';
+  count.textContent = 'Showing ' + items.length + ' of ' + (selectedAnalysis.combinations || []).length + ' combinations';
   if (!items.length) {
     list.innerHTML = stateMarkup(
       selectedAnalysis.combinations && selectedAnalysis.combinations.length ? 'empty' : 'empty',
-      selectedAnalysis.combinations && selectedAnalysis.combinations.length ? 'Ninguna combinación coincide con los filtros' : 'Detalle de combinaciones no retenido',
-      selectedAnalysis.combinations && selectedAnalysis.combinations.length ? 'Elige otra estrategia o resultado.' : 'Los totales completos están disponibles en Resumen y Estrategias.'
+      selectedAnalysis.combinations && selectedAnalysis.combinations.length ? 'No combinations match the filters' : 'Combination detail not retained',
+      selectedAnalysis.combinations && selectedAnalysis.combinations.length ? 'Try another strategy or result.' : 'Full totals are available in Summary and Strategies.'
     );
     return;
   }
@@ -542,9 +542,9 @@ function renderCombinationList() {
         '<thead>',
           '<tr>',
             '<th style="width: 50px;">Pos</th>',
-            '<th>Estrategia</th>',
-            '<th>Combinación</th>',
-            '<th>Resultado</th>',
+            '<th>Strategy</th>',
+            '<th>Combination</th>',
+            '<th>Result</th>',
             '<th style="text-align: right;">Premio</th>',
           '</tr>',
         '</thead>',
@@ -586,7 +586,7 @@ function activateAnalysisTab(panelName, focusTab) {
 function renderAnalysisDetail(data) {
   selectedAnalysis = data;
   document.getElementById('analysis-modal-sub').textContent = dateLabel(data.draw.draw_date) +
-    ' · ' + Number(data.summary.evaluated_combinations || 0).toLocaleString() + ' combinaciones evaluadas';
+    ' · ' + Number(data.summary.evaluated_combinations || 0).toLocaleString() + ' evaluated combinations';
   document.getElementById('analysis-modal-balls').innerHTML = ballsHTML(data.draw.numbers, data.draw.extra, true);
   document.getElementById('analysis-modal-content').innerHTML =
     summaryPanel(data) + strategiesPanel(data) + combinationsPanel(data) + distributionPanel(data);
@@ -600,11 +600,11 @@ async function openAnalysisModal(drawDate) {
   const overlay = document.getElementById('analysis-modal-overlay');
   analysisLastFocused = document.activeElement;
   selectedAnalysis = null;
-  document.getElementById('analysis-modal-title').textContent = 'Análisis de Sorteo';
-  document.getElementById('analysis-modal-sub').textContent = 'Cargando análisis de ' + dateLabel(drawDate) + '...';
+  document.getElementById('analysis-modal-title').textContent = 'Draw Analysis';
+  document.getElementById('analysis-modal-sub').textContent = 'Loading analysis for ' + dateLabel(drawDate) + '...';
   document.getElementById('analysis-modal-balls').innerHTML = '';
   document.getElementById('analysis-modal-content').innerHTML = stateMarkup(
-    'loading', 'Cargando análisis de sorteo', 'Ensamblando los resultados evaluados...'
+    'loading', 'Loading draw analysis', 'Assembling evaluated results...'
   );
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
@@ -615,11 +615,11 @@ async function openAnalysisModal(drawDate) {
   const data = await api('/api/analyses/' + encodeURIComponent(drawDate) + '?game=' + GAME);
   if (!data || data.error) {
     document.getElementById('analysis-modal-content').innerHTML = stateMarkup(
-      'error', 'Análisis no disponible', 'No se pudo cargar este sorteo evaluado. Reintenta.'
+      'error', 'Analysis unavailable', 'Could not load this evaluated draw. Please retry.'
     );
     return;
   }
-  document.getElementById('analysis-modal-title').textContent = 'Análisis de Sorteo - ' + dateLabel(data.draw.draw_date);
+  document.getElementById('analysis-modal-title').textContent = 'Draw Analysis - ' + dateLabel(data.draw.draw_date);
   renderAnalysisDetail(data);
 }
 
@@ -741,16 +741,16 @@ async function renderRankings() {
         const roiText = (roiVal * 100).toFixed(1) + '%';
         const rankClass = index === 0 ? 'gold' : (index === 1 ? 'silver' : 'bronze');
         const bestMatch = strategy.best_match || strategy.covered_best_match;
-        const bestResult = bestMatch ? matchLabel(bestMatch, data.game.extra_ball_name) : 'No retenido';
+        const bestResult = bestMatch ? matchLabel(bestMatch, data.game.extra_ball_name) : 'Not retained';
 
         return [
           '<div class="podium-card ' + (index === 0 ? 'rank-top-1' : '') + '">',
             '<div class="rank-badge-lg ' + rankClass + '">#' + strategy.rank + '</div>',
             '<div class="podium-title">' + strategyName(strategy.strategy_id || strategy.name) + '</div>',
             '<div class="podium-desc">' + strategyDescription(strategy.strategy_id || strategy.name) + '</div>',
-            '<div class="podium-stat-row"><span class="podium-stat-label">ROI Total</span><span class="podium-stat-val ' + roiClass + '">' + (roiVal >= 0 ? '+' : '') + roiText + '</span></div>',
-            '<div class="podium-stat-row"><span class="podium-stat-label">Premios Ganados</span><span class="podium-stat-val">' + money(totalWon) + '</span></div>',
-            '<div class="podium-stat-row"><span class="podium-stat-label">Máximo Acierto</span><span class="podium-stat-val" style="color: var(--mega);">' + bestResult + '</span></div>',
+            '<div class="podium-stat-row"><span class="podium-stat-label">Lifetime ROI</span><span class="podium-stat-val ' + roiClass + '">' + (roiVal >= 0 ? '+' : '') + roiText + '</span></div>',
+            '<div class="podium-stat-row"><span class="podium-stat-label">Total Won</span><span class="podium-stat-val">' + money(totalWon) + '</span></div>',
+            '<div class="podium-stat-row"><span class="podium-stat-label">Best Match</span><span class="podium-stat-val" style="color: var(--mega);">' + bestResult + '</span></div>',
           '</div>'
         ].join('');
       }).join(''),
@@ -763,12 +763,12 @@ async function renderRankings() {
         '<thead>',
           '<tr>',
             '<th style="width: 50px;">Pos</th>',
-            '<th>Modelo / Estrategia</th>',
-            '<th style="text-align: right;">Premios Ganados</th>',
-            '<th style="text-align: right;">ROI Acumulado</th>',
-            '<th style="text-align: right;">Aciertos Ganadores</th>',
-            '<th style="text-align: right;">Sorteos Evaluados</th>',
-            '<th>Máximo Acierto</th>',
+            '<th>Model / Strategy</th>',
+            '<th style="text-align: right;">Total Won</th>',
+            '<th style="text-align: right;">Lifetime ROI</th>',
+            '<th style="text-align: right;">Winning Combinations</th>',
+            '<th style="text-align: right;">Evaluated Draws</th>',
+            '<th>Best Match</th>',
           '</tr>',
         '</thead>',
         '<tbody>',
@@ -779,7 +779,7 @@ async function renderRankings() {
             const winningCombinations = complete ? Number(strategy.winning_combinations || 0).toLocaleString() :
               Number(strategy.covered_winning_combinations || 0).toLocaleString();
             const bestMatch = strategy.best_match || strategy.covered_best_match;
-            const bestResult = bestMatch ? matchLabel(bestMatch, data.game.extra_ball_name) : 'No retenido';
+            const bestResult = bestMatch ? matchLabel(bestMatch, data.game.extra_ball_name) : 'Not retained';
             const roiVal = Number(strategy.lifetime_roi || 0);
             const roiClass = roiVal >= 0 ? 'pos' : 'neg';
             const roiText = (roiVal * 100).toFixed(1) + '%';
@@ -865,7 +865,7 @@ async function renderTechnicalStrategies() {
   const body = document.getElementById('strategies-body');
 
   if (!strategies || !strategies.length) {
-    body.innerHTML = '<tr><td colspan="7">No hay datos de estrategias disponibles.</td></tr>';
+    body.innerHTML = '<tr><td colspan="7">No strategy data available.</td></tr>';
     return;
   }
 
@@ -876,7 +876,7 @@ async function renderTechnicalStrategies() {
   body.innerHTML = strategies.map(function (strategy, index) {
     const weight = Number(strategy.current_weight || 0);
     const fill = maxWeight ? (weight / maxWeight * 100).toFixed(1) : 0;
-    const statusText = String(strategy.status || 'active') === 'active' ? 'Activo' : 'Inactivo';
+    const statusText = String(strategy.status || 'active') === 'active' ? 'Active' : 'Inactive';
     return [
       '<tr>',
         '<td><strong style="color: var(--accent); font-family: var(--font-mono);">#' + (index + 1) + '</strong></td>',
@@ -884,7 +884,7 @@ async function renderTechnicalStrategies() {
         '<td><span class="pill">' + statusText + '</span></td>',
         '<td><div class="weight-bar-wrap"><div class="weight-bar"><div class="weight-fill" style="width:' +
           fill + '%"></div></div><span class="weight-val">' + weight.toFixed(4) + '</span></div></td>',
-        '<td id="spark-' + strategy.id + '"><span class="spark-empty">Cargando</span></td>',
+        '<td id="spark-' + strategy.id + '"><span class="spark-empty">Loading</span></td>',
         '<td>' + roi(strategy.avg_roi) + '</td>',
         '<td style="font-weight: 700; font-family: var(--font-mono); color: var(--mega);">' + money(strategy.lifetime_prize || 0) + '</td>',
       '</tr>'
@@ -901,13 +901,13 @@ async function renderLastCycle() {
 
   if (!data || data.message) {
     meta.textContent = '';
-    body.innerHTML = '<tr><td colspan="8">No hay ciclo evaluado disponible.</td></tr>';
+    body.innerHTML = '<tr><td colspan="8">No evaluated cycle available.</td></tr>';
     return;
   }
 
   const cycle = data.cycle;
   const results = data.strategy_results || [];
-  meta.textContent = 'Sorteo del ' + dateLabel(cycle.draw_date) + ': ' +
+  meta.textContent = 'Draw on ' + dateLabel(cycle.draw_date) + ': ' +
     [cycle.n1, cycle.n2, cycle.n3, cycle.n4, cycle.n5].join(' - ') +
     ' / PB ' + cycle.pb;
 
@@ -943,15 +943,15 @@ function parseNumbers(value) {
 function prizeLabel(value) {
   const normalized = String(value || '').toLowerCase().replace(/\s/g, '');
   if (normalized === 'match0+pb') return 'Powerball';
-  if (normalized === 'match1+pb') return '1 acierto + PB';
-  if (normalized === 'match2+pb') return '2 aciertos + PB';
-  if (normalized === 'match3') return '3 aciertos';
-  if (normalized === 'match3+pb') return '3 aciertos + PB';
-  if (normalized === 'match4') return '4 aciertos';
-  if (normalized === 'match4+pb') return '4 aciertos + PB';
-  if (normalized === 'match5') return '5 aciertos';
+  if (normalized === 'match1+pb') return '1 match + PB';
+  if (normalized === 'match2+pb') return '2 matches + PB';
+  if (normalized === 'match3') return '3 matches';
+  if (normalized === 'match3+pb') return '3 matches + PB';
+  if (normalized === 'match4') return '4 matches';
+  if (normalized === 'match4+pb') return '4 matches + PB';
+  if (normalized === 'match5') return '5 matches';
   if (normalized === 'jackpot') return 'Jackpot';
-  return String(value || 'Premio verificado').replace(/\+/g, ' + ');
+  return String(value || 'Verified prize').replace(/\+/g, ' + ');
 }
 
 async function renderWins() {
@@ -963,14 +963,14 @@ async function renderWins() {
     total.textContent = '';
     list.innerHTML = stateMarkup(
       data ? 'empty' : 'error',
-      data ? 'No hay aciertos recientes aún' : 'Aciertos recientes no disponibles',
-      data ? 'Los aciertos verificados aparecerán tras evaluar sorteos.' : 'Reintenta cuando el servicio esté disponible.'
+      data ? 'No recent wins yet' : 'Recent wins unavailable',
+      data ? 'Verified wins will appear after draws are evaluated.' : 'Retry when the service is available.'
     );
     return;
   }
 
-  total.innerHTML = '<strong style="color: var(--mega); font-size: 16px;">' + money(data.total_amount) + '</strong> acumulados en <strong style="color: var(--ink); font-size: 13.5px;">' +
-    Number(data.total_count).toLocaleString() + ' aciertos</strong>';
+  total.innerHTML = '<strong style="color: var(--mega); font-size: 16px;">' + money(data.total_amount) + '</strong> earned across <strong style="color: var(--ink); font-size: 13.5px;">' +
+    Number(data.total_count).toLocaleString() + ' wins</strong>';
 
   list.innerHTML = (data.wins || []).slice(0, 6).map(function (win) {
     const numbers = parseNumbers(win.numbers);
@@ -997,9 +997,9 @@ function internalScore(value) {
 
 function updateNextAnalysisFilter() {
   const select = document.getElementById('next-analysis-strategy');
-  select.innerHTML = '<option value="all">Todas las 160 combinaciones</option>' +
+  select.innerHTML = '<option value="all">All 160 combinations</option>' +
     nextAnalysisStrategies.map(function (strategy) {
-      return '<option value="' + strategy.id + '">' + strategyName(strategy.id) + ' (20 combinaciones)</option>';
+      return '<option value="' + strategy.id + '">' + strategyName(strategy.id) + ' (20 combinations)</option>';
     }).join('');
   select.value = nextAnalysisStrategy;
   select.disabled = false;
@@ -1011,8 +1011,8 @@ function updateNextAnalysisPagination(visibleCount) {
   const page = Math.floor(nextAnalysisOffset / NEXT_ANALYSIS_LIMIT) + 1;
   const pages = Math.max(1, Math.ceil(nextAnalysisTotal / NEXT_ANALYSIS_LIMIT));
   document.getElementById('next-analysis-count').textContent =
-    'Mostrando ' + start + '-' + end + ' de ' + nextAnalysisTotal + ' combinaciones analíticas';
-  document.getElementById('next-analysis-page').textContent = 'Página ' + page + ' de ' + pages;
+    'Showing ' + start + '-' + end + ' of ' + nextAnalysisTotal + ' analytical combinations';
+  document.getElementById('next-analysis-page').textContent = 'Page ' + page + ' of ' + pages;
   document.getElementById('next-analysis-prev').disabled = nextAnalysisOffset === 0;
   document.getElementById('next-analysis-next').disabled = nextAnalysisOffset + visibleCount >= nextAnalysisTotal;
 }
@@ -1022,21 +1022,21 @@ async function renderNextAnalysis() {
   const list = document.getElementById('next-analysis-list');
   document.getElementById('next-analysis-prev').disabled = true;
   document.getElementById('next-analysis-next').disabled = true;
-  list.innerHTML = stateMarkup('loading', 'Cargando combinaciones', 'Preparando la primera página del análisis.');
+  list.innerHTML = stateMarkup('loading', 'Loading combinations', 'Preparing the first page of the analysis.');
   const strategyQuery = nextAnalysisStrategy === 'all' ? '' : '&strategy=' + encodeURIComponent(nextAnalysisStrategy);
   const data = await api('/api/next-draw-analysis?game=' + GAME + '&limit=' + NEXT_ANALYSIS_LIMIT +
     '&offset=' + nextAnalysisOffset + strategyQuery);
 
   if (!data) {
-    context.innerHTML = stateMarkup('error', 'Próximo sorteo no disponible', 'Reintenta cuando el servicio esté disponible.');
-    list.innerHTML = stateMarkup('error', 'Análisis no disponible', 'No se pudieron cargar las combinaciones.');
+    context.innerHTML = stateMarkup('error', 'Next draw unavailable', 'Retry when the service is available.');
+    list.innerHTML = stateMarkup('error', 'Analysis unavailable', 'Could not load the combinations.');
     nextAnalysisTotal = 0;
     updateNextAnalysisPagination(0);
     return;
   }
   if (!data.found) {
-    context.innerHTML = stateMarkup('empty', 'Próximo ciclo no generado aún', 'Las 160 combinaciones aparecerán cuando el ciclo esté listo.');
-    list.innerHTML = stateMarkup('empty', 'Sin análisis aún', 'Estado temporal del ciclo.');
+    context.innerHTML = stateMarkup('empty', 'Next cycle not generated yet', 'The 160 combinations will appear once the cycle is ready.');
+    list.innerHTML = stateMarkup('empty', 'No analysis yet', 'Temporary cycle status.');
     document.getElementById('next-analysis-strategy').disabled = true;
     nextAnalysisTotal = 0;
     updateNextAnalysisPagination(0);
@@ -1044,9 +1044,9 @@ async function renderNextAnalysis() {
   }
 
   context.innerHTML = [
-    '<div><span>Próximo Sorteo</span><strong>' + dateLabel(data.draw_date) + '</strong></div>',
-    '<div><span>Jackpot Estimado</span><strong style="color: var(--mega);">' + (data.jackpot && data.jackpot.found ? money(data.jackpot.amount) : 'No disponible') + '</strong></div>',
-    '<div><span>Estado del Análisis</span><strong style="color: var(--positive);">' + Number(data.expected_combinations || 0).toLocaleString() + ' combinaciones listas</strong></div>'
+    '<div><span>Next Draw</span><strong>' + dateLabel(data.draw_date) + '</strong></div>',
+    '<div><span>Estimated Jackpot</span><strong style="color: var(--mega);">' + (data.jackpot && data.jackpot.found ? money(data.jackpot.amount) : 'Not available') + '</strong></div>',
+    '<div><span>Analysis Status</span><strong style="color: var(--positive);">' + Number(data.expected_combinations || 0).toLocaleString() + ' combinations ready</strong></div>'
   ].join('');
 
   if (nextAnalysisStrategy === 'all' && nextAnalysisOffset === 0 && !nextAnalysisStrategies.length) {

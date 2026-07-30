@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Reporte probabilístico, tickets proyectados y resultados verificados en SHIOL+ v9."/>
-  <title>SHIOL+ | Reporte Analítico</title>
+  <meta name="description" content="Probabilistic report, projected combinations, and verified results on SHIOL+ v9."/>
+  <title>SHIOL+ | Analytics Report</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body class="report-page">
-  <a class="skip-link" href="#main-report">Saltar al reporte</a>
+  <a class="skip-link" href="#main-report">Skip to report</a>
 
   <!-- Main Top Bar -->
   <header class="topbar report-topbar">
@@ -29,28 +29,28 @@
         <span class="brand-plus">+</span>
         <span class="brand-tag">v9 Analytics</span>
       </a>
-      <nav class="desktop-nav" aria-label="Secciones del reporte">
-        <a href="#overview" class="nav-link active" aria-current="location">Resumen</a>
-        <a href="#draw-history" class="nav-link">Histórico de Sorteos</a>
-        <a href="#rankings" class="nav-link">Ranking de Modelos</a>
-        <a href="#next-analysis" class="nav-link">Próximo Sorteo</a>
+      <nav class="desktop-nav" aria-label="Report sections">
+        <a href="#overview" class="nav-link active" aria-current="location">Overview</a>
+        <a href="#draw-history" class="nav-link">Draw History</a>
+        <a href="#rankings" class="nav-link">Rankings</a>
+        <a href="#next-analysis" class="nav-link">Next Draw</a>
       </nav>
       <div class="data-status" role="status" aria-live="polite">
-        <span class="status-dot" aria-hidden="true"></span><span id="report-status">Datos en tiempo real</span>
+        <span class="status-dot" aria-hidden="true"></span><span id="report-status">Live data</span>
       </div>
     </div>
   </header>
 
   <main class="report-shell" id="main-report">
     <!-- Disclaimer Banner -->
-    <aside class="trust-banner report-trust-banner" aria-label="Información importante">
-      <strong>Aviso Estadístico</strong>
-      <span>Análisis probabilístico descriptivo. Los resultados pasados no garantizan premios futuros.</span>
-      <a href="legal.html#important-disclaimer">Ver descargo de responsabilidad</a>
+    <aside class="trust-banner report-trust-banner" aria-label="Important notice">
+      <strong>Statistical Notice</strong>
+      <span>Descriptive probabilistic analysis. Past results do not guarantee future prizes.</span>
+      <a href="legal.html#important-disclaimer">Read disclaimer</a>
     </aside>
 
     <!-- Game Switcher Pills Bar -->
-    <div class="game-switcher" aria-label="Seleccionar juego">
+    <div class="game-switcher" aria-label="Select game">
       <a href="game.html?game=powerball" data-game="powerball">🔴 Powerball</a>
       <a href="game.html?game=mega_millions" data-game="mega_millions">🟡 Mega Millions</a>
       <a href="game.html?game=cash5" data-game="cash5">🟢 NC Cash 5</a>
@@ -59,41 +59,41 @@
     <!-- Intro Headline -->
     <section class="report-intro">
       <div>
-        <p class="eyebrow">Reporte de Analítica en Vivo</p>
-        <h1 id="report-title">Reporte de Estrategias</h1>
+        <p class="eyebrow">Live Strategy Report</p>
+        <h1 id="report-title">Strategy Report</h1>
         <p id="report-description" class="report-lead">
-          Evaluación continua de rendimiento histórico y combinaciones analíticas preparadas para el próximo sorteo.
+          Continuous evaluation of historical performance and analytical combinations prepared for the next draw.
         </p>
       </div>
-      <button class="text-action" type="button" data-report-details-open style="margin-top: 12px;">Ver detalles técnicos <span aria-hidden="true">&rarr;</span></button>
+      <button class="text-action" type="button" data-report-details-open style="margin-top: 12px;">View technical details <span aria-hidden="true">&rarr;</span></button>
     </section>
 
     <!-- Overview Metrics Stage -->
     <section class="report-section report-stage report-stage-overview" id="overview" aria-labelledby="overview-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Juego Seleccionado</p>
-          <h2 id="overview-title">Resumen General</h2>
+          <p class="eyebrow">Selected Game</p>
+          <h2 id="overview-title">Overview</h2>
         </div>
         <div class="section-heading-actions">
-          <p class="section-note">Métricas del sorteo actual e histórico acumulado.</p>
+          <p class="section-note">Current draw metrics and cumulative lifetime evaluation.</p>
         </div>
       </div>
 
       <div class="summary-band">
         <div class="summary-item jackpot-summary">
-          <span class="summary-label">Jackpot Estimado</span>
-          <strong id="jackpot-amount" class="summary-primary">Cargando...</strong>
-          <span id="jackpot-sub" class="summary-secondary">Próximo sorteo oficial</span>
+          <span class="summary-label">Estimated Jackpot</span>
+          <strong id="jackpot-amount" class="summary-primary">Loading...</strong>
+          <span id="jackpot-sub" class="summary-secondary">Next official draw</span>
         </div>
         <div class="summary-item">
-          <span class="summary-label">Próximo Sorteo</span>
-          <strong id="countdown-value" class="summary-value">Cargando...</strong>
-          <span id="next-draw-label" class="summary-secondary">Cargando horario...</span>
+          <span class="summary-label">Next Draw</span>
+          <strong id="countdown-value" class="summary-value">Loading...</strong>
+          <span id="next-draw-label" class="summary-secondary">Loading schedule...</span>
         </div>
         <div class="summary-item latest-summary">
-          <span class="summary-label">Último Resultado <span id="draw-date"></span></span>
-          <div class="draw-balls" id="draw-balls" aria-label="Números del último sorteo">
+          <span class="summary-label">Latest Result <span id="draw-date"></span></span>
+          <div class="draw-balls" id="draw-balls" aria-label="Latest draw numbers">
             <span class="ball skeleton"></span><span class="ball skeleton"></span>
             <span class="ball skeleton"></span><span class="ball skeleton"></span>
             <span class="ball skeleton"></span><span class="ball extra skeleton"></span>
@@ -101,21 +101,21 @@
         </div>
       </div>
 
-      <div class="performance-strip" aria-label="Resumen de evaluación acumulada">
+      <div class="performance-strip" aria-label="Cumulative evaluation summary">
         <div>
-          <span class="summary-label">Premios Generados</span>
-          <strong id="overview-total-won">Cargando...</strong>
-          <small id="overview-total-cost">En todas las combinaciones evaluadas</small>
+          <span class="summary-label">Total Won</span>
+          <strong id="overview-total-won">Loading...</strong>
+          <small id="overview-total-cost">Across all evaluated combinations</small>
         </div>
         <div>
-          <span class="summary-label">Historial de Evaluación</span>
-          <strong id="overview-draws">Cargando...</strong>
-          <small id="overview-combinations">Cargando total de combinaciones...</small>
+          <span class="summary-label">Evaluation History</span>
+          <strong id="overview-draws">Loading...</strong>
+          <small id="overview-combinations">Loading combination totals...</small>
         </div>
         <div>
-          <span class="summary-label">Estrategia Líder</span>
-          <strong id="overview-leader">Cargando...</strong>
-          <small id="overview-leader-note">Ordenado por premios ganados</small>
+          <span class="summary-label">Leading Strategy</span>
+          <strong id="overview-leader">Loading...</strong>
+          <small id="overview-leader-note">Ranked by prizes won</small>
         </div>
       </div>
     </section>
@@ -124,31 +124,31 @@
     <section id="draw-history" class="report-section report-stage" aria-labelledby="draw-history-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Historial Evaluado</p>
-          <h2 id="draw-history-title">Sorteos Verificados</h2>
+          <p class="eyebrow">Evaluated Draws</p>
+          <h2 id="draw-history-title">Draw History</h2>
         </div>
-        <p class="section-note">Diez análisis por página con detalle retenido claramente marcado.</p>
+        <p class="section-note">Ten analyses per page, with retained detail clearly marked.</p>
       </div>
 
-      <div class="history-table" role="table" aria-label="Historial de sorteos evaluados">
+      <div class="history-table" role="table" aria-label="Evaluated draw history">
         <div class="history-header" role="row">
-          <span>Fecha y Resultado</span><span>Premios</span><span>Combinaciones Ganadoras</span>
-          <span>Mejor Estrategia</span><span>Máximo Acierto</span><span>Acción</span>
+          <span>Date &amp; Result</span><span>Won</span><span>Winning Combinations</span>
+          <span>Best Strategy</span><span>Best Match</span><span>Action</span>
         </div>
         <div id="history-body" class="history-body">
           <div class="ui-state ui-state-loading" role="status">
             <span class="ui-state-marker" aria-hidden="true"></span>
-            <div><strong>Cargando historial de sorteos</strong><p>Recuperando evaluaciones históricas...</p></div>
+            <div><strong>Loading draw history</strong><p>Retrieving historical evaluations...</p></div>
           </div>
         </div>
       </div>
 
       <div class="list-footer history-footer">
-        <span id="history-count">Cargando cobertura de historial...</span>
-        <div class="pagination" aria-label="Paginación de historial">
-          <button id="history-prev" class="pagination-button" type="button" disabled>Anterior</button>
-          <span id="history-page">Página 1</span>
-          <button id="history-next" class="pagination-button" type="button" disabled>Siguiente</button>
+        <span id="history-count">Loading history coverage...</span>
+        <div class="pagination" aria-label="History pagination">
+          <button id="history-prev" class="pagination-button" type="button" disabled>Previous</button>
+          <span id="history-page">Page 1</span>
+          <button id="history-next" class="pagination-button" type="button" disabled>Next</button>
         </div>
       </div>
     </section>
@@ -157,26 +157,26 @@
     <section id="rankings" class="report-section report-stage" aria-labelledby="rankings-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Rendimiento Histórico</p>
-          <h2 id="rankings-title">Ranking de Modelos Algorítmicos</h2>
+          <p class="eyebrow">Lifetime Performance</p>
+          <h2 id="rankings-title">Historical Strategy Rankings</h2>
         </div>
-        <p class="section-note">Acumulado en todos los sorteos evaluados.</p>
+        <p class="section-note">Cumulative across all evaluated draws.</p>
       </div>
 
       <!-- Historical Strategy Ranking Container (Rendered by JS) -->
-      <div id="podium" class="historical-ranking-container" aria-label="Ranking de estrategias">
+      <div id="podium" class="historical-ranking-container" aria-label="Strategy rankings">
         <div class="ui-state ui-state-loading" role="status">
           <span class="ui-state-marker" aria-hidden="true"></span>
-          <div><strong>Cargando ranking histórico</strong><p>Comparando resultados de modelos probabilísticos...</p></div>
+          <div><strong>Loading historical rankings</strong><p>Comparing probabilistic model results...</p></div>
         </div>
       </div>
 
       <div class="list-footer rankings-footer">
         <div>
-          <span id="rankings-count">Cargando cobertura de ranking...</span>
-          <small id="rankings-coverage" style="display: block; margin-top: 2px;">Verificando detalle retenido...</small>
+          <span id="rankings-count">Loading ranking coverage...</span>
+          <small id="rankings-coverage" style="display: block; margin-top: 2px;">Verifying retained detail...</small>
         </div>
-        <button class="text-action" type="button" data-report-details-open>Métricas técnicas <span aria-hidden="true">&rarr;</span></button>
+        <button class="text-action" type="button" data-report-details-open>Technical metrics <span aria-hidden="true">&rarr;</span></button>
       </div>
     </section>
 
@@ -184,46 +184,46 @@
     <section id="next-analysis" class="report-section report-stage" aria-labelledby="next-analysis-title">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Próximo Sorteo</p>
-          <h2 id="next-analysis-title">Análisis Proyectado</h2>
+          <p class="eyebrow">Upcoming Draw</p>
+          <h2 id="next-analysis-title">Next Draw Analysis</h2>
         </div>
-        <p class="section-note">160 combinaciones ordenadas por score interno de confianza.</p>
+        <p class="section-note">160 combinations ordered by raw internal confidence score.</p>
       </div>
 
-      <div id="next-analysis-context" class="next-analysis-context" aria-label="Contexto del próximo sorteo">
+      <div id="next-analysis-context" class="next-analysis-context" aria-label="Next draw context">
         <div class="ui-state ui-state-loading" role="status">
           <span class="ui-state-marker" aria-hidden="true"></span>
-          <div><strong>Cargando análisis</strong><p>Verificando ciclo de proyecciones...</p></div>
+          <div><strong>Loading analysis</strong><p>Verifying projection cycle...</p></div>
         </div>
       </div>
 
       <div class="control-row next-analysis-controls">
-        <label style="font-weight: 600;">Estrategia:
+        <label style="font-weight: 600;">Strategy:
           <select id="next-analysis-strategy" class="filter-control" disabled>
-            <option value="all">Todas las 160 combinaciones</option>
+            <option value="all">All 160 combinations</option>
           </select>
         </label>
-        <p style="margin: 0; font-size: 12px; color: var(--muted);">Posición asignada por puntuación cuantitativa de confianza.</p>
+        <p style="margin: 0; font-size: 12px; color: var(--muted);">Position assigned by quantitative confidence score.</p>
       </div>
 
-      <div class="next-analysis-table" role="table" aria-label="Combinaciones para el próximo sorteo">
+      <div class="next-analysis-table" role="table" aria-label="Combinations for the next draw">
         <div class="next-analysis-header" role="row">
-          <span>Posición</span><span>Combinación Generada</span><span>Modelo</span><span>Score Interno</span>
+          <span>Position</span><span>Generated Combination</span><span>Model</span><span>Internal Score</span>
         </div>
         <div id="next-analysis-list" class="next-analysis-list">
           <div class="ui-state ui-state-loading" role="status">
             <span class="ui-state-marker" aria-hidden="true"></span>
-            <div><strong>Cargando combinaciones</strong><p>Preparando primera página de proyecciones...</p></div>
+            <div><strong>Loading combinations</strong><p>Preparing first page of projections...</p></div>
           </div>
         </div>
       </div>
 
       <div class="list-footer next-analysis-footer">
-        <span id="next-analysis-count">Cargando cobertura de análisis...</span>
-        <div class="pagination" aria-label="Paginación de próximo sorteo">
-          <button id="next-analysis-prev" class="pagination-button" type="button" disabled>Anterior</button>
-          <span id="next-analysis-page">Página 1</span>
-          <button id="next-analysis-next" class="pagination-button" type="button" disabled>Siguiente</button>
+        <span id="next-analysis-count">Loading analysis coverage...</span>
+        <div class="pagination" aria-label="Next draw pagination">
+          <button id="next-analysis-prev" class="pagination-button" type="button" disabled>Previous</button>
+          <span id="next-analysis-page">Page 1</span>
+          <button id="next-analysis-next" class="pagination-button" type="button" disabled>Next</button>
         </div>
       </div>
     </section>
@@ -232,44 +232,44 @@
   <!-- Technical Details Modal Overlay (Hidden by default via .modal-overlay CSS) -->
   <div class="modal-overlay report-details-overlay" id="report-details-modal" aria-hidden="true">
     <div class="modal-card report-details-card" role="dialog" aria-modal="true" aria-labelledby="report-details-title">
-      <button class="modal-close" id="report-details-close" type="button" aria-label="Cerrar detalles del reporte">&times;</button>
-      <p class="eyebrow">Datos de Respaldo</p>
-      <h2 id="report-details-title">Detalles Técnicos del Reporte</h2>
-      <p class="modal-sub" id="report-details-subtitle">Resultados verificados, métricas completas de modelos y último ciclo de evaluación.</p>
-      
+      <button class="modal-close" id="report-details-close" type="button" aria-label="Close report details">&times;</button>
+      <p class="eyebrow">Supporting Data</p>
+      <h2 id="report-details-title">Technical Report Details</h2>
+      <p class="modal-sub" id="report-details-subtitle">Verified results, full model metrics, and the latest evaluation cycle.</p>
+
       <div id="report-details-content">
         <section class="report-details-wins">
           <div class="section-heading">
-            <div><p class="eyebrow">Resultados Verificados</p><h3>Aciertos Recientes</h3></div>
+            <div><p class="eyebrow">Verified Results</p><h3>Recent Wins</h3></div>
             <div class="wins-total" id="wins-total"></div>
           </div>
-          <div id="wins-grid" class="wins-list"><div class="loading">Cargando aciertos...</div></div>
+          <div id="wins-grid" class="wins-list"><div class="loading">Loading wins...</div></div>
         </section>
 
         <details id="rankings-details" style="margin-top: 20px;">
-          <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Métricas extendidas y pesos de modelos</summary>
+          <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Extended metrics and model weights</summary>
           <p class="details-intro" style="margin-top: 8px; color: var(--muted); font-size: 12.5px;">
-            El peso asignado representa la confianza del motor en el modelo actual. El ROI compara los premios con el costo teórico de los tickets.
+            The assigned weight reflects the engine's current confidence in each model. ROI compares prizes won against the theoretical ticket cost.
           </p>
           <div class="table-wrap" style="margin-top: 12px; overflow-x: auto;">
             <table id="strategies-table" class="data-table">
               <thead>
-                <tr><th>#</th><th>Modelo</th><th>Estado</th><th>Peso</th><th>Tendencia</th><th>ROI Prom.</th><th>Total Premio</th></tr>
+                <tr><th>#</th><th>Model</th><th>Status</th><th>Weight</th><th>Trend</th><th>Avg ROI</th><th>Total Won</th></tr>
               </thead>
-              <tbody id="strategies-body"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody>
+              <tbody id="strategies-body"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody>
             </table>
           </div>
         </details>
 
         <details id="last-cycle" style="margin-top: 16px;">
-          <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Desglose del último ciclo</summary>
-          <p class="details-intro" id="cycle-meta" style="margin-top: 8px; color: var(--muted); font-size: 12.5px;">Cargando...</p>
+          <summary style="font-weight: 700; cursor: pointer; color: var(--accent);">Last cycle breakdown</summary>
+          <p class="details-intro" id="cycle-meta" style="margin-top: 8px; color: var(--muted); font-size: 12.5px;">Loading...</p>
           <div class="table-wrap" style="margin-top: 12px; overflow-x: auto;">
             <table class="data-table">
               <thead>
-                <tr><th>Estrategia</th><th>Tickets</th><th>3 Aciertos</th><th>4 Aciertos</th><th>5 Aciertos</th><th>Premio</th><th>ROI</th><th>Ajuste de Peso</th></tr>
+                <tr><th>Strategy</th><th>Tickets</th><th>3 Matches</th><th>4 Matches</th><th>5 Matches</th><th>Prize</th><th>ROI</th><th>Weight Adj.</th></tr>
               </thead>
-              <tbody id="cycle-body"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody>
+              <tbody id="cycle-body"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
             </table>
           </div>
         </details>
@@ -280,25 +280,25 @@
   <!-- Draw Analysis Modal Overlay (Hidden by default via .modal-overlay CSS) -->
   <div class="modal-overlay analysis-modal-overlay" id="analysis-modal-overlay" aria-hidden="true" tabindex="-1">
     <div class="modal-card analysis-modal-card" role="dialog" aria-modal="true" aria-labelledby="analysis-modal-title">
-      <button class="modal-close" id="analysis-modal-close" type="button" aria-label="Cerrar análisis de sorteo">&times;</button>
-      <p class="eyebrow">Sorteo Evaluado</p>
-      <h2 id="analysis-modal-title">Análisis Detallado</h2>
+      <button class="modal-close" id="analysis-modal-close" type="button" aria-label="Close draw analysis">&times;</button>
+      <p class="eyebrow">Evaluated Draw</p>
+      <h2 id="analysis-modal-title">Detailed Analysis</h2>
       <div class="analysis-modal-heading">
-        <p id="analysis-modal-sub" class="modal-sub">Cargando análisis...</p>
-        <div id="analysis-modal-balls" class="draw-balls" aria-label="Números del sorteo seleccionado"></div>
+        <p id="analysis-modal-sub" class="modal-sub">Loading analysis...</p>
+        <div id="analysis-modal-balls" class="draw-balls" aria-label="Selected draw numbers"></div>
       </div>
 
-      <div class="analysis-tabs" role="tablist" aria-label="Secciones de detalle del análisis">
-        <button id="analysis-tab-summary" class="analysis-tab active" type="button" role="tab" aria-selected="true" aria-controls="analysis-panel-summary" data-panel="summary">Resumen</button>
-        <button id="analysis-tab-strategies" class="analysis-tab" type="button" role="tab" aria-selected="false" aria-controls="analysis-panel-strategies" data-panel="strategies">Estrategias</button>
-        <button id="analysis-tab-combinations" class="analysis-tab" type="button" role="tab" aria-selected="false" aria-controls="analysis-panel-combinations" data-panel="combinations">Combinaciones</button>
-        <button id="analysis-tab-distribution" class="analysis-tab" type="button" role="tab" aria-selected="false" aria-controls="analysis-panel-distribution" data-panel="distribution">Distribución</button>
+      <div class="analysis-tabs" role="tablist" aria-label="Analysis detail sections">
+        <button id="analysis-tab-summary" class="analysis-tab active" type="button" role="tab" aria-selected="true" aria-controls="analysis-panel-summary" data-panel="summary">Summary</button>
+        <button id="analysis-tab-strategies" class="analysis-tab" type="button" role="tab" aria-selected="false" aria-controls="analysis-panel-strategies" data-panel="strategies">Strategies</button>
+        <button id="analysis-tab-combinations" class="analysis-tab" type="button" role="tab" aria-selected="false" aria-controls="analysis-panel-combinations" data-panel="combinations">Combinations</button>
+        <button id="analysis-tab-distribution" class="analysis-tab" type="button" role="tab" aria-selected="false" aria-controls="analysis-panel-distribution" data-panel="distribution">Distribution</button>
       </div>
 
       <div id="analysis-modal-content" class="analysis-modal-content">
         <div class="ui-state ui-state-loading" role="status">
           <span class="ui-state-marker" aria-hidden="true"></span>
-          <div><strong>Cargando análisis de sorteo</strong><p>Ensamblando resultados verificados de estrategias...</p></div>
+          <div><strong>Loading draw analysis</strong><p>Assembling verified strategy results...</p></div>
         </div>
       </div>
     </div>
@@ -310,7 +310,7 @@
         <span class="brand-text">SHIOL</span>
         <span class="brand-plus">+</span>
       </a>
-      <p class="footer-copy">&copy; 2026 SHIOL+ v9 Analytics. Todos los derechos reservados.</p>
+      <p class="footer-copy">&copy; 2026 SHIOL+ v9 Analytics. All rights reserved.</p>
     </div>
   </footer>
 
