@@ -1,0 +1,19 @@
+{
+  "name": "SHIOL+ v9 Strategy Analytics",
+  "short_name": "SHIOL+",
+  "description": "Reporte probabilístico, combinaciones proyectadas y resultados verificados de lotería.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
