@@ -338,30 +338,35 @@ button, a {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   padding: 24px;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 16px;
 }
 
 .game-report:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: var(--line-strong);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .game-report-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.game-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .game-marker {
-  display: inline-block;
   width: 10px;
   height: 10px;
-  margin-right: 8px;
   border-radius: 50%;
 }
 
@@ -370,58 +375,94 @@ button, a {
 .game-report.cash5 .game-marker { background: var(--cash5); }
 
 .game-report h3 {
-  display: inline;
-  font-size: 19px;
-  font-weight: 700;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--ink);
+  letter-spacing: -0.02em;
 }
 
-.game-report p {
-  margin: 4px 0 0;
-  font-size: 12px;
+.game-days-badge {
+  font-size: 11px;
+  font-weight: 700;
   color: var(--muted);
+  background: var(--bg-surface-elevated);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--line);
 }
 
-.report-arrow {
-  font-size: 18px;
+.game-jackpot-block {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-label {
+  font-size: 11px;
+  font-weight: 700;
   color: var(--muted);
-  transition: transform 0.2s ease, color 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
 }
 
-.game-report:hover .report-arrow {
-  color: var(--accent);
-  transform: translateX(4px);
+.jackpot-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--mega);
+  font-family: var(--font-main);
+  letter-spacing: -0.03em;
+  display: block;
 }
 
 .game-report-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
 }
 
-.game-report-metrics div span {
-  display: block;
-  font-size: 11px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.metric-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.game-report-metrics div strong {
-  display: block;
-  font-size: 15px;
+.metric-val {
+  font-size: 14px;
   font-weight: 700;
   color: var(--ink);
-  margin-top: 2px;
+  display: block;
 }
 
-.game-report-metrics div small {
-  display: block;
+.metric-val small {
   font-size: 11px;
-  color: var(--faint);
-  margin-top: 2px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.game-report-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.report-arrow {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.game-report:hover .report-arrow {
+  transform: translateX(4px);
 }
 
 /* Method Strip */

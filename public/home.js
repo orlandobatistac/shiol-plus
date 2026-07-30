@@ -47,9 +47,11 @@ function strategyName(value) {
 }
 
 function drawDays(value) {
-  const labels = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
+  const str = String(value || '').toLowerCase();
+  if (str.includes('sun') && str.includes('mon') && str.includes('sat')) return 'Todos los Días';
+  const labels = { mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie', sat: 'Sáb', sun: 'Dom' };
   return String(value || '').split(',').map(function (day) {
-    return labels[day.trim()] || day.trim();
+    return labels[day.trim().toLowerCase()] || day.trim();
   }).join(' / ');
 }
 
@@ -60,7 +62,7 @@ async function loadGameStats(gameId) {
   const top = overview.top_strategy || null;
 
   return {
-    topStrategy: top ? strategyName(top.strategy_id || top.name) : 'Not available',
+    topStrategy: top ? strategyName(top.strategy_id || top.name) : 'No disponible',
     totalWon: Number(performance.total_won || 0),
     evaluatedDraws: Number(performance.evaluated_draws || 0),
     jackpot: jackpot.found ? Number(jackpot.amount || 0) : 0
@@ -70,20 +72,35 @@ async function loadGameStats(gameId) {
 function activeReport(game, stats) {
   const gameClass = game.id === 'powerball' ? 'powerball' :
     (game.id === 'mega_millions' ? 'mega' : 'cash5');
+  const jackpotText = stats.jackpot ? money(stats.jackpot) : 'No disponible';
+  const wonText = money(stats.totalWon);
+  
   return [
     '<a class="game-report ' + gameClass + '" href="game.html?game=' + game.id + '">',
       '<div class="game-report-head">',
-        '<div>',
+        '<div class="game-title-group">',
           '<span class="game-marker" aria-hidden="true"></span>',
           '<h3>' + game.name + '</h3>',
-          '<p>' + drawDays(game.draw_days) + '</p>',
         '</div>',
-        '<span class="report-arrow" aria-hidden="true">&rarr;</span>',
+        '<span class="game-days-badge">' + drawDays(game.draw_days) + '</span>',
+      '</div>',
+      '<div class="game-jackpot-block">',
+        '<span class="card-label">Jackpot Estimado</span>',
+        '<strong class="jackpot-value">' + jackpotText + '</strong>',
       '</div>',
       '<div class="game-report-metrics">',
-        '<div><span>Current jackpot</span><strong>' + (stats.jackpot ? money(stats.jackpot) : 'Not available') + '</strong></div>',
-        '<div><span>Top strategy</span><strong>' + stats.topStrategy + '</strong></div>',
-        '<div><span>Total won</span><strong>' + money(stats.totalWon) + '</strong><small>' + stats.evaluatedDraws + ' evaluated draws</small></div>',
+        '<div class="metric-col">',
+          '<span class="card-label">Modelo Líder</span>',
+          '<strong class="metric-val">' + stats.topStrategy + '</strong>',
+        '</div>',
+        '<div class="metric-col">',
+          '<span class="card-label">Premios Generados</span>',
+          '<strong class="metric-val">' + wonText + ' <small>(' + stats.evaluatedDraws + ' sorteos)</small></strong>',
+        '</div>',
+      '</div>',
+      '<div class="game-report-footer">',
+        '<span>Explorar Estrategias</span>',
+        '<span class="report-arrow" aria-hidden="true">&rarr;</span>',
       '</div>',
     '</a>'
   ].join('');
@@ -93,8 +110,8 @@ function inactiveReport(game) {
   return [
     '<div class="game-report is-inactive">',
       '<div class="game-report-head">',
-        '<div><h3>' + game.name + '</h3><p>' + drawDays(game.draw_days) + '</p></div>',
-        '<span class="muted-status">Coming soon</span>',
+        '<div class="game-title-group"><h3>' + game.name + '</h3></div>',
+        '<span class="game-days-badge">Próximamente</span>',
       '</div>',
     '</div>'
   ].join('');
@@ -107,8 +124,8 @@ async function renderGames() {
   if (!games || !games.length) {
     grid.innerHTML = stateMarkup(
       games ? 'empty' : 'error',
-      games ? 'No active reports yet' : 'Reports temporarily unavailable',
-      games ? 'Game reports will appear when a lottery is activated.' : 'Please retry when the data service is available.'
+      games ? 'No hay reportes activos aún' : 'Reportes no disponibles temporalmente',
+      games ? 'Los reportes aparecerán cuando se active un juego.' : 'Por favor reintenta cuando el servicio esté disponible.'
     );
     return;
   }
