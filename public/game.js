@@ -97,12 +97,13 @@ function dateLabel(value, options) {
   }).format(date);
 }
 
-function ballsHTML(numbers, extra) {
+function ballsHTML(numbers, extra, isCompact) {
+  const cls = isCompact ? 'ball ball-sm' : 'ball';
   const whiteBalls = (numbers || []).map(function (number) {
-    return '<span class="ball">' + String(number).padStart(2, '0') + '</span>';
+    return '<span class="' + cls + '">' + String(number).padStart(2, '0') + '</span>';
   }).join('');
   const extraBall = extra == null ? '' :
-    '<span class="ball extra">' + String(extra).padStart(2, '0') + '</span>';
+    '<span class="' + cls + ' extra">' + String(extra).padStart(2, '0') + '</span>';
   return whiteBalls + extraBall;
 }
 
@@ -339,21 +340,21 @@ async function renderHistory() {
     const draw = analysis.draw || {};
     const detailComplete = Number(analysis.detail_coverage || 0) === 1;
     const bestStrategy = analysis.best_strategy ?
-      strategyName(analysis.best_strategy.strategy_id || analysis.best_strategy.name) : 'Not available';
+      strategyName(analysis.best_strategy.strategy_id || analysis.best_strategy.name) : 'No disponible';
     return [
       '<div class="history-row" role="row">',
         '<div class="history-result" role="cell">',
-          '<strong>' + dateLabel(draw.draw_date) + '</strong>',
-          '<div class="draw-balls">' + ballsHTML(draw.numbers, draw.extra) + '</div>',
+          '<strong class="history-date">' + dateLabel(draw.draw_date) + '</strong>',
+          '<div class="draw-balls">' + ballsHTML(draw.numbers, draw.extra, true) + '</div>',
         '</div>',
-        '<div class="history-metric" role="cell"><span>Won</span><strong>' + money(analysis.total_won) + '</strong></div>',
-        '<div class="history-metric" role="cell"><span>Winning combinations</span><strong>' +
-          (detailComplete ? Number(analysis.winning_combinations || 0).toLocaleString() : 'Not retained') + '</strong></div>',
-        '<div class="history-metric" role="cell"><span>Best strategy</span><strong>' + bestStrategy + '</strong></div>',
-        '<div class="history-metric" role="cell"><span>Best match</span><strong>' +
-          (detailComplete ? matchLabel(analysis.best_match, data.game.extra_ball_name) : 'Partial detail') + '</strong></div>',
+        '<div class="history-metric" role="cell"><strong style="font-family: var(--font-mono); font-size: 14px;">' + money(analysis.total_won) + '</strong></div>',
+        '<div class="history-metric" role="cell"><span style="font-family: var(--font-mono);">' +
+          (detailComplete ? Number(analysis.winning_combinations || 0).toLocaleString() : 'No retenido') + '</span></div>',
+        '<div class="history-metric" role="cell"><strong>' + bestStrategy + '</strong></div>',
+        '<div class="history-metric" role="cell"><span class="match-tag">' +
+          (detailComplete ? matchLabel(analysis.best_match, data.game.extra_ball_name) : 'Detalle parcial') + '</span></div>',
         '<div class="history-action" role="cell">',
-          '<button class="control-button view-analysis-button" type="button" data-draw-date="' + draw.draw_date + '">View analysis</button>',
+          '<button class="pagination-button view-analysis-button" type="button" data-draw-date="' + draw.draw_date + '">Ver Análisis</button>',
         '</div>',
       '</div>'
     ].join('');
@@ -670,41 +671,53 @@ async function renderRankings() {
     return;
   }
 
-  body.innerHTML = rankings.map(function (strategy, index) {
-    const totalWon = Number(strategy.total_won || 0);
-    const coverage = Number(strategy.detail_coverage && strategy.detail_coverage.ratio || 0);
-    const complete = coverage === 1;
-    const winningCombinations = complete ? Number(strategy.winning_combinations || 0).toLocaleString() :
-      Number(strategy.covered_winning_combinations || 0).toLocaleString() + ' retained';
-    const winRate = complete ? Number(strategy.win_rate || 0).toFixed(1) + '%' :
-      Number(strategy.covered_win_rate || 0).toFixed(1) + '% covered';
-    const bestMatch = strategy.best_match || strategy.covered_best_match;
-    const bestResult = bestMatch ? matchLabel(bestMatch, data.game.extra_ball_name) + (complete ? '' : ' · covered') : 'Not retained';
-    const delta = strategy.trend && strategy.trend.total_won_delta;
-    const trendClass = delta == null || Number(delta) === 0 ? 'is-flat' : Number(delta) > 0 ? 'is-up' : 'is-down';
-    const trendText = delta == null ? 'Trend unavailable' : Number(delta) === 0 ? 'Flat vs prior draw' :
-      (Number(delta) > 0 ? 'Up ' : 'Down ') + money(Math.abs(Number(delta))) + ' vs prior draw';
-    return [
-      '<article class="historical-ranking-card ' + (index === 0 ? 'is-leading' : '') + '" role="listitem">',
-        '<div class="ranking-card-head">',
-          '<span class="ranking-position">' + strategy.rank + '</span>',
-          '<div class="ranking-identity"><strong>' + strategyName(strategy.strategy_id || strategy.name) + '</strong>',
-            '<small>' + strategyDescription(strategy.strategy_id || strategy.name) + '</small></div>',
-          '<div class="ranking-prize"><span>Total won</span><strong>' + money(totalWon) + '</strong></div>',
-          '<span class="ranking-trend ' + trendClass + '">' + trendText + '</span>',
-        '</div>',
-        '<div class="ranking-metrics">',
-          '<div><span>Winning combinations</span><strong>' + winningCombinations + '</strong></div>',
-          '<div><span>Win rate</span><strong>' + winRate + '</strong></div>',
-          '<div><span>Combinations evaluated</span><strong>' + Number(strategy.evaluated_combinations || 0).toLocaleString() + '</strong></div>',
-          '<div><span>Draws evaluated</span><strong>' + Number(strategy.evaluated_draws || 0).toLocaleString() + '</strong></div>',
-          '<div><span>Lifetime ROI</span><strong class="' + (Number(strategy.lifetime_roi || 0) >= 0 ? 'positive' : 'negative') + '">' +
-            (Number(strategy.lifetime_roi || 0) * 100).toFixed(1) + '%</strong></div>',
-          '<div><span>Best result</span><strong>' + bestResult + '</strong></div>',
-        '</div>',
-      '</article>'
-    ].join('');
-  }).join('');
+  body.innerHTML = [
+    '<div class="ranking-table-wrap">',
+      '<table class="data-table ranking-table">',
+        '<thead>',
+          '<tr>',
+            '<th style="width: 50px;">Pos</th>',
+            '<th>Modelo / Estrategia</th>',
+            '<th style="text-align: right;">Premios Ganados</th>',
+            '<th style="text-align: right;">ROI Acumulado</th>',
+            '<th style="text-align: right;">Aciertos Ganadores</th>',
+            '<th style="text-align: right;">Sorteos Evaluados</th>',
+            '<th>Máximo Acierto</th>',
+          '</tr>',
+        '</thead>',
+        '<tbody>',
+          rankings.map(function (strategy, index) {
+            const totalWon = Number(strategy.total_won || 0);
+            const coverage = Number(strategy.detail_coverage && strategy.detail_coverage.ratio || 0);
+            const complete = coverage === 1;
+            const winningCombinations = complete ? Number(strategy.winning_combinations || 0).toLocaleString() :
+              Number(strategy.covered_winning_combinations || 0).toLocaleString();
+            const bestMatch = strategy.best_match || strategy.covered_best_match;
+            const bestResult = bestMatch ? matchLabel(bestMatch, data.game.extra_ball_name) : 'No retenido';
+            const roiVal = Number(strategy.lifetime_roi || 0);
+            const roiClass = roiVal >= 0 ? 'pos' : 'neg';
+            const roiText = (roiVal * 100).toFixed(1) + '%';
+            const rankClass = index === 0 ? 'rank-1' : (index === 1 ? 'rank-2' : (index === 2 ? 'rank-3' : 'rank-other'));
+
+            return [
+              '<tr class="' + (index === 0 ? 'top-rank-row' : '') + '">',
+                '<td><span class="rank-badge ' + rankClass + '">#' + strategy.rank + '</span></td>',
+                '<td>',
+                  '<strong style="font-size: 14px; display: block; color: var(--ink);">' + strategyName(strategy.strategy_id || strategy.name) + '</strong>',
+                  '<small style="color: var(--muted); font-size: 11px;">' + strategyDescription(strategy.strategy_id || strategy.name) + '</small>',
+                '</td>',
+                '<td style="text-align: right; font-weight: 700; font-family: var(--font-mono);">' + money(totalWon) + '</td>',
+                '<td style="text-align: right;"><span class="' + roiClass + '">' + (roiVal >= 0 ? '+' : '') + roiText + '</span></td>',
+                '<td style="text-align: right; font-family: var(--font-mono);">' + winningCombinations + '</td>',
+                '<td style="text-align: right; font-family: var(--font-mono);">' + Number(strategy.evaluated_draws || 0).toLocaleString() + '</td>',
+                '<td><span class="match-tag">' + bestResult + '</span></td>',
+              '</tr>'
+            ].join('');
+          }).join(''),
+        '</tbody>',
+      '</table>',
+    '</div>'
+  ].join('');
 
   const expected = rankings.reduce(function (sum, strategy) {
     return sum + Number(strategy.detail_coverage && strategy.detail_coverage.expected_combinations || 0);
@@ -960,12 +973,19 @@ async function renderNextAnalysis() {
     return;
   }
   list.innerHTML = items.map(function (item) {
+    const scoreNum = Number(item.analytical_score || 0);
+    const scorePct = (scoreNum <= 1 ? scoreNum * 100 : scoreNum).toFixed(1);
     return [
       '<div class="next-analysis-row" role="row">',
-        '<div class="next-analysis-position" role="cell"><strong>#' + item.pool_position + '</strong><small>of 160</small></div>',
-        '<div class="draw-balls" role="cell">' + ballsHTML(item.numbers, item.extra) + '</div>',
-        '<div class="next-analysis-method" role="cell"><strong>' + strategyName(item.strategy_id || item.strategy_name) + '</strong><small>' + strategyDescription(item.strategy_id) + '</small></div>',
-        '<div class="next-analysis-score" role="cell"><strong>' + internalScore(item.analytical_score) + '</strong><small>raw internal score</small></div>',
+        '<div class="next-analysis-position" role="cell"><strong style="color: var(--accent); font-family: var(--font-mono); font-size: 14px;">#' + item.pool_position + '</strong></div>',
+        '<div class="draw-balls" role="cell">' + ballsHTML(item.numbers, item.extra, true) + '</div>',
+        '<div class="next-analysis-method" role="cell"><strong>' + strategyName(item.strategy_id || item.strategy_name) + '</strong></div>',
+        '<div class="next-analysis-score" role="cell">',
+          '<div class="score-meter">',
+            '<span class="score-num">' + scorePct + '%</span>',
+            '<div class="meter-bar"><div class="meter-fill" style="width:' + scorePct + '%"></div></div>',
+          '</div>',
+        '</div>',
       '</div>'
     ].join('');
   }).join('');

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SHIOL+ v9 DESIGN SYSTEM - MODERN ANALYTICAL SAAS (NO AI CLICHÉS)
+   SHIOL+ v9 DESIGN SYSTEM - MODERN ANALYTICAL SAAS (MINIMALIST & HUMAN READABLE)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
@@ -35,11 +35,11 @@
   --cash5: #10b981;
   --cash5-bg: rgba(16, 185, 129, 0.12);
 
-  --radius: 10px;
-  --radius-large: 16px;
+  --radius: 8px;
+  --radius-large: 14px;
   --radius-full: 9999px;
   
-  --content: 1160px;
+  --content: 1180px;
   --shadow-soft: 0 12px 36px rgba(0, 0, 0, 0.4);
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.25);
   
@@ -59,7 +59,7 @@ body {
   background: var(--page);
   color: var(--ink);
   font-family: var(--font-main);
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -108,14 +108,14 @@ button, a {
   position: sticky;
   top: 0;
   z-index: 100;
-  height: 68px;
+  height: 64px;
   border-bottom: 1px solid var(--line);
-  background: rgba(9, 13, 22, 0.85);
+  background: rgba(9, 13, 22, 0.88);
   backdrop-filter: blur(12px);
 }
 
 .topbar-inner {
-  width: min(var(--content), calc(100% - 48px));
+  width: min(var(--content), calc(100% - 40px));
   height: 100%;
   margin: 0 auto;
   display: flex;
@@ -235,23 +235,23 @@ button, a {
 .home-main,
 .report-shell,
 .legal-shell {
-  width: min(var(--content), calc(100% - 48px));
+  width: min(var(--content), calc(100% - 40px));
   margin: 0 auto;
 }
 
 .home-main {
-  padding: 32px 0 64px;
+  padding: 28px 0 64px;
 }
 
 .home-hero {
   max-width: 780px;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .eyebrow {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--accent);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -262,20 +262,20 @@ button, a {
 .legal-shell h1 {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(30px, 4vw, 44px);
+  font-size: clamp(28px, 3.5vw, 40px);
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   line-height: 1.1;
 }
 
 .home-lead,
 .report-lead,
 .legal-lead {
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   max-width: 680px;
   color: var(--muted);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 14.5px;
+  line-height: 1.55;
 }
 
 /* Game Switcher Tabs */
@@ -286,7 +286,7 @@ button, a {
   border-radius: var(--radius);
   border: 1px solid var(--line);
   gap: 4px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .game-switcher a {
@@ -336,7 +336,7 @@ button, a {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-large);
-  padding: 24px;
+  padding: 22px;
   transition: transform 0.2s ease, border-color 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -353,7 +353,7 @@ button, a {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .game-marker {
@@ -370,7 +370,7 @@ button, a {
 
 .game-report h3 {
   display: inline;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--ink);
 }
@@ -396,7 +396,7 @@ button, a {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  padding-top: 16px;
+  padding-top: 14px;
   border-top: 1px solid var(--line);
 }
 
@@ -410,7 +410,7 @@ button, a {
 
 .game-report-metrics div strong {
   display: block;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink);
   margin-top: 2px;
@@ -423,38 +423,12 @@ button, a {
   margin-top: 2px;
 }
 
-/* Method Strip */
-.method-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-large);
-  padding: 24px;
-  margin-top: 40px;
-}
-
-.method-strip div strong {
-  display: block;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.method-strip div span {
-  display: block;
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-
 /* Summary Cards Band (Overview Stage) */
 .summary-band {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 @media (max-width: 800px) {
@@ -466,7 +440,7 @@ button, a {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-large);
-  padding: 20px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -483,11 +457,11 @@ button, a {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .summary-primary {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
   color: var(--mega);
   letter-spacing: -0.03em;
@@ -495,7 +469,7 @@ button, a {
 }
 
 .summary-value {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--ink);
   font-family: var(--font-mono);
@@ -511,58 +485,75 @@ button, a {
 .draw-balls {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  flex-wrap: nowrap; /* CRITICAL: All 6 balls stay strictly on 1 horizontal row! */
+  gap: 5px;
+  margin-top: 4px;
 }
 
 .ball {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   font-family: var(--font-mono);
   user-select: none;
   position: relative;
   background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
   color: #0f172a;
-  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: inset 0 -2px 5px rgba(0,0,0,0.35), 0 3px 8px rgba(0,0,0,0.3);
+  flex-shrink: 0;
 }
 
 .ball::after {
   content: '';
   position: absolute;
   top: 3px;
-  left: 8px;
-  width: 12px;
-  height: 6px;
+  left: 7px;
+  width: 10px;
+  height: 5px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.45);
+}
+
+/* Compact Balls for Data Tables */
+.ball-sm {
+  width: 26px;
+  height: 26px;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.ball-sm::after {
+  top: 2px;
+  left: 5px;
+  width: 8px;
+  height: 4px;
 }
 
 .ball.extra,
 .ball.pb {
   background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
   color: #ffffff;
-  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.5), 0 4px 12px rgba(220, 38, 38, 0.4);
+  box-shadow: inset 0 -2px 5px rgba(0,0,0,0.5), 0 3px 10px rgba(220, 38, 38, 0.4);
 }
 
 body.game-mega .ball.extra,
 body.game-mega .ball.pb {
   background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
   color: #1e1b4b;
-  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.5), 0 4px 12px rgba(217, 119, 6, 0.4);
+  box-shadow: inset 0 -2px 5px rgba(0,0,0,0.5), 0 3px 10px rgba(217, 119, 6, 0.4);
 }
 
 body.game-cash5 .ball.extra,
 body.game-cash5 .ball.pb {
   background: linear-gradient(135deg, #34d399 0%, #059669 100%);
   color: #ffffff;
-  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.5), 0 4px 12px rgba(5, 150, 105, 0.4);
+  box-shadow: inset 0 -2px 5px rgba(0,0,0,0.5), 0 3px 10px rgba(5, 150, 105, 0.4);
 }
 
 .skeleton {
@@ -579,17 +570,13 @@ body.game-cash5 .ball.pb {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-large);
-  padding: 20px 24px;
+  padding: 18px 20px;
   margin-top: 16px;
-}
-
-.performance-strip > div {
-  min-width: 0;
 }
 
 .performance-strip strong {
   display: block;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--ink);
   margin-top: 2px;
@@ -597,22 +584,22 @@ body.game-cash5 .ball.pb {
 
 .performance-strip small {
   display: block;
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--muted);
   margin-top: 2px;
 }
 
 /* Section Containers */
 .report-section {
-  padding: 40px 0 0;
+  padding: 32px 0 0;
 }
 
 .report-stage {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-large);
-  padding: 28px;
-  margin-top: 24px;
+  padding: 24px;
+  margin-top: 20px;
   box-shadow: var(--shadow-card);
 }
 
@@ -621,29 +608,29 @@ body.game-cash5 .ball.pb {
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--line);
 }
 
 .section-heading h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 .section-note {
   margin: 0;
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--muted);
 }
 
-/* Data Tables */
+/* Proportional Grid Data Tables */
 .history-table,
-.next-analysis-table {
+.next-analysis-table,
+.ranking-table-wrap {
   width: 100%;
-  border-collapse: collapse;
   background: var(--surface-subtle);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -651,10 +638,81 @@ body.game-cash5 .ball.pb {
   margin-top: 16px;
 }
 
+/* Draw History Precision Columns: Date/Balls (280px), Won (100px), Combinations (130px), Best Strategy (180px), Best Match (1fr), Action (100px) */
 .history-header,
-.next-analysis-header {
+.history-row {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: 280px 100px 130px 180px 1fr 100px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.history-header {
+  background: var(--surface-elevated);
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.history-row {
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.history-row:hover,
+.next-analysis-row:hover {
+  background: var(--surface-hover);
+}
+
+.history-result {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-date {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+/* Next Draw Analysis Precision Columns: Pos (80px), Balls (240px), Strategy (180px), Score (1fr) */
+.next-analysis-header,
+.next-analysis-row {
+  display: grid;
+  grid-template-columns: 80px 240px 180px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.next-analysis-header {
+  background: var(--surface-elevated);
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.next-analysis-row {
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+/* Leaderboard Ranking Table (HUMAN READABLE HIGH-SCAN) */
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.ranking-table th {
   background: var(--surface-elevated);
   padding: 12px 16px;
   font-weight: 700;
@@ -665,27 +723,47 @@ body.game-cash5 .ball.pb {
   border-bottom: 1px solid var(--line-strong);
 }
 
-.next-analysis-header {
-  grid-template-columns: 80px 1fr 180px 160px;
-}
-
-.history-row,
-.next-analysis-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  padding: 14px 16px;
-  align-items: center;
+.ranking-table td {
+  padding: 12px 16px;
   border-bottom: 1px solid var(--line);
+  vertical-align: middle;
   font-size: 13px;
 }
 
-.next-analysis-row {
-  grid-template-columns: 80px 1fr 180px 160px;
+.ranking-table tr.top-rank-row {
+  background: rgba(245, 158, 11, 0.03);
 }
 
-.history-row:hover,
-.next-analysis-row:hover {
+.ranking-table tr:hover {
   background: var(--surface-hover);
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+}
+
+.rank-badge.rank-1 { background: rgba(245, 158, 11, 0.2); color: var(--mega); border: 1px solid var(--mega); }
+.rank-badge.rank-2 { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid #cbd5e1; }
+.rank-badge.rank-3 { background: rgba(180, 83, 9, 0.2); color: #d97706; border: 1px solid #d97706; }
+.rank-badge.rank-other { background: var(--surface-elevated); color: var(--muted); border: 1px solid var(--line); }
+
+.match-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--surface-elevated);
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 600;
+  border: 1px solid var(--line);
 }
 
 /* Score Meter Bar */
@@ -695,9 +773,17 @@ body.game-cash5 .ball.pb {
   gap: 10px;
 }
 
+.score-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  min-width: 48px;
+}
+
 .meter-bar {
   height: 6px;
-  width: 80px;
+  width: 100px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -707,82 +793,6 @@ body.game-cash5 .ball.pb {
   height: 100%;
   background: var(--accent);
   border-radius: var(--radius-full);
-}
-
-/* Podium & Historical Ranking List */
-.historical-ranking-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
-}
-
-.ranking-card {
-  background: var(--surface-subtle);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px;
-  position: relative;
-  transition: border-color 0.2s ease;
-}
-
-.ranking-card:hover {
-  border-color: var(--line-strong);
-}
-
-.ranking-card-rank {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 12px;
-  background: var(--surface-elevated);
-  border: 1px solid var(--line-strong);
-}
-
-.ranking-card:nth-child(1) .ranking-card-rank {
-  background: rgba(245, 158, 11, 0.2);
-  color: var(--mega);
-  border-color: var(--mega);
-}
-
-.ranking-card:nth-child(2) .ranking-card-rank {
-  background: rgba(148, 163, 184, 0.2);
-  color: #cbd5e1;
-  border-color: #cbd5e1;
-}
-
-.ranking-card:nth-child(3) .ranking-card-rank {
-  background: rgba(180, 83, 9, 0.2);
-  color: #d97706;
-  border-color: #d97706;
-}
-
-.ranking-card-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--ink);
-  margin-bottom: 4px;
-}
-
-.ranking-card-desc {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 16px;
-}
-
-.ranking-card-stat {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  padding: 6px 0;
-  border-top: 1px solid var(--line);
 }
 
 .pos { color: var(--positive); font-weight: 700; }
@@ -795,7 +805,7 @@ body.game-cash5 .ball.pb {
   justify-content: space-between;
   gap: 16px;
   background: var(--surface-subtle);
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-radius: var(--radius);
   border: 1px solid var(--line);
   margin-bottom: 16px;
@@ -816,11 +826,11 @@ body.game-cash5 .ball.pb {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 16px;
-  margin-top: 16px;
+  padding-top: 14px;
+  margin-top: 14px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
 .pagination {
@@ -833,11 +843,12 @@ body.game-cash5 .ball.pb {
   background: var(--surface-elevated);
   color: var(--ink);
   border: 1px solid var(--line);
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .pagination-button:disabled {
@@ -861,6 +872,7 @@ body.game-cash5 .ball.pb {
   background: transparent;
   padding: 0;
   border: 0;
+  cursor: pointer;
 }
 
 .text-action:hover {
@@ -869,7 +881,7 @@ body.game-cash5 .ball.pb {
 
 /* State Boxes */
 .ui-state {
-  padding: 20px;
+  padding: 18px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -894,10 +906,10 @@ body.game-cash5 .ball.pb {
 /* Footer */
 .site-footer {
   border-top: 1px solid var(--line);
-  padding: 36px 0;
-  margin-top: 60px;
+  padding: 32px 0;
+  margin-top: 50px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12.5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -918,20 +930,20 @@ body.game-cash5 .ball.pb {
 .legal-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
-  margin-top: 28px;
+  gap: 16px;
+  margin-top: 24px;
 }
 
 .legal-card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-large);
-  padding: 24px;
+  padding: 22px;
 }
 
 .legal-card h2 {
-  margin: 0 0 12px;
-  font-size: 18px;
+  margin: 0 0 10px;
+  font-size: 17px;
   color: var(--ink);
 }
 
