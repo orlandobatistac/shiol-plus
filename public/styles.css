@@ -1441,8 +1441,8 @@ body.game-cash5 .ball.pb {
 .site-footer {
   border-top: 1px solid var(--line);
   background: var(--bg-base);
-  padding: 32px 20px;
-  margin-top: 50px;
+  padding: 40px 20px 48px;
+  margin-top: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1453,13 +1453,15 @@ body.game-cash5 .ball.pb {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .footer-copy {
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13.5px;
+  font-weight: 500;
   margin: 0;
+  letter-spacing: -0.01em;
 }
 
 /* Legal Page Styles */
