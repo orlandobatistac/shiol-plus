@@ -157,6 +157,38 @@ if ('serviceWorker' in navigator) {
 }
 
 // PWA Install Handler
+function initDisclaimerModal() {
+  const overlay = document.getElementById('disclaimer-modal');
+  if (!overlay) return;
+  const closeBtn = document.getElementById('disclaimer-modal-close');
+  document.querySelectorAll('[data-disclaimer-open]').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      overlay.classList.add('open');
+      overlay.setAttribute('aria-hidden', 'false');
+      closeBtn.focus();
+    });
+  });
+  closeBtn.addEventListener('click', function () {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+  });
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) {
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+  });
+}
+
+initDisclaimerModal();
+
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', function (event) {
   event.preventDefault();

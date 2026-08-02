@@ -3,7 +3,7 @@
 Contexto persistente del proyecto. Actualizar esta lista al cerrar cada sesion de trabajo
 para que una conversacion nueva pueda retomar sin perder contexto.
 
-Ultima actualizacion: 2026-07-22 (sesion 34 -- Fase 9 cerrada: wheeling seeded en D1, incidente de cron diagnosticado y corregido, CLAUDE.md creado)
+Ultima actualizacion: 2026-08-01 (sesion 35 -- Fase 9 y migracion de dominio confirmadas como completadas en produccion; shiolplus.com apunta a Cloudflare v9)
 
 ## Estado actual
 
@@ -512,22 +512,20 @@ analisis estadistico completo:
       historico minimo). 6/6 + 3/3 de `test_cash5.py` en verde. Smoke en los
       3 juegos: 20 tickets en ~0.15s.
 
-**Pendiente (Orlando, desde terminal Windows -- ver gotchas de deploy):**
+**Completado (confirmado con Cloudflare MCP + produccion el 2026-08-01):**
 
-- [ ] QA local: `npx wrangler d1 execute shiol-plus-db --local --file schema/0003_wheeling.sql`
-      + `wrangler dev` y verificar que el ciclo genera 180 tickets (9 x 20).
-- [ ] Seed D1 produccion: `npx wrangler d1 execute shiol-plus-db --remote --file schema/0003_wheeling.sql`.
-- [ ] `npx wrangler deploy` (imagen del container se reconstruye con la
-      estrategia nueva).
-- [ ] Verificar tras el primer cron real que `wheeling` aparece en el dashboard
-      de los 3 juegos con sus 20 tickets y stats.
+- [x] Seed D1 produccion ejecutado: `schema/0003_wheeling.sql` aplicado.
+- [x] `npx wrangler deploy` completado con la estrategia nueva.
+- [x] Verificado en D1 real: `wheeling` activo en los 3 juegos con ciclos corridos:
+      Powerball (4 ciclos, peso 0.729), Mega Millions (4 ciclos, peso 0.810),
+      Cash5 (9 ciclos, peso 0.425). Todos los ciclos generan 180 tickets (9x20).
 
 **Criterio de salida.** `wheeling` corriendo en produccion en los 3 juegos
 durante >=20 ciclos, comparable en el podio contra `random_baseline`. La lectura
 del experimento (ROI y concentracion vs baseline) se documenta aqui al cierre.
+Con Cash5 ya en 9 ciclos, Powerball y MM en 4 -- seguimiento pendiente a largo plazo.
 
-**Regla vigente:** no modificar dominio, DNS, VPS, `main`, PR #40 ni
-`agent/publish-v8` hasta nueva decision explicita.
+**Fase 9 COMPLETA.**
 
 ### Fase 10 -- PLAN: familia "digit games" (NC Pick 3 / Pick 4) + home por jurisdiccion
 
@@ -594,12 +592,16 @@ ir antes que la Parte A):**
       Carolina", ...) generadas desde los datos -- estados nuevos aparecen
       solos, sin tocar codigo.
 
-**Orden recomendado:** cerrar Fase 9 (seed+deploy wheeling) -> mergear
-`codex/add-nc-cash5` a main (arreglando el test roto de
+**Orden recomendado:** mergear `codex/add-nc-cash5` a main (arreglando el test roto de
 frontend-foundation) -> Parte B -> Parte A (10.0-10.5).
 
 ### Registro de avance
 
+- **2026-08-01, sesion 35:** Fase 9 (wheeling) y migracion de dominio confirmadas como
+  completadas en produccion via Cloudflare MCP. `wheeling` activo en D1 en los 3 juegos
+  (Powerball 4 ciclos, MM 4 ciclos, Cash5 9 ciclos; todos los ciclos generan 180 tickets).
+  `shiolplus.com` sirviendo SHIOL+ v9 desde Cloudflare. TODO.md y CLAUDE.md actualizados.
+  Siguiente paso: Fase 10 (digit games NC Pick 3/Pick 4).
 - **2026-07-10, sesion 27:** roadmap creado; implementacion aun no iniciada. La
   seccion 4 fue corregida a `Next Draw Analysis` (`AI Insights for Next Drawing`) y
   se elimino por completo el concepto de validador de tickets. Dominio, DNS, VPS,

@@ -188,7 +188,35 @@ test('strategy rankings expose partial coverage without claiming a lifetime win 
   assert.equal(ranking.covered_win_rate, 2.5);
   assert.deepEqual(ranking.covered_best_match, { white: 1, extra: 1 });
   assert.equal(ranking.trend.total_won_delta, -4);
+  assert.equal(ranking.expected_won, 160);
+  assert.equal(body.ordering.primary, 'empirical_bayes_expected_won_desc');
   assert.deepEqual(body.ordering.tie_breakers, ['lifetime_roi_desc', 'strategy_id_asc']);
+});
+
+test('strategy rankings keep any positive WON above zero-WON strategies', async () => {
+  const db = new FakeDB({
+    first: [GAME],
+    all: [[
+      {
+        strategy_id: 'wheeling', name: 'Wheeling', description: '', status: 'active',
+        current_weight: 0.5, evaluated_draws: 4, evaluated_combinations: 40, total_won: 0,
+        matches_3: 0, matches_4: 0, matches_5: 0, available_combinations: 40,
+        winning_combinations: 0, best_match_score: 2,
+        latest_total_won: 0, previous_total_won: 0, latest_roi: -1, previous_roi: -1,
+      },
+      {
+        strategy_id: 'range_balanced', name: 'Range Balanced', description: '', status: 'active',
+        current_weight: 0.5, evaluated_draws: 9, evaluated_combinations: 180, total_won: 10,
+        matches_3: 0, matches_4: 0, matches_5: 0, available_combinations: 180,
+        winning_combinations: 1, best_match_score: 2,
+        latest_total_won: 0, previous_total_won: 10, latest_roi: -1, previous_roi: -0.9,
+      },
+    ]],
+  });
+  const { path, url } = request('/api/strategy-rankings?game=mega_millions');
+  const { body } = await responseJson(await handlePresentationAPI(path, url, { DB: db }));
+  assert.equal(body.rankings[0].strategy_id, 'range_balanced');
+  assert.equal(body.rankings[1].strategy_id, 'wheeling');
 });
 
 test('next draw analysis assigns a global pool position by raw internal score', async () => {

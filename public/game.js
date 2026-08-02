@@ -49,6 +49,10 @@ function roi(value) {
     (number >= 0 ? '+' : '') + percent + '%</span>';
 }
 
+function isBaseline(strategyId) {
+  return String(strategyId || '').replace(/_(mega_millions|cash5)$/, '') === 'random_baseline';
+}
+
 function strategyName(value) {
   const normalized = String(value || '').replace(/_(mega_millions|cash5)$/, '');
   const names = {
@@ -155,12 +159,6 @@ async function renderGameIdentity() {
     if (active) link.setAttribute('aria-current', 'page');
   });
 
-  const footer = document.getElementById('page-footer');
-  if (footer) {
-    footer.innerHTML =
-      '<span>SHIOL+ v9</span><span>' + game.name +
-      ' data updates after every published draw.</span>';
-  }
 }
 
 function getZonedParts(date) {
@@ -729,35 +727,7 @@ async function renderRankings() {
     return;
   }
 
-  const top3 = rankings.slice(0, 3);
-  const rest = rankings.slice(3);
-
-  const podiumHTML = [
-    '<div class="podium-cards-grid">',
-      top3.map(function (strategy, index) {
-        const totalWon = Number(strategy.total_won || 0);
-        const roiVal = Number(strategy.lifetime_roi || 0);
-        const roiClass = roiVal >= 0 ? 'pos' : 'neg';
-        const roiText = (roiVal * 100).toFixed(1) + '%';
-        const rankClass = index === 0 ? 'gold' : (index === 1 ? 'silver' : 'bronze');
-        const bestMatch = strategy.best_match || strategy.covered_best_match;
-        const bestResult = bestMatch ? matchLabel(bestMatch, data.game.extra_ball_name) : 'Not retained';
-
-        return [
-          '<div class="podium-card ' + (index === 0 ? 'rank-top-1' : '') + '">',
-            '<div class="rank-badge-lg ' + rankClass + '">#' + strategy.rank + '</div>',
-            '<div class="podium-title">' + strategyName(strategy.strategy_id || strategy.name) + '</div>',
-            '<div class="podium-desc">' + strategyDescription(strategy.strategy_id || strategy.name) + '</div>',
-            '<div class="podium-stat-row"><span class="podium-stat-label">Lifetime ROI</span><span class="podium-stat-val ' + roiClass + '">' + (roiVal >= 0 ? '+' : '') + roiText + '</span></div>',
-            '<div class="podium-stat-row"><span class="podium-stat-label">Total Won</span><span class="podium-stat-val">' + money(totalWon) + '</span></div>',
-            '<div class="podium-stat-row"><span class="podium-stat-label">Best Match</span><span class="podium-stat-val" style="color: var(--mega);">' + bestResult + '</span></div>',
-          '</div>'
-        ].join('');
-      }).join(''),
-    '</div>'
-  ].join('');
-
-  const restHTML = rest.length ? [
+  const tableHTML = [
     '<div class="ranking-table-wrap">',
       '<table class="data-table ranking-table">',
         '<thead>',
@@ -772,7 +742,11 @@ async function renderRankings() {
           '</tr>',
         '</thead>',
         '<tbody>',
-          rest.map(function (strategy) {
+          rankings.map(function (strategy) {
+            const pos = strategy.rank;
+            const isTop = pos <= 3;
+            const rankClass = pos === 1 ? 'gold' : (pos === 2 ? 'silver' : (pos === 3 ? 'bronze' : 'rank-other'));
+            const isBase = isBaseline(strategy.strategy_id || strategy.name);
             const totalWon = Number(strategy.total_won || 0);
             const coverage = Number(strategy.detail_coverage && strategy.detail_coverage.ratio || 0);
             const complete = coverage === 1;
@@ -784,12 +758,17 @@ async function renderRankings() {
             const roiClass = roiVal >= 0 ? 'pos' : 'neg';
             const roiText = (roiVal * 100).toFixed(1) + '%';
 
+            const rowClasses = [
+              isTop ? 'rank-top-row rank-top-' + pos : '',
+              isBase ? 'baseline-row' : '',
+            ].filter(Boolean).join(' ');
+
             return [
-              '<tr>',
-                '<td><span class="rank-badge rank-other">#' + strategy.rank + '</span></td>',
+              '<tr' + (rowClasses ? ' class="' + rowClasses + '"' : '') + '>',
+                '<td><span class="rank-badge ' + rankClass + '">#' + pos + '</span></td>',
                 '<td>',
                   '<strong style="font-size: 13.5px; display: block; color: var(--ink);">' + strategyName(strategy.strategy_id || strategy.name) + '</strong>',
-                  '<small style="color: var(--muted); font-size: 11px;">' + strategyDescription(strategy.strategy_id || strategy.name) + '</small>',
+                  (isBase ? '<span class="baseline-chip">Benchmark</span>' : '<small style="color: var(--muted); font-size: 11px;">' + strategyDescription(strategy.strategy_id || strategy.name) + '</small>'),
                 '</td>',
                 '<td style="text-align: right; font-weight: 700; font-family: var(--font-mono);">' + money(totalWon) + '</td>',
                 '<td style="text-align: right;"><span class="' + roiClass + '">' + (roiVal >= 0 ? '+' : '') + roiText + '</span></td>',
@@ -802,9 +781,9 @@ async function renderRankings() {
         '</tbody>',
       '</table>',
     '</div>'
-  ].join('') : '';
+  ].join('');
 
-  body.innerHTML = podiumHTML + restHTML;
+  body.innerHTML = tableHTML;
 
   const expected = rankings.reduce(function (sum, strategy) {
     return sum + Number(strategy.detail_coverage && strategy.detail_coverage.expected_combinations || 0);
@@ -814,7 +793,7 @@ async function renderRankings() {
   }, 0);
   const coveragePercent = expected ? Math.round(available * 100 / expected) : 0;
   document.getElementById('rankings-count').textContent =
-    'Showing 1-' + rankings.length + ' of ' + rankings.length + ' strategies · ordered by lifetime prizes';
+    'Showing 1-' + rankings.length + ' of ' + rankings.length + ' strategies · ordered by statistical performance';
   document.getElementById('rankings-coverage').textContent = coveragePercent === 100
     ? 'Winning combinations, win rate and best result cover the full evaluation period.'
     : 'Combination-level metrics cover ' + coveragePercent + '% of the period; prize totals, cost, ROI and evaluated counts are complete.';
@@ -1129,8 +1108,39 @@ function initScrollSpy() {
   updateActiveSection();
 }
 
+function initDisclaimerModal() {
+  const overlay = document.getElementById('disclaimer-modal');
+  if (!overlay) return;
+  const closeBtn = document.getElementById('disclaimer-modal-close');
+  document.querySelectorAll('[data-disclaimer-open]').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      overlay.classList.add('open');
+      overlay.setAttribute('aria-hidden', 'false');
+      closeBtn.focus();
+    });
+  });
+  closeBtn.addEventListener('click', function () {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+  });
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) {
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+  });
+}
+
 async function init() {
   initHistoryPagination();
+  initDisclaimerModal();
   initAnalysisModal();
   initReportDetailsModal();
   initNextAnalysis();

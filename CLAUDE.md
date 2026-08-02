@@ -138,6 +138,49 @@ es 0 porque no hay bola extra. Ejemplo: `(5, 0): ('jackpot', 0)`.
 
 ---
 
+## Servidor local de desarrollo
+
+El proyecto usa **wrangler dev --remote**, que conecta al Worker en Cloudflare pero
+sirve los assets localmente en el puerto 8788. El Container Python no corre en local
+(solo en remoto), por lo que las rutas que lo invocan (`/api/run`, etc.) usan la
+instancia de producción.
+
+### Levantar el servidor
+
+La configuración está en `.claude/launch.json` (entrada `shiol-plus-dev`).
+
+**Desde Claude Code** (recomendado para agentes AI): usa la herramienta
+`preview_start` con `name: "shiol-plus-dev"`. El agente puede luego usar
+`preview_logs` con el `serverId` retornado para verificar que el servidor esté listo
+(busca la línea `Ready on http://127.0.0.1:8788`).
+
+**Desde terminal**:
+```bash
+npx wrangler dev --remote --port 8788 --test-scheduled
+```
+
+El flag `--test-scheduled` habilita el endpoint `/__scheduled` para disparar crons
+manualmente durante el desarrollo.
+
+### Verificar que está corriendo
+
+```bash
+curl http://localhost:8788/api/health
+```
+
+Respuesta esperada: `{ "status": "ok", ... }`
+
+### Notas importantes
+
+- `--remote` es obligatorio: el Container Python solo corre en Cloudflare, no en local.
+  Sin `--remote`, las llamadas al Container fallan.
+- Si el puerto 8788 ya está en uso, otro proceso wrangler está activo. Verificar con
+  `netstat -ano | findstr 8788` (Windows) o `lsof -i :8788` (Unix).
+- Los assets en `public/` se sirven localmente; cambios en esos archivos se reflejan
+  sin reiniciar. Cambios en `src/worker.js` requieren reinicio del servidor.
+
+---
+
 ## Deploy checklist
 
 ### Al modificar código existente:

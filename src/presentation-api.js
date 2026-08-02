@@ -10,6 +10,9 @@ const TICKET_COSTS = {
   cash5: 1,
 };
 
+// Equivalent evidence strength for the empirical-Bayes ranking adjustment.
+const RANKING_PRIOR_DRAWS = 20;
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
 }
@@ -473,14 +476,48 @@ async function strategyRankings(env, game) {
     LEFT JOIN ticket_stats ts ON ts.strategy_id=s.id
     LEFT JOIN trends tr ON tr.strategy_id=s.id
     WHERE s.lottery_id=? AND s.status!='archived'
-    ORDER BY total_won DESC,
-             CASE WHEN evaluated_combinations>0
-               THEN (total_won - evaluated_combinations * ?) / (evaluated_combinations * ?)
-               ELSE -999 END DESC,
-             s.id ASC
-  `).bind(lotteryId, lotteryId, lotteryId, lotteryId, ticketCost, ticketCost).all();
+  `).bind(lotteryId, lotteryId, lotteryId, lotteryId).all();
 
-  const rankings = results.map((row, index) => {
+  const rowsWithEvidence = results.filter(row => number(row.evaluated_combinations) > 0);
+  const globalCombinations = rowsWithEvidence.reduce(
+    (sum, row) => sum + number(row.evaluated_combinations), 0
+  );
+  const globalWon = rowsWithEvidence.reduce(
+    (sum, row) => sum + number(row.total_won), 0
+  );
+  const globalDraws = rowsWithEvidence.reduce(
+    (sum, row) => sum + number(row.evaluated_draws), 0
+  );
+  const globalWonRate = globalCombinations > 0 ? globalWon / globalCombinations : 0;
+  const averageCombinationsPerDraw = globalDraws > 0
+    ? globalCombinations / globalDraws
+    : 0;
+  const priorCombinations = averageCombinationsPerDraw * RANKING_PRIOR_DRAWS;
+
+  const rankedResults = results.map(row => {
+    const combinations = number(row.evaluated_combinations);
+    const adjustedWonRate = combinations > 0 && priorCombinations > 0
+      ? (number(row.total_won) + priorCombinations * globalWonRate)
+        / (combinations + priorCombinations)
+      : globalWonRate;
+    return {
+      row,
+      hasEvidence: combinations > 0,
+      hasPrize: number(row.total_won) > 0,
+      expectedWon: adjustedWonRate * priorCombinations,
+      lifetimeRoi: lifetimeRoi(number(row.total_won), combinations, ticketCost),
+    };
+  }).sort((a, b) => {
+    if (a.hasPrize !== b.hasPrize) return a.hasPrize ? -1 : 1;
+    if (a.hasEvidence !== b.hasEvidence) return a.hasEvidence ? -1 : 1;
+    if (b.expectedWon !== a.expectedWon) return b.expectedWon - a.expectedWon;
+    const aRoi = a.lifetimeRoi == null ? -Infinity : a.lifetimeRoi;
+    const bRoi = b.lifetimeRoi == null ? -Infinity : b.lifetimeRoi;
+    if (bRoi !== aRoi) return bRoi - aRoi;
+    return String(a.row.strategy_id).localeCompare(String(b.row.strategy_id));
+  });
+
+  const rankings = rankedResults.map(({ row, expectedWon }, index) => {
     const expected = number(row.evaluated_combinations);
     const available = number(row.available_combinations);
     const detailRatio = coverage(available, expected);
@@ -500,6 +537,7 @@ async function strategyRankings(env, game) {
       evaluated_draws: number(row.evaluated_draws),
       evaluated_combinations: expected,
       total_won: number(row.total_won),
+      expected_won: rounded(expectedWon),
       total_cost: expected * ticketCost,
       lifetime_roi: lifetimeRoi(number(row.total_won), expected, ticketCost),
       detail_coverage: {
@@ -520,6 +558,12 @@ async function strategyRankings(env, game) {
         extra: number(row.best_match_score) % 2,
       } : null,
       aggregate_best_white_match: aggregateBestWhite,
+      credibility: {
+        evaluated_draws: number(row.evaluated_draws),
+        threshold: 20,
+        factor: Math.min(1, number(row.evaluated_draws) / 20),
+        mature: number(row.evaluated_draws) >= 20,
+      },
       trend: {
         latest_total_won: row.latest_total_won == null ? null : number(row.latest_total_won),
         previous_total_won: row.previous_total_won == null ? null : number(row.previous_total_won),
@@ -536,7 +580,10 @@ async function strategyRankings(env, game) {
   return json({
     game: gamePayload(game),
     ordering: {
-      primary: 'total_won_desc',
+      primary: 'empirical_bayes_expected_won_desc',
+      description: `Estrategias con WON positivo primero; dentro de cada grupo, WON esperado proyectado a ${RANKING_PRIOR_DRAWS} sorteos y ajustado hacia el promedio global según la evidencia disponible.`,
+      prior_draws: RANKING_PRIOR_DRAWS,
+      prior_combinations: rounded(priorCombinations),
       tie_breakers: ['lifetime_roi_desc', 'strategy_id_asc'],
     },
     rankings,

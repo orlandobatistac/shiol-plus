@@ -293,6 +293,18 @@ async function evaluatePastCycle(game, env, ticketsPerStrategy, overrideDate = n
   } catch (e) {
     console.error('[fetch-draw]', e);
   }
+  // Fallback: si la fuente externa no tiene el draw pero ya está en D1
+  // (ciclos varados cuyo dato llegó tarde o la fuente ya no lo expone),
+  // usarlo directamente para no bloquear la evaluación indefinidamente.
+  if (!draw) {
+    const cached = await db.prepare(
+      `SELECT draw_date,n1,n2,n3,n4,n5,extra,source FROM draws WHERE lottery_id=? AND draw_date=?`
+    ).bind(gameId, drawDate).first();
+    if (cached) {
+      draw = { ...cached, pb: cached.extra };
+      console.log(`[pipeline] ${gameId} ${drawDate}: usando draw cacheado en D1 (fuente externa no disponible)`);
+    }
+  }
   if (!draw) return { skipped: true, reason: 'draw_not_available', draw_date: drawDate };
 
   await db.prepare(

@@ -46,7 +46,7 @@
     <aside class="trust-banner report-trust-banner" aria-label="Important notice">
       <strong>Statistical Notice</strong>
       <span>Descriptive probabilistic analysis. Past results do not guarantee future prizes.</span>
-      <a href="legal.html#important-disclaimer">Read disclaimer</a>
+      <a href="/legal#important-disclaimer" data-disclaimer-open>Read full disclaimer</a>
     </aside>
 
     <!-- Game Switcher Pills Bar -->
@@ -228,6 +228,18 @@
       </div>
     </section>
   </main>
+
+  <!-- Disclaimer Modal -->
+  <div class="modal-overlay" id="disclaimer-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="disclaimer-modal-title" style="max-width:560px;">
+      <button class="modal-close" id="disclaimer-modal-close" type="button" aria-label="Close disclaimer">&times;</button>
+      <p class="eyebrow">Legal Notice</p>
+      <h2 id="disclaimer-modal-title">Important Disclaimer</h2>
+      <p style="margin-top:12px;color:var(--muted);line-height:1.65;">SHIOL+ is a product intended solely for statistical, educational, and entertainment purposes. No model, score, algorithm, or past or projected combination guarantees a prize or predicts the outcome of any future draw.</p>
+      <p style="margin-top:12px;color:var(--muted);line-height:1.65;">Playing the lottery involves financial risk. SHIOL+ does not constitute financial advice or a recommendation to play.</p>
+      <a href="/legal" class="text-action" style="display:inline-block;margin-top:20px;">View full legal information <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </div>
 
   <!-- Technical Details Modal Overlay (Hidden by default via .modal-overlay CSS) -->
   <div class="modal-overlay report-details-overlay" id="report-details-modal" aria-hidden="true">
