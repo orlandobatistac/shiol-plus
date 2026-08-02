@@ -3,7 +3,7 @@
 Contexto persistente del proyecto. Actualizar esta lista al cerrar cada sesion de trabajo
 para que una conversacion nueva pueda retomar sin perder contexto.
 
-Ultima actualizacion: 2026-08-01 (sesion 35 -- Fase 9 y migracion de dominio confirmadas como completadas en produccion; shiolplus.com apunta a Cloudflare v9)
+Ultima actualizacion: 2026-08-01 (sesion 35 -- Fase 9 completada; Fase 10.A PLP API completada; todos los endpoints responden 200 en produccion; PREDICTLOTTOPRO_API_KEY secret configurado)
 
 ## Estado actual
 
@@ -593,9 +593,9 @@ imagen (OCR) NO se usan — fuera del alcance.
 - [x] 10.A.6 Implementar adaptadores para endpoints publicos existentes:
       `/api/v1/public/jackpot`, `/api/v1/public/recent-draws`,
       `/api/v1/public/best-match`, `/api/v1/public/analytics/draw/{date}`.
-- [x] 10.A.7 Auth Bearer implementada en Worker. Pendiente: `wrangler secret put PREDICTLOTTOPRO_API_KEY` (usar el mismo valor que `SHIOL_API_KEY` en `C:\Dev\apps\patternlottopro\.env`).
-- [ ] 10.A.8 Actualizar `.env` de PLP: `SHIOL_API_BASE=https://shiolplus.com/api/v2` (apuntar al Worker v9 en lugar del VPS).
-- [ ] 10.A.9 Verificar end-to-end: dashboard de PLP carga sin fallback.
+- [x] 10.A.7 Auth Bearer implementada en Worker. `PREDICTLOTTOPRO_API_KEY` secret subido a Cloudflare (sesion 35). Clave completa 44-char (base64 con `=` final) — extraida via Python para evitar truncado de `cut -d=`.
+- [x] 10.A.8 Actualizar `.env` de PLP: `SHIOL_API_BASE=https://shiolplus.com/api/v2` (apuntar al Worker v9 en lugar del VPS). Completado sesion 35.
+- [x] 10.A.9 Verificar end-to-end: todos los endpoints responden 200 con datos reales. `/api/v2/plp-dashboard` (draws: 2363, hot numbers, 5 strategies, next_draw 2026-08-01), `/api/v2/pipeline/pool`, `/api/v2/generate-multi-strategy`, `/api/v2/analytics/context`, `/api/v1/public/jackpot` ($707M, 2026-08-03). Completado sesion 35.
 - [ ] 10.A.10 Posponer `POST /api/v2/generator/interactive` para v2 — requiere
        logica compleja del engine Python que no justifica el esfuerzo en v1.
 
