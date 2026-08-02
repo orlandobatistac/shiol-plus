@@ -28,6 +28,7 @@ import {
   fetchJackpotFromEngine,
 } from './container.js';
 import { handlePresentationAPI } from './presentation-api.js';
+import { handlePlpAPI } from './plp-api.js';
 
 // ─────────────────────────────────────────────────────────────
 // PIPELINE ENGINE (JS — ejecuta en el cron)
@@ -605,8 +606,11 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_H });
 }
 
-async function handleAPI(path, url, env) {
+async function handleAPI(path, url, request, env) {
   const lotteryId = url.searchParams.get('game') || 'powerball';
+
+  const plpResponse = await handlePlpAPI(path, url, request, env);
+  if (plpResponse) return plpResponse;
 
   const presentationResponse = await handlePresentationAPI(path, url, env);
   if (presentationResponse) return presentationResponse;
@@ -806,7 +810,7 @@ export default {
       return new Response(null, { status: 204, headers: JSON_H });
     }
     if (path.startsWith('/api/')) {
-      try { return await handleAPI(path, url, env); }
+      try { return await handleAPI(path, url, request, env); }
       catch (err) { console.error('[api]', err); return json({ error: err.message }, 500); }
     }
     // Todo lo que no es /api/* es frontend estático: index.html (Home),

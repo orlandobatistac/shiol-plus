@@ -527,6 +527,80 @@ Con Cash5 ya en 9 ciclos, Powerball y MM en 4 -- seguimiento pendiente a largo p
 
 **Fase 9 COMPLETA.**
 
+### Fase 10.A -- API de consulta para patternlottopro.com (cliente externo huerfano)
+
+**Contexto.** `https://patternlottopro.com/` consumia endpoints del proyecto viejo
+(VPS v8) bajo `/api/v2/*`, protegidos con `Authorization: Bearer <PREDICTLOTTOPRO_API_KEY>`.
+Con la migracion a Cloudflare esos endpoints quedaron huerfanos -- el sitio externo
+solo tiene el fallback y no recibe datos reales del pipeline SHIOL+.
+
+**Contrato identificado (fuente: `C:\Dev\apps\patternlottopro\backend\app\shiol_client.py`).**
+
+PLP llama a SHIOL+ desde su propio backend (server-to-server). El frontend de PLP
+solo hace llamadas same-origin a `patternlottopro.com/api/...`. Los endpoints de
+imagen (OCR) NO se usan — fuera del alcance.
+
+**Endpoints que PLP consume activamente en SHIOL+:**
+
+| Auth | Metodo | Ruta SHIOL+ v8 | Usado por | Mapeado en v9 |
+|------|--------|----------------|-----------|----------------|
+| Bearer | GET | `/api/v2/plp-dashboard` | `get_plp_dashboard()` — dashboard principal | ❌ nuevo |
+| Bearer | GET | `/api/v2/pipeline/pool?count=N` | `generate_etsy_sets()` — PDFs de Etsy | ❌ nuevo |
+| Bearer | POST | `/api/v2/generate-multi-strategy` | `fetch_shiol_predictions()` — 5 tickets | ❌ nuevo |
+| Bearer | GET | `/api/v2/analytics/context` | `get_analytics_context()` — tab Analytics | ❌ nuevo |
+| Bearer | POST | `/api/v2/analytics/analyze-ticket` | `analyze_ticket()` — scorer | ❌ nuevo |
+| Bearer | POST | `/api/v2/generator/interactive` | `generate_interactive()` — generador | ❌ nuevo |
+| Publico | GET | `/api/v1/public/jackpot` | `fetch_jackpot_text()` — jackpot display | ✅ `/api/jackpot?game=powerball` existe |
+| Publico | GET | `/api/v1/public/recent-draws?limit=N` | `get_recent_draws()` — historial | ⚠️ `/api/analyses` existe pero forma distinta |
+| Publico | GET | `/api/v1/public/best-match` | `get_best_match()` — record historico | ❌ nuevo (query D1) |
+| Publico | GET | `/api/v1/public/analytics/draw/{date}` | `get_draw_analytics()` — detalle sorteo | ✅ `/api/analyses/{drawDate}` existe |
+
+**Notas de implementacion:**
+
+- `plp-dashboard` es el mas critico: agrega `draw_stats`, `hot_cold`, `top_strategies`
+  y `predictions` en una sola llamada. Todo derivable desde D1 v9.
+- `pipeline/pool` devuelve tickets del ciclo `generated` actual con campos
+  `{id, n1-n5, pb, strategy, confidence}` — mapea directo a la tabla `tickets` de v9.
+- `generate-multi-strategy` devuelve 5 tickets on-demand. En v9 puede servirse
+  desde el ciclo `generated` actual en lugar de generar en tiempo real.
+- `analytics/context` y `analyze-ticket` requieren logica del engine Python
+  (hot/cold calculado desde `draws`, scoring desde `strategy_stats`). Factible
+  desde D1 sin llamar al Container.
+- `generator/interactive` es el mas complejo: requiere el engine Python real.
+  Evaluar si se implementa en v1 o se pospone.
+- Los 2 endpoints publicos ya existentes (`/api/jackpot`, `/api/analyses/{date}`)
+  necesitan adaptar el payload al formato que PLP espera (diferente shape).
+
+**Autenticacion:** Bearer token en header. Agregar Cloudflare Secret
+`PREDICTLOTTOPRO_API_KEY` y validar en el Worker. CORS para `https://patternlottopro.com`.
+
+**Sub-fases:**
+
+- [x] 10.A.1 Implementar `GET /api/v2/plp-dashboard` — agrega desde D1:
+      `draw_stats` (total sorteos, ultimo draw), `hot_cold` (frecuencias desde
+      tabla `draws`), `top_strategies` (desde `strategy_stats`), `predictions`
+      (5 tickets del ciclo `generated` actual). Cache 5min en Worker.
+- [x] 10.A.2 Implementar `GET /api/v2/pipeline/pool?count=N` — devuelve N tickets
+      del ciclo `generated` mas reciente de Powerball desde tabla `tickets`.
+- [x] 10.A.3 Implementar `POST /api/v2/generate-multi-strategy` — sirve desde el
+      pool del ciclo `generated` actual (no genera on-demand). Misma fuente que
+      pool, diferente shape de respuesta.
+- [x] 10.A.4 Implementar `GET /api/v2/analytics/context` — hot/cold desde tabla
+      `draws` (ultimos 100 sorteos), tendencias desde `strategy_stats`.
+- [x] 10.A.5 Implementar `POST /api/v2/analytics/analyze-ticket` — score basado
+      en frecuencia historica de cada numero desde tabla `draws`. Sin llamar
+      al Container.
+- [x] 10.A.6 Implementar adaptadores para endpoints publicos existentes:
+      `/api/v1/public/jackpot`, `/api/v1/public/recent-draws`,
+      `/api/v1/public/best-match`, `/api/v1/public/analytics/draw/{date}`.
+- [x] 10.A.7 Auth Bearer implementada en Worker. Pendiente: `wrangler secret put PREDICTLOTTOPRO_API_KEY` (usar el mismo valor que `SHIOL_API_KEY` en `C:\Dev\apps\patternlottopro\.env`).
+- [ ] 10.A.8 Actualizar `.env` de PLP: `SHIOL_API_BASE=https://shiolplus.com/api/v2` (apuntar al Worker v9 en lugar del VPS).
+- [ ] 10.A.9 Verificar end-to-end: dashboard de PLP carga sin fallback.
+- [ ] 10.A.10 Posponer `POST /api/v2/generator/interactive` para v2 — requiere
+       logica compleja del engine Python que no justifica el esfuerzo en v1.
+
+---
+
 ### Fase 10 -- PLAN: familia "digit games" (NC Pick 3 / Pick 4) + home por jurisdiccion
 
 Planificada en sesion 33 (2026-07-21). Implementacion NO iniciada. Reglas
