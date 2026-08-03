@@ -691,7 +691,18 @@ async function nextDrawAnalysis(url, env, game) {
   });
 }
 
+async function listActiveGames(db) {
+  const { results } = await db.prepare(`
+    SELECT id, name, draw_days, white_ball_count, white_ball_max,
+           extra_ball_name, extra_ball_max, active, game_type, jurisdiction
+    FROM lotteries WHERE active=1 ORDER BY created_at ASC
+  `).all();
+  return json((results || []).map(gamePayload));
+}
+
 export async function handlePresentationAPI(path, url, env) {
+  if (path === '/api/games') return listActiveGames(env.DB);
+
   const detailPrefix = '/api/analyses/';
   const isDetail = path.startsWith(detailPrefix);
   const supported = path === '/api/overview'
