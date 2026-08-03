@@ -26,6 +26,9 @@ node_modules/
 .DS_Store
 desktop.ini
 
+# Backups / Datos locales
+backup-vps/
+
 # Local tool directories
 .claude/
 .codex/
