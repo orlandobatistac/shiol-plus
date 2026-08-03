@@ -152,8 +152,11 @@ def _from_nc_web(draw_date: str, url: str, has_extra_ball: bool = True,
 
     return {
         'draw_date': draw_date,
-        'n1': w[0], 'n2': w[1], 'n3': w[2],
-        'n4': w[3], 'n5': w[4],
+        'n1': w[0] if len(w) > 0 else None,
+        'n2': w[1] if len(w) > 1 else None,
+        'n3': w[2] if len(w) > 2 else None,
+        'n4': w[3] if len(w) > 3 else None,
+        'n5': w[4] if len(w) > 4 else None,
         'pb': extra,
     }
 
@@ -162,19 +165,6 @@ def _from_ny_data(draw_date: str, dataset_id: str, extra_field: str = None,
                   has_extra_ball: bool = True) -> Optional[Dict]:
     """
     NY State Open Data (Socrata, data.ny.gov) -- alimentado por NY Lottery/MUSL.
-    Powerball: dataset 'd6yy-54nr'. Mega Millions: dataset '5xaw-6ayf'.
-
-    El schema de 'winning_numbers' NO es igual entre datasets -- verificado
-    contra la API real (Fase de activación de Mega Millions, ADR-0001):
-      - Powerball: 'winning_numbers' trae los 6 números juntos
-        ('n1 n2 n3 n4 n5 extra').
-      - Mega Millions: 'winning_numbers' trae solo las 5 blancas: la bola
-        extra viene en un campo separado ('mega_ball').
-    `extra_field` indica cuál caso aplica: None = embebido en
-    winning_numbers (Powerball); nombre de columna = campo separado (Mega
-    Millions). Bug real encontrado: antes de este fix, esta función asumía
-    siempre el formato de Powerball y devolvía None para siempre con
-    cualquier otro juego que no lo compartiera.
     """
     if not dataset_id:
         return None
@@ -196,14 +186,12 @@ def _from_ny_data(draw_date: str, dataset_id: str, extra_field: str = None,
         n1, n2, n3, n4, n5 = whites
         extra = None
     elif extra_field:
-        # Bola extra en un campo separado (Mega Millions: 'mega_ball').
         whites = [int(n) for n in row['winning_numbers'].split()]
         if len(whites) != 5:
             return None
         n1, n2, n3, n4, n5 = whites
         extra = int(row[extra_field])
     else:
-        # Los 6 números juntos en winning_numbers (Powerball).
         nums = [int(n) for n in row['winning_numbers'].split()]
         if len(nums) != 6:
             return None
@@ -227,24 +215,26 @@ def _from_nc_csv(draw_date: str, url: str, cols: dict, date_fmt: str,
     c = cols  # shorthand
     for parts in csv.reader(io.StringIO(resp.text)):
         parts = [p.strip() for p in parts]
-        if len(parts) < 6:
+        if len(parts) < 3:
             continue
         try:
             parsed = pd.to_datetime(parts[c.get('date', 0)], format=date_fmt, errors='coerce')
             if pd.isna(parsed) or parsed.strftime('%Y-%m-%d') != draw_date:
                 continue
-            # El CSV oficial de Cash 5 incluye dos filas por fecha desde 2021:
-            # DP=0 es el juego base; DP=1 es Double Play.
             if 'dp' in c and int(parts[c['dp']]) != 0:
                 continue
+
+            n1 = int(parts[c['n1']]) if 'n1' in c and len(parts) > c['n1'] else None
+            n2 = int(parts[c['n2']]) if 'n2' in c and len(parts) > c['n2'] else None
+            n3 = int(parts[c['n3']]) if 'n3' in c and len(parts) > c['n3'] else None
+            n4 = int(parts[c['n4']]) if 'n4' in c and len(parts) > c['n4'] else None
+            n5 = int(parts[c['n5']]) if 'n5' in c and len(parts) > c['n5'] else None
+            extra = int(parts[c['extra']]) if has_extra_ball and 'extra' in c and len(parts) > c['extra'] else None
+
             return {
                 'draw_date': draw_date,
-                'n1': int(parts[c.get('n1', 1)]),
-                'n2': int(parts[c.get('n2', 2)]),
-                'n3': int(parts[c.get('n3', 3)]),
-                'n4': int(parts[c.get('n4', 4)]),
-                'n5': int(parts[c.get('n5', 5)]),
-                'pb': int(parts[c.get('extra', 6)]) if has_extra_ball else None,
+                'n1': n1, 'n2': n2, 'n3': n3, 'n4': n4, 'n5': n5,
+                'pb': extra,
             }
         except (ValueError, IndexError):
             continue
