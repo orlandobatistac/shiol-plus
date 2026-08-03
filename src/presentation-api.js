@@ -87,6 +87,7 @@ function gamePayload(game) {
     white_ball_max: number(game.white_ball_max),
     extra_ball_name: game.extra_ball_name,
     extra_ball_max: number(game.extra_ball_max),
+    active: game.active != null ? Boolean(game.active) : true,
     ticket_cost: TICKET_COSTS[game.id] || 1,
     game_type: game.game_type || 'lotto',
     jurisdiction: game.jurisdiction || 'national',

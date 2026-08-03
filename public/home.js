@@ -72,8 +72,9 @@ async function loadGameStats(gameId) {
 function activeReport(game, stats) {
   stats = stats || {};
   const gameClass = game.id === 'powerball' ? 'powerball' :
-    (game.id === 'mega_millions' ? 'mega' : 'cash5');
-  const jackpotText = stats.jackpot ? money(stats.jackpot) : 'Not available';
+    (game.id === 'mega_millions' ? 'mega' : (game.id === 'cash5' ? 'cash5' : (game.id === 'pick3' ? 'pick3' : 'pick4')));
+  const jackpotText = stats.jackpot ? money(stats.jackpot) :
+    (game.game_type === 'digit' ? (game.id === 'pick3' ? '$500' : '$5,000') : 'Not available');
   const wonText = money(stats.totalWon || 0);
   const topStrategyText = stats.topStrategy || 'Not available';
   const evaluatedDrawsText = stats.evaluatedDraws || 0;
