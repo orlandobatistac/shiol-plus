@@ -6,12 +6,16 @@ Agregar un juego nuevo = importarlo aquí.
 from .powerball     import GAME as POWERBALL
 from .mega_millions import GAME as MEGA_MILLIONS
 from .cash5         import GAME as CASH5
+from .pick3         import GAME as PICK3
+from .pick4         import GAME as PICK4
 
 # Registry completo — orden importa para el dashboard
 ALL_GAMES = {
     'powerball':     POWERBALL,
     'mega_millions': MEGA_MILLIONS,
     'cash5':         CASH5,
+    'pick3':         PICK3,
+    'pick4':         PICK4,
 }
 
 # Solo juegos activos
@@ -36,8 +40,11 @@ def get_lottery_config(game_id: str) -> dict:
     g = get_game(game_id)
     return {
         'white_count': g['white_count'],
+        'white_min':   g.get('white_min', 1),
         'white_max':   g['white_max'],
         'extra_max':   g['extra_max'],
         'extra_name':  g['extra_name'],
         'has_extra_ball': g.get('has_extra_ball', True),
+        'game_type': g.get('game_type', 'lotto'),
+        'allow_duplicates': g.get('allow_duplicates', False),
     }

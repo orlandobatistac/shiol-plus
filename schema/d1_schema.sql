@@ -13,15 +13,17 @@ CREATE TABLE IF NOT EXISTS lotteries (
     extra_ball_name TEXT NOT NULL,           -- 'Powerball', 'Mega Ball'
     extra_ball_max  INTEGER NOT NULL,
     active          INTEGER DEFAULT 1,
+    game_type       TEXT DEFAULT 'lotto',    -- 'lotto' | 'digit'
+    jurisdiction    TEXT DEFAULT 'national', -- 'national' | 'NC'
     created_at      TEXT DEFAULT (datetime('now'))
 );
 
 -- Seed inicial
 INSERT OR IGNORE INTO lotteries VALUES (
-    'powerball', 'Powerball', 'mon,wed,sat', 5, 69, 'Powerball', 26, 1, datetime('now')
+    'powerball', 'Powerball', 'mon,wed,sat', 5, 69, 'Powerball', 26, 1, 'lotto', 'national', datetime('now')
 );
 INSERT OR IGNORE INTO lotteries VALUES (
-    'cash5', 'NC Cash 5', 'sun,mon,tue,wed,thu,fri,sat', 5, 43, '', 0, 0, datetime('now')
+    'cash5', 'NC Cash 5', 'sun,mon,tue,wed,thu,fri,sat', 5, 43, '', 0, 0, 'lotto', 'NC', datetime('now')
 );
 
 -- ============================================================
@@ -31,16 +33,17 @@ CREATE TABLE IF NOT EXISTS draws (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     lottery_id  TEXT NOT NULL,
     draw_date   TEXT NOT NULL,               -- YYYY-MM-DD
+    draw_number INTEGER DEFAULT 1 NOT NULL,   -- 1 = Single/Daytime, 2 = Evening
     n1 INTEGER, n2 INTEGER, n3 INTEGER,
     n4 INTEGER, n5 INTEGER,
-    extra       INTEGER,                     -- powerball / mega ball
+    extra       INTEGER,                     -- powerball / mega ball / fireball
     source      TEXT,                        -- 'csv', 'powerball.com', 'musl_api'
     created_at  TEXT DEFAULT (datetime('now')),
-    UNIQUE(lottery_id, draw_date),
+    UNIQUE(lottery_id, draw_date, draw_number),
     FOREIGN KEY (lottery_id) REFERENCES lotteries(id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_draws_date ON draws(lottery_id, draw_date DESC);
+CREATE INDEX IF NOT EXISTS idx_draws_date ON draws(lottery_id, draw_date DESC, draw_number DESC);
 
 -- ============================================================
 -- STRATEGIES — Registro de estrategias
@@ -77,6 +80,7 @@ CREATE TABLE IF NOT EXISTS cycles (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     lottery_id      TEXT NOT NULL,
     draw_date       TEXT NOT NULL,
+    draw_number     INTEGER DEFAULT 1 NOT NULL,
     status          TEXT DEFAULT 'pending',  -- 'pending' | 'generated' | 'evaluated'
     draw_source     TEXT,
     tickets_total   INTEGER DEFAULT 0,
@@ -84,7 +88,7 @@ CREATE TABLE IF NOT EXISTS cycles (
     elapsed_seconds REAL,
     notes           TEXT,
     executed_at     TEXT DEFAULT (datetime('now')),
-    UNIQUE(lottery_id, draw_date)
+    UNIQUE(lottery_id, draw_date, draw_number)
 );
 
 -- ============================================================

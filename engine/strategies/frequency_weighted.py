@@ -15,6 +15,9 @@ class FrequencyWeightedStrategy(BaseStrategy):
         super().__init__('frequency_weighted', lottery_config)
 
     def generate(self, draws: pd.DataFrame, count: int = 10) -> List[Dict]:
+        if self.game_type == 'digit':
+            return self._generate_digit(draws, count)
+
         wb_probs = self._white_ball_probs(draws)
         extra_probs = self._extra_probs(draws) if self.has_extra_ball else None
         tickets = []
@@ -22,7 +25,7 @@ class FrequencyWeightedStrategy(BaseStrategy):
         for _ in range(count):
             try:
                 numbers = sorted(np.random.choice(
-                    range(1, self.white_max + 1),
+                    range(self.white_min, self.white_max + 1),
                     size=self.white_count,
                     replace=False,
                     p=wb_probs
@@ -31,9 +34,43 @@ class FrequencyWeightedStrategy(BaseStrategy):
                          if self.has_extra_ball else None)
                 tickets.append(self._safe_ticket(numbers, extra, 0.72))
             except Exception:
-                numbers = sorted(random.sample(range(1, self.white_max + 1), self.white_count))
+                numbers = sorted(random.sample(range(self.white_min, self.white_max + 1), self.white_count))
                 extra = self._random_extra()
                 tickets.append(self._safe_ticket(numbers, extra, 0.50))
+
+        return tickets
+
+    def _generate_digit(self, draws: pd.DataFrame, count: int) -> List[Dict]:
+        cols = [f'n{i+1}' for i in range(self.white_count)]
+        positional_probs = []
+        num_range = list(range(self.white_min, self.white_max + 1))
+        num_count = len(num_range)
+
+        for col in cols:
+            freq = np.zeros(num_count)
+            if col in draws.columns:
+                for val in draws[col].dropna():
+                    try:
+                        n = int(val)
+                        if self.white_min <= n <= self.white_max:
+                            freq[n - self.white_min] += 1
+                    except (ValueError, TypeError):
+                        pass
+            total = freq.sum()
+            probs = freq / total if total > 0 else np.ones(num_count) / num_count
+            positional_probs.append(probs)
+
+        tickets = []
+        for _ in range(count):
+            try:
+                digits = []
+                for p in range(self.white_count):
+                    d = int(np.random.choice(num_range, p=positional_probs[p]))
+                    digits.append(d)
+                tickets.append(self._safe_ticket(digits, None, 0.75))
+            except Exception:
+                digits = [random.randint(self.white_min, self.white_max) for _ in range(self.white_count)]
+                tickets.append(self._safe_ticket(digits, None, 0.50))
 
         return tickets
 

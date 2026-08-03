@@ -14,11 +14,11 @@ class RandomBaselineStrategy(BaseStrategy):
         super().__init__('random_baseline', lottery_config)
 
     def generate(self, draws: pd.DataFrame, count: int = 10) -> List[Dict]:
-        return [
-            self._safe_ticket(
-                sorted(random.sample(range(1, self.white_max + 1), self.white_count)),
-                self._random_extra(),
-                0.50
-            )
-            for _ in range(count)
-        ]
+        tickets = []
+        for _ in range(count):
+            if self.game_type == 'digit':
+                nums = [random.randint(self.white_min, self.white_max) for _ in range(self.white_count)]
+            else:
+                nums = sorted(random.sample(range(self.white_min, self.white_max + 1), self.white_count))
+            tickets.append(self._safe_ticket(nums, self._random_extra(), 0.50))
+        return tickets

@@ -1,0 +1,38 @@
+"""SHIOL+ v9 -- North Carolina Pick 4 game definition."""
+
+GAME = {
+    'id': 'pick4',
+    'name': 'NC Pick 4',
+    'active': True,
+    'game_type': 'digit',
+    'jurisdiction': 'NC',
+    'digit_count': 4,
+    'white_count': 4,
+    'white_min': 0,
+    'white_max': 9,
+    'allow_duplicates': True,
+    'has_extra_ball': False,
+    'extra_max': None,
+    'extra_name': None,
+    'ticket_cost': 1.00,
+    'draw_days': ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    'draw_time_et': '23:22',
+    'cron_primary': ['0 5 * * *', '0 20 * * *'],
+    'cron_backup': ['0 9 * * *'],
+    'nc_web_url': 'https://nclottery.com/pick4',
+    'data_sources': ['nc_lottery_csv', 'nc_web'],
+    'nc_csv_url': 'https://nclottery.com/pick4-download',
+    'nc_csv_date_format': '%m/%d/%Y',
+    'nc_csv_columns': {
+        'date': 0,
+        'draw_time': 1,
+        'n1': 2, 'n2': 3, 'n3': 4, 'n4': 5,
+        'fireball': 6,
+    },
+    'prize_table': {
+        4: ('straight', 5000.0),
+    },
+    'compatible_strategies': ['random_baseline', 'frequency_weighted'],
+    'description': 'NC Pick 4 -- sorteos diarios (Day & Evening). Cuatro dígitos del 0 al 9.',
+    'logo_color': '#9c27b0',
+}

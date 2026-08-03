@@ -176,8 +176,8 @@ def cmd_register(args):
     d1_fn("""
         INSERT OR REPLACE INTO lotteries
             (id, name, draw_days, white_ball_count, white_ball_max,
-             extra_ball_name, extra_ball_max, active)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             extra_ball_name, extra_ball_max, active, game_type, jurisdiction)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, [
         gid,
         game['name'],
@@ -187,11 +187,18 @@ def cmd_register(args):
         game['extra_name'] or '',
         game['extra_max'] or 0,
         1 if game['active'] else 0,
+        game.get('game_type', 'lotto'),
+        game.get('jurisdiction', 'national'),
     ])
     print(f"  ✓ Lottery '{gid}' registrada")
 
-    # 2. Seed de estrategias
-    strategies = list(ALL_STRATEGIES.keys())
+    # 2. Seed de estrategias compatibles
+    compat = game.get('compatible_strategies', 'all')
+    if compat == 'all':
+        strategies = list(ALL_STRATEGIES.keys())
+    else:
+        strategies = list(compat)
+
     seeded = 0
     for sid in strategies:
         nice_name = sid.replace('_', ' ').title()
@@ -209,17 +216,12 @@ def cmd_register(args):
 
 def cmd_backfill(args):
     """
-    Descarga histórico desde NY Open Data (Socrata) e inserta en D1.
-
-    Antes usaba directo game['nc_csv_url'] -- ese endpoint quedó 404 (NC
-    Lottery cambió su estructura de URLs, verificado 2026-07-04) y este
-    comando nunca se actualizó al fix de ny_data_api que sí se aplicó en
-    fetch_draw.py/worker.js. Bug real detectado y arreglado al activar
-    Mega Millions (ADR-0001): correr este backfill hoy explotaba con un
-    404 apenas se intentaba.
+    Descarga histórico desde NY Open Data (Socrata) o NC Lottery CSV e inserta en D1.
     """
     from engine.games import get_game
-    game        = get_game(args.game_id)
+    game = get_game(args.game_id)
+    if game.get('game_type') == 'digit':
+        return _cmd_backfill_digit(args, game)
     if game['id'] == 'cash5' or getattr(args, 'csv_path', None):
         return _cmd_backfill_cash5(args, game)
     from_date   = args.from_date or '2010-01-01'
@@ -365,6 +367,87 @@ def _cmd_backfill_cash5(args, game):
         processed += len(batch)
         print(f'   -> {processed}/{len(draws)} procesados', end='\r')
     print(f'\nBackfill Cash 5 completo: {processed} filas procesadas de forma idempotente.\n')
+
+
+def _cmd_backfill_digit(args, game):
+    import io
+    d1_fn = d1_local if args.local else d1
+    target = 'LOCAL' if args.local else 'PRODUCCIÓN'
+    url = game.get('nc_csv_url')
+
+    if getattr(args, 'csv_path', None):
+        csv_path = Path(args.csv_path)
+        print(f"\nBackfill {game['name']} desde archivo {csv_path} -> {target}")
+        content = csv_path.read_text(encoding='utf-8-sig')
+    elif url:
+        print(f"\nBackfill {game['name']} desde {url} -> {target}")
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        content = resp.text
+    else:
+        raise ValueError(f"No hay fuente CSV configurada para {game['name']}")
+
+    draws = []
+    handle = io.StringIO(content)
+    for row in csv.DictReader(handle):
+        try:
+            raw_date = row.get('Date', '').strip()
+            if not raw_date:
+                continue
+            date_str = datetime.strptime(raw_date, game.get('nc_csv_date_format', '%m/%d/%Y')).strftime('%Y-%m-%d')
+
+            if args.from_date and date_str < args.from_date:
+                continue
+
+            day_eve = row.get('Day/Eve', 'D').strip().upper()
+            draw_number = 1 if day_eve == 'D' else 2
+
+            digit_count = game.get('white_count', 3)
+            nums = []
+            for i in range(1, digit_count + 1):
+                nums.append(int(row[f'Ball {i}']))
+
+            n1 = nums[0] if len(nums) > 0 else None
+            n2 = nums[1] if len(nums) > 1 else None
+            n3 = nums[2] if len(nums) > 2 else None
+            n4 = nums[3] if len(nums) > 3 else None
+            n5 = nums[4] if len(nums) > 4 else None
+
+            extra = int(row['Fireball']) if 'Fireball' in row and row['Fireball'].isdigit() else None
+
+            draws.append({
+                'date': date_str,
+                'draw_number': draw_number,
+                'n1': n1, 'n2': n2, 'n3': n3, 'n4': n4, 'n5': n5,
+                'extra': extra,
+            })
+        except (KeyError, ValueError, TypeError):
+            continue
+
+    draws.sort(key=lambda d: (d['date'], d['draw_number']))
+    print(f"   {len(draws)} sorteos de {game['name']} extraídos de la fuente CSV")
+
+    processed = 0
+    batch_size = 200 if args.local else 50
+    for offset in range(0, len(draws), batch_size):
+        batch = draws[offset:offset + batch_size]
+        placeholders = ','.join(['(?,?,?,?,?,?,?,?,?,\'nc_digit_csv_backfill\')'] * len(batch))
+        params = []
+        for draw in batch:
+            params.extend([
+                game['id'], draw['date'], draw['draw_number'],
+                draw['n1'], draw['n2'], draw['n3'],
+                draw['n4'], draw['n5'], draw['extra']
+            ])
+        d1_fn(f"""
+            INSERT OR IGNORE INTO draws
+                (lottery_id, draw_date, draw_number, n1, n2, n3, n4, n5, extra, source)
+            VALUES {placeholders}
+        """, params)
+        processed += len(batch)
+        print(f"   -> {processed}/{len(draws)} procesados...", end='\r')
+
+    print(f"\n  ✓ {processed} sorteos insertados/procesados de {game['name']} en {target}\n")
 
 
 def main():

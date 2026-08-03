@@ -31,7 +31,10 @@ class BaseStrategy(ABC):
         self.name = name
         self.config = lottery_config
         self.white_count = lottery_config.get('white_count', 5)
+        self.white_min = lottery_config.get('white_min', 1)
         self.white_max = lottery_config.get('white_max', 69)
+        self.game_type = lottery_config.get('game_type', 'lotto')
+        self.allow_duplicates = lottery_config.get('allow_duplicates', False)
         self.has_extra_ball = lottery_config.get('has_extra_ball', True)
         self.extra_max = lottery_config.get('extra_max') if self.has_extra_ball else None
 
@@ -46,8 +49,8 @@ class BaseStrategy(ABC):
 
         Returns:
             Lista de dicts: {
-                'numbers': [int, ...],  # white balls, sorted
-                'extra': int,           # powerball / mega ball
+                'numbers': [int, ...],  # white balls or digits
+                'extra': int,           # powerball / mega ball / None
                 'confidence': float     # 0.0 - 1.0
             }
         """
@@ -56,9 +59,9 @@ class BaseStrategy(ABC):
         """Valida que un ticket cumple las reglas del juego."""
         if len(numbers) != self.white_count:
             return False
-        if len(set(numbers)) != self.white_count:
+        if not self.allow_duplicates and len(set(numbers)) != self.white_count:
             return False
-        if not all(1 <= n <= self.white_max for n in numbers):
+        if not all(self.white_min <= n <= self.white_max for n in numbers):
             return False
         if self.has_extra_ball:
             if extra is None or not 1 <= extra <= self.extra_max:
@@ -71,11 +74,16 @@ class BaseStrategy(ABC):
         """Construye un ticket validado."""
         import random
         if not self.validate(numbers, extra):
-            numbers = sorted(random.sample(range(1, self.white_max + 1), self.white_count))
+            if self.game_type == 'digit':
+                numbers = [random.randint(self.white_min, self.white_max) for _ in range(self.white_count)]
+            else:
+                numbers = sorted(random.sample(range(self.white_min, self.white_max + 1), self.white_count))
             extra = self._random_extra()
             confidence = 0.5
+
+        final_numbers = list(numbers) if self.game_type == 'digit' else sorted(numbers)
         return {
-            'numbers': sorted(numbers),
+            'numbers': final_numbers,
             'extra': extra,
             'confidence': round(confidence, 4)
         }

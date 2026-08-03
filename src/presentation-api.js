@@ -8,6 +8,8 @@ const TICKET_COSTS = {
   powerball: 2,
   mega_millions: 2,
   cash5: 1,
+  pick3: 1,
+  pick4: 1,
 };
 
 // Equivalent evidence strength for the empirical-Bayes ranking adjustment.
@@ -85,15 +87,21 @@ function gamePayload(game) {
     white_ball_max: number(game.white_ball_max),
     extra_ball_name: game.extra_ball_name,
     extra_ball_max: number(game.extra_ball_max),
-    ticket_cost: TICKET_COSTS[game.id],
+    ticket_cost: TICKET_COSTS[game.id] || 1,
+    game_type: game.game_type || 'lotto',
+    jurisdiction: game.jurisdiction || 'national',
   };
 }
 
 function drawPayload(row) {
   if (!row || !row.draw_date) return null;
+  const numbers = [row.n1, row.n2, row.n3, row.n4, row.n5]
+    .filter(n => n !== null && n !== undefined)
+    .map(number);
   return {
     draw_date: row.draw_date,
-    numbers: [row.n1, row.n2, row.n3, row.n4, row.n5].map(number),
+    draw_number: row.draw_number != null ? number(row.draw_number) : 1,
+    numbers,
     extra: row.extra == null ? null : number(row.extra),
   };
 }
@@ -101,7 +109,7 @@ function drawPayload(row) {
 async function loadGame(db, lotteryId) {
   return db.prepare(`
     SELECT id, name, draw_days, white_ball_count, white_ball_max,
-           extra_ball_name, extra_ball_max, active
+           extra_ball_name, extra_ball_max, active, game_type, jurisdiction
     FROM lotteries WHERE id=? AND active=1
   `).bind(lotteryId).first();
 }
@@ -392,7 +400,7 @@ async function analysisDetail(drawDate, env, game) {
     strategy_id: row.strategy_id,
     strategy_name: row.strategy_name,
     strategy_position: number(row.strategy_position),
-    numbers: [row.n1, row.n2, row.n3, row.n4, row.n5].map(number),
+    numbers: [row.n1, row.n2, row.n3, row.n4, row.n5].filter(n => n !== null && n !== undefined).map(number),
     extra: row.extra == null ? null : number(row.extra),
     analytical_score: number(row.confidence),
     score_scope: 'strategy_internal',
@@ -656,7 +664,7 @@ async function nextDrawAnalysis(url, env, game) {
     strategy_description: row.strategy_description || '',
     pool_position: number(row.pool_position),
     strategy_position: number(row.strategy_position),
-    numbers: [row.n1, row.n2, row.n3, row.n4, row.n5].map(number),
+    numbers: [row.n1, row.n2, row.n3, row.n4, row.n5].filter(n => n !== null && n !== undefined).map(number),
     extra: row.extra == null ? null : number(row.extra),
     analytical_score: number(row.confidence),
     score_scope: 'strategy_internal',

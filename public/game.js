@@ -50,11 +50,11 @@ function roi(value) {
 }
 
 function isBaseline(strategyId) {
-  return String(strategyId || '').replace(/_(mega_millions|cash5)$/, '') === 'random_baseline';
+  return String(strategyId || '').replace(/_(mega_millions|cash5|pick3|pick4)$/, '') === 'random_baseline';
 }
 
 function strategyName(value) {
-  const normalized = String(value || '').replace(/_(mega_millions|cash5)$/, '');
+  const normalized = String(value || '').replace(/_(mega_millions|cash5|pick3|pick4)$/, '');
   const names = {
     xgboost_ml: 'XGBoost ML',
     hybrid_ensemble: 'Hybrid Ensemble',
@@ -72,7 +72,7 @@ function strategyName(value) {
 }
 
 function strategyDescription(value) {
-  const normalized = String(value || '').replace(/_(mega_millions|cash5)$/, '');
+  const normalized = String(value || '').replace(/_(mega_millions|cash5|pick3|pick4)$/, '');
   const descriptions = {
     xgboost_ml: 'Machine-learning model trained on historical draws',
     hybrid_ensemble: '70% XGBoost + 30% co-occurrence',
@@ -102,9 +102,12 @@ function dateLabel(value, options) {
 }
 
 function ballsHTML(numbers, extra, isCompact) {
+  const isDigit = (GAME === 'pick3' || GAME === 'pick4');
   const cls = isCompact ? 'ball ball-sm' : 'ball';
+  const digitStyle = isDigit ? 'border-radius:6px; font-weight:800;' : '';
   const whiteBalls = (numbers || []).map(function (number) {
-    return '<span class="' + cls + '">' + String(number).padStart(2, '0') + '</span>';
+    const text = isDigit ? String(number) : String(number).padStart(2, '0');
+    return '<span class="' + cls + '" style="' + digitStyle + '">' + text + '</span>';
   }).join('');
   const extraBall = extra == null ? '' :
     '<span class="' + cls + ' extra">' + String(extra).padStart(2, '0') + '</span>';
