@@ -115,19 +115,55 @@ async function loadGame(db, lotteryId) {
   `).bind(lotteryId).first();
 }
 
+function getETParts(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    weekday: 'short'
+  });
+  const parts = {};
+  formatter.formatToParts(date).forEach(p => { parts[p.type] = p.value; });
+  const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+  return {
+    year: Number(parts.year),
+    month: Number(parts.month),
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+    dateStr: `${parts.year}-${parts.month}-${parts.day}`,
+    weekday: dayMap[parts.weekday.toLowerCase().slice(0, 3)]
+  };
+}
+
 function getNextDrawDate(game) {
   const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
   const drawDays = (game.draw_days || '').split(',').map(d => dayMap[d.trim().toLowerCase()]).filter(d => d !== undefined);
-  const now = new Date();
-  const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const et = getETParts(new Date());
+
+  const drawHour = game.id === 'cash5' ? 23 : (game.id === 'powerball' ? 22 : 23);
+  const drawMin = game.id === 'cash5' ? 22 : (game.id === 'powerball' ? 59 : 0);
+
+  const todayDrawPassed = et.hour > drawHour || (et.hour === drawHour && et.minute >= drawMin);
+  const todayEtDate = new Date(Date.UTC(et.year, et.month - 1, et.day));
+
   for (let i = 0; i <= 7; i++) {
-    const candidate = new Date(utcDate);
-    candidate.setUTCDate(utcDate.getUTCDate() + i);
-    if (drawDays.length === 0 || drawDays.includes(candidate.getUTCDay())) {
+    const candidate = new Date(todayEtDate);
+    candidate.setUTCDate(todayEtDate.getUTCDate() + i);
+    const candidateWeekday = candidate.getUTCDay();
+
+    if (drawDays.length === 0 || drawDays.includes(candidateWeekday)) {
+      if (i === 0 && todayDrawPassed) {
+        continue;
+      }
       return candidate.toISOString().slice(0, 10);
     }
   }
-  return utcDate.toISOString().slice(0, 10);
+  return todayEtDate.toISOString().slice(0, 10);
 }
 
 async function overview(url, env, game) {
