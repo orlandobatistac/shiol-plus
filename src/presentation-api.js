@@ -115,6 +115,21 @@ async function loadGame(db, lotteryId) {
   `).bind(lotteryId).first();
 }
 
+function getNextDrawDate(game) {
+  const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+  const drawDays = (game.draw_days || '').split(',').map(d => dayMap[d.trim().toLowerCase()]).filter(d => d !== undefined);
+  const now = new Date();
+  const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  for (let i = 0; i <= 7; i++) {
+    const candidate = new Date(utcDate);
+    candidate.setUTCDate(utcDate.getUTCDate() + i);
+    if (drawDays.length === 0 || drawDays.includes(candidate.getUTCDay())) {
+      return candidate.toISOString().slice(0, 10);
+    }
+  }
+  return utcDate.toISOString().slice(0, 10);
+}
+
 async function overview(url, env, game) {
   const lotteryId = game.id;
   const ticketCost = TICKET_COSTS[lotteryId];
@@ -181,13 +196,13 @@ async function overview(url, env, game) {
   return json({
     game: gamePayload(game),
     jackpot: jackpotPayload(jackpotResult.results[0]),
-    next_draw: next ? {
+    next_draw: {
       found: true,
-      draw_date: next.draw_date,
-      status: next.status,
-      expected_combinations: number(next.tickets_total),
-      available_combinations: number(next.available_combinations),
-    } : { found: false },
+      draw_date: next ? next.draw_date : getNextDrawDate(game),
+      status: next ? next.status : 'scheduled',
+      expected_combinations: next ? number(next.tickets_total) : 0,
+      available_combinations: next ? number(next.available_combinations) : 0,
+    },
     last_result: drawPayload(latest),
     performance: {
       evaluated_draws: number(history.evaluated_draws),
