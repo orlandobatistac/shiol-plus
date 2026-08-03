@@ -829,20 +829,17 @@ export default {
 
     // Leer juegos activos desde D1 (source of truth)
     const { results: activeGames } = await env.DB.prepare(
-      `SELECT id, draw_days FROM lotteries WHERE active = 1`
+      `SELECT id, name, draw_days, white_ball_count, white_ball_max, extra_ball_name, extra_ball_max, active, game_type, jurisdiction FROM lotteries WHERE active = 1`
     ).all();
 
     const results = [];
     for (const g of activeGames) {
-      const gameConfig = GAME_CONFIGS[g.id];
-      if (!gameConfig) {
-        console.warn(`[cron] No GAME_CONFIGS entry for '${g.id}', skipping`);
-        continue;
-      }
-      // draw_days en D1 es 'mon,wed,sat' → convertir a nombres completos
       const dayFull = { mon:'Monday', tue:'Tuesday', wed:'Wednesday',
                         thu:'Thursday', fri:'Friday', sat:'Saturday', sun:'Sunday' };
-      gameConfig.draw_days = g.draw_days.split(',').map(d => dayFull[d] || d);
+      const gameConfig = {
+        ...g,
+        draw_days: (g.draw_days || '').split(',').map(d => dayFull[d.trim()] || d.trim()),
+      };
 
       try {
         const result = await runPipeline(gameConfig, env);
