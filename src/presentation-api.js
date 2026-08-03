@@ -155,7 +155,7 @@ async function overview(url, env, game) {
       LEFT JOIN tickets t ON t.cycle_id=c.id AND t.evaluated=0
       WHERE c.lottery_id=? AND c.status='generated'
       GROUP BY c.id, c.draw_date, c.status, c.tickets_total
-      ORDER BY c.draw_date ASC LIMIT 1
+      ORDER BY c.draw_date DESC LIMIT 1
     `).bind(lotteryId),
     env.DB.prepare(`
       SELECT COUNT(*) AS available_combinations,
@@ -616,7 +616,7 @@ async function nextDrawAnalysis(url, env, game) {
   const cycle = await env.DB.prepare(`
     SELECT id, draw_date, tickets_total
     FROM cycles WHERE lottery_id=? AND status='generated'
-    ORDER BY draw_date ASC LIMIT 1
+    ORDER BY draw_date DESC LIMIT 1
   `).bind(lotteryId).first();
   if (!cycle) return json({ game: gamePayload(game), found: false });
 
